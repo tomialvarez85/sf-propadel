@@ -111,3 +111,19 @@ El panel de `/admin` usa Supabase Auth para el login (no hay un sistema de usuar
 4. Por default el `AdminUser` nuevo queda con `rol: "admin"` y `nombre` igual a la parte del email antes del `@`. Si querés un nombre distinto, hoy se edita directamente en la base (todavía no hay una UI de gestión de usuarios admin).
 
 Para sumar más admins más adelante, se repite el mismo flujo: crear el usuario en Supabase Auth y loguearse una vez en `/admin/login`.
+
+### 4. Verificar el bucket de Storage y sus políticas RLS
+
+Las imágenes (productos, banners, categorías, marcas, logo, etc.) se suben desde el cliente al bucket `product-images` de Supabase Storage (ver `UPLOADS_BUCKET` en `src/lib/supabase/storage.ts`). Ese bucket y sus políticas **no están versionados en este repo** — se crean a mano en el dashboard de Supabase, así que:
+
+- **Si producción usa el mismo proyecto de Supabase que desarrollo**: no hay nada que hacer, el bucket y las políticas ya existen.
+- **Si producción usa un proyecto de Supabase distinto** (recomendado para no mezclar datos de prueba con datos reales): hay que recrear el bucket a mano en el proyecto nuevo:
+  1. Supabase dashboard → **Storage** → **New bucket** → nombre `product-images`, marcado como **Public bucket** (las imágenes se sirven con URL pública, sin firma).
+  2. Agregar políticas RLS sobre `storage.objects` para ese bucket: lectura pública (`SELECT` para el rol `anon`/`public`) y escritura solo para admins logueados (`INSERT`/`UPDATE`/`DELETE` para el rol `authenticated`). Sin la política de escritura, el admin logueado no va a poder subir imágenes aunque el login funcione.
+  3. Confirmar que `next.config.ts` (`images.remotePatterns`) sigue cubriendo el dominio del proyecto nuevo — ya cubre `**.supabase.co` como wildcard, así que no hace falta tocarlo salvo que el proyecto nuevo sirva imágenes desde otro dominio.
+
+## Datos de prueba (seed)
+
+`prisma/seed.ts` (`npx prisma db seed`) carga categorías, marcas, productos, banners y una fila de `SiteSettings` **de prueba** — imágenes placeholder de `placehold.co`, WhatsApp y email falsos, dirección ficticia. Sirve para tener datos con los que trabajar en desarrollo.
+
+**No correrlo contra la base de producción.** Sobreescribiría (vía `upsert`) los datos reales de `SiteSettings`, categorías y marcas que el dueño del negocio haya cargado, y mezclaría productos de prueba con el catálogo real. La app en producción arranca con la base vacía (después de `migrate deploy`) y se carga a mano desde `/admin`.
