@@ -7,9 +7,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-geist-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -35,6 +34,8 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-lime-foreground: var(--lime-foreground);
+  --color-lime: var(--lime);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -55,8 +56,11 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  /* SF ProPadel brand accent (vibrant orange) — base grays stay neutral. */
-  --primary: oklch(0.646 0.222 41.116);
+  /* SF ProPadel brand: two-accent hierarchy extracted from the real logo (see DESIGN.md > Colors).
+     Teal is the structural/primary accent (was placeholder orange). Lime is the sparing secondary
+     accent, defined below as its own --lime/--lime-foreground pair, not a --primary variant — base
+     grays stay neutral. */
+  --primary: oklch(0.4247 0.0697 213.01);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -67,7 +71,12 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.646 0.222 41.116);
+  --ring: oklch(0.4247 0.0697 213.01);
+  /* SF Lime: the secondary energy accent. Foreground is ink, never white — lime is too light
+     (80% lightness) for white text to sit on. Never used as a large fill or as text color
+     itself (see DESIGN.md > The Two-Accent Hierarchy Rule). */
+  --lime: oklch(0.8077 0.1818 115.67);
+  --lime-foreground: oklch(0.145 0 0);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -82,6 +91,46 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Court-Line Field: storefront-only background texture (see DESIGN.md > Shapes). Diagonal hairlines at 12% ink alpha — same 45deg direction as the hero's Angled Corner, so the two signature devices share one geometric language. Never orange, never on the admin dashboard. */
+  --pattern-court-lines: repeating-linear-gradient(
+    45deg,
+    transparent 0px,
+    transparent 27px,
+    oklch(0.145 0 0 / 0.12) 27px,
+    oklch(0.145 0 0 / 0.12) 28px
+  );
+
+  /* Real header height, measured by SiteHeader via ResizeObserver and written onto
+     :root at runtime (see header.tsx) — the header's own height isn't static, since the
+     promo bar is conditional and mobile adds an extra search row. This fallback only
+     covers the instant before that effect runs on mount. */
+  --header-height: 140px;
+
+  /* Angled Corner motif (hero banner only, see DESIGN.md > Shapes). The hero fills the
+     viewport below the header (calc(100vh - var(--header-height)), see hero-carousel.tsx),
+     not a fixed vh or an aspect-ratio tied to width — so the cut is expressed in vh too, at
+     a fixed ~8% of the banner's typical height at every breakpoint, instead of a px value
+     that would need re-tuning any time the height formula changes. */
+  --hero-corner-cut: 3.5vh;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --hero-corner-cut: 4vh;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --hero-corner-cut: 4.5vh;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --hero-corner-cut: 5.5vh;
+  }
 }
 
 .dark {
@@ -127,5 +176,90 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@utility bg-court-lines {
+  background-image: var(--pattern-court-lines);
+  background-repeat: repeat;
+}
+
+@utility hero-corner-cut {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--hero-corner-cut)),
+    calc(100% - var(--hero-corner-cut)) 100%,
+    0 100%
+  );
+}
+
+@theme inline {
+  @keyframes heart-pop {
+    0% {
+      transform: scale(1);
+    }
+    40% {
+      transform: scale(1.25);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+}
+
+@utility animate-heart-pop {
+  animation: heart-pop 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-heart-pop {
+    animation: none;
+  }
+}
+
+/* Hero ball bounce: ambient background detail on the home hero only (see DESIGN.md > Shapes,
+   pending confirmation before reuse elsewhere). Only `transform` is animated — never top/left/
+   margin, which would force layout recalculation — so this stays entirely on the compositor.
+   Distinct easing per keyframe segment: 0%->50% uses an ease-in curve for the fall (gravity
+   accelerating it down), 50%->100% uses an ease-out curve for the bounce back up. */
+@theme inline {
+  @keyframes hero-ball-bounce {
+    0%,
+    100% {
+      transform: translate(0, 0);
+      animation-timing-function: cubic-bezier(0.5, 0, 1, 0.5);
+    }
+    50% {
+      transform: translate(14px, 46px);
+      animation-timing-function: cubic-bezier(0, 0.5, 0.5, 1);
+    }
+  }
+}
+
+@utility hero-ball-bounce {
+  animation: hero-ball-bounce 2.4s infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-ball-bounce {
+    animation: none;
+    will-change: auto;
+  }
+}
+
+/* Category Tiles hover (home, see DESIGN.md > Components > Category Tiles).
+   The image zoom, scrim, and text lift are plain Tailwind `motion-safe:` variants
+   inline on the component — no CSS needed here for those. This handles the one
+   piece Tailwind utilities can't express directly: dimming the *other* tiles
+   while one is hovered, which needs a parent-scoped :has() selector. Opt-in via
+   `no-preference` (rather than the more common `reduce`-disables pattern used
+   elsewhere in this file) so the dim never fires at all for reduced-motion users
+   instead of firing instantly without a transition. */
+@media (prefers-reduced-motion: no-preference) {
+  .category-tiles:has(.category-tile:hover) .category-tile:not(:hover) {
+    opacity: 0.92;
+    transition: opacity 300ms ease-out;
   }
 }

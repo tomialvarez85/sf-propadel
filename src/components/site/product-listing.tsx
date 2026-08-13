@@ -1,10 +1,23 @@
+import Link from "next/link";
+
+import type { Genero } from "@/generated/prisma";
+import { ActiveFilters } from "@/components/site/active-filters";
+import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/site/product-card";
-import { ProductFilters } from "@/components/site/product-filters";
+import {
+  ProductFilters,
+  type FilterOptionWithCount,
+} from "@/components/site/product-filters";
 import { ProductPagination } from "@/components/site/product-pagination";
 import { ProductSort } from "@/components/site/product-sort";
-import { getMainCategories } from "@/lib/home-data";
+import { getCategoryNav } from "@/lib/site-data";
+import {
+  GENERO_OPTIONS,
+  parseGeneroOption,
+} from "@/lib/product-genero-options";
 import {
   getBrandOptions,
+  getFilterFacetCounts,
   getProductListing,
   resolveBrandIdsBySlugs,
   resolveCategoryIdsBySlugs,
@@ -45,19 +58,26 @@ export async function ProductListing({
   const precioMin = parseNumber(searchParams.precioMin);
   const precioMax = parseNumber(searchParams.precioMax);
   const brandSlugs = parseList(searchParams.marca);
+  const generoOption = parseGeneroOption(firstValue(searchParams.genero));
+  const genero = generoOption
+    ? (generoOption.toUpperCase() as Genero)
+    : undefined;
 
-  const [categoryIds, brandIds, categories, brands] = await Promise.all([
-    categoryScope
-      ? Promise.resolve(categoryScope.ids)
-      : resolveCategoryIdsBySlugs(parseList(searchParams.categoria)),
-    resolveBrandIdsBySlugs(brandSlugs),
-    categoryScope ? Promise.resolve([]) : getMainCategories(),
-    getBrandOptions(),
-  ]);
+  const [categoryIds, brandIds, categoryNav, brands, facetCounts] =
+    await Promise.all([
+      categoryScope
+        ? Promise.resolve(categoryScope.ids)
+        : resolveCategoryIdsBySlugs(parseList(searchParams.categoria)),
+      resolveBrandIdsBySlugs(brandSlugs),
+      categoryScope ? Promise.resolve([]) : getCategoryNav(),
+      getBrandOptions(),
+      getFilterFacetCounts(categoryScope?.ids),
+    ]);
 
   const { products, total, totalPages } = await getProductListing({
     categoryIds,
     brandIds,
+    genero,
     precioMin,
     precioMax,
     soloOfertas,
@@ -65,21 +85,58 @@ export async function ProductListing({
     page,
   });
 
+  const categories: FilterOptionWithCount[] = categoryNav.map((category) => {
+    const ownCount = facetCounts.categoryCounts[category.id] ?? 0;
+    const childrenCount = category.children.reduce(
+      (sum, child) => sum + (facetCounts.categoryCounts[child.id] ?? 0),
+      0,
+    );
+    return {
+      id: category.id,
+      nombre: category.nombre,
+      slug: category.slug,
+      count: ownCount + childrenCount,
+    };
+  });
+
+  const brandsWithCounts: FilterOptionWithCount[] = brands.map((brand) => ({
+    ...brand,
+    count: facetCounts.brandCounts[brand.id] ?? 0,
+  }));
+
+  const generoCounts = Object.fromEntries(
+    GENERO_OPTIONS.map((option) => [
+      option.value,
+      facetCounts.generoCounts[option.value.toUpperCase() as Genero] ?? 0,
+    ]),
+  );
+
+  const hasActiveFilters =
+    soloOfertas ||
+    precioMin !== undefined ||
+    precioMax !== undefined ||
+    brandSlugs.length > 0 ||
+    genero !== undefined ||
+    (!categoryScope && parseList(searchParams.categoria).length > 0);
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
-      <h1 className="text-2xl font-semibold tracking-tight">
+      <h1 className="font-heading text-2xl font-bold tracking-[-0.015em]">
         {categoryScope?.nombre ?? "Productos"}
       </h1>
 
-      <div className="mt-6 flex flex-col gap-8 md:flex-row">
+      <div className="mt-8 flex flex-col gap-8 md:flex-row">
         <ProductFilters
           categories={categories}
-          brands={brands}
+          brands={brandsWithCounts}
+          generoCounts={generoCounts}
           hideCategoryFilter={!!categoryScope}
         />
 
-        <div className="flex-1">
-          <div className="mb-4 flex items-center justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <ActiveFilters categories={categories} brands={brandsWithCounts} />
+
+          <div className="border-border mb-6 flex items-center justify-between gap-4 border-b pb-4">
             <p className="text-muted-foreground text-sm">
               {total} {total === 1 ? "producto" : "productos"}
             </p>
@@ -87,11 +144,18 @@ export async function ProductListing({
           </div>
 
           {products.length === 0 ? (
-            <p className="text-muted-foreground py-16 text-center text-sm">
-              No encontramos productos con estos filtros.
-            </p>
+            <div className="flex flex-col items-center gap-3 py-16 text-center">
+              <p className="text-muted-foreground text-sm">
+                No encontramos productos con estos filtros.
+              </p>
+              {hasActiveFilters && (
+                <Button asChild variant="outline" size="sm">
+                  <Link href={basePath}>Limpiar filtros</Link>
+                </Button>
+              )}
+            </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
               {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

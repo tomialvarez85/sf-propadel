@@ -36,6 +36,12 @@ model Brand {
   products Product[]
 }
 
+enum Genero {
+  HOMBRE
+  MUJER
+  UNISEX
+}
+
 model Product {
   id             String   @id @default(cuid())
   nombre         String
@@ -44,6 +50,7 @@ model Product {
   precio         Decimal  @db.Decimal(10, 2)
   precioAnterior Decimal? @db.Decimal(10, 2)
   stock          Int
+  genero         Genero?
   destacado      Boolean  @default(false)
   enOferta       Boolean  @default(false)
   activo         Boolean  @default(true)
@@ -99,6 +106,12 @@ model SiteSettings {
   textoEnvioGratis String?
   textoCuotas      String?
   textoNosotros    String?
+
+  // Imágenes de los tiles "Hombre" / "Mujer" en el home (ver CategoryTiles).
+  // El tile de "Accesorios" no necesita un campo propio: reutiliza la imagen
+  // ya existente de la categoría real.
+  imagenGeneroHombre String?
+  imagenGeneroMujer  String?
 }
 
 model AdminUser {

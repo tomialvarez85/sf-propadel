@@ -81,6 +81,7 @@ export function BannerForm({
                   value={field.value || null}
                   onChange={(url) => field.onChange(url ?? "")}
                   folder="banners"
+                  recommendedMinSize={{ width: 1920, height: 1080 }}
                 />
               </FormControl>
               <FormMessage />

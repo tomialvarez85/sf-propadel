@@ -9,6 +9,8 @@ export const siteSettingsSchema = z.object({
   textoEnvioGratis: z.string().trim().nullable().optional(),
   textoCuotas: z.string().trim().nullable().optional(),
   textoNosotros: z.string().trim().nullable().optional(),
+  imagenGeneroHombre: z.string().url().nullable().optional(),
+  imagenGeneroMujer: z.string().url().nullable().optional(),
 });
 
 export type SiteSettingsFormValues = z.infer<typeof siteSettingsSchema>;

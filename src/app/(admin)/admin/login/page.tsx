@@ -10,10 +10,10 @@ export const metadata: Metadata = {
 
 export default function AdminLoginPage() {
   return (
-    <div className="bg-muted/30 flex min-h-screen items-center justify-center px-6">
-      <Card className="w-full max-w-sm">
+    <div className="bg-foreground flex min-h-screen items-center justify-center px-6">
+      <Card className="[--card-spacing:24px] w-full max-w-sm shadow-2xl">
         <CardHeader>
-          <CardTitle className="text-xl">
+          <CardTitle className="text-2xl font-extrabold tracking-[-0.02em]">
             SF <span className="text-primary">ProPadel</span> Admin
           </CardTitle>
         </CardHeader>

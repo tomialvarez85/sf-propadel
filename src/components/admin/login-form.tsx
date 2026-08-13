@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 
@@ -90,8 +91,16 @@ export function LoginForm() {
           <p className="text-destructive text-sm font-medium">{formError}</p>
         )}
 
-        <Button type="submit" disabled={form.formState.isSubmitting}>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={form.formState.isSubmitting}
+        >
           {form.formState.isSubmitting ? "Ingresando..." : "Ingresar"}
+        </Button>
+
+        <Button asChild variant="outline" className="w-full">
+          <Link href="/">Volver al sitio</Link>
         </Button>
       </form>
     </Form>

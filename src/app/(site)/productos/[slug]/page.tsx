@@ -68,8 +68,10 @@ export default async function ProductoPage(
 
       {product.descripcion && (
         <section className="mt-12 max-w-3xl">
-          <h2 className="mb-3 text-lg font-semibold">Descripción</h2>
-          <p className="text-muted-foreground whitespace-pre-line">
+          <h2 className="font-heading mb-6 text-2xl font-bold tracking-[-0.015em]">
+            Descripción
+          </h2>
+          <p className="text-muted-foreground text-sm whitespace-pre-line">
             {product.descripcion}
           </p>
         </section>
@@ -77,7 +79,7 @@ export default async function ProductoPage(
 
       {relatedProducts.length > 0 && (
         <section className="mt-16">
-          <h2 className="mb-6 text-2xl font-semibold tracking-tight">
+          <h2 className="font-heading mb-6 text-2xl font-bold tracking-[-0.015em]">
             También te puede interesar
           </h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">

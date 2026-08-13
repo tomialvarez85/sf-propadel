@@ -50,6 +50,8 @@ export function ProductGallery({
                   alt={productName}
                   fill
                   priority
+                  quality={85}
+                  sizes="(min-width: 768px) 50vw, 100vw"
                   className="object-cover"
                 />
               </div>
@@ -72,11 +74,17 @@ export function ProductGallery({
               type="button"
               onClick={() => api?.scrollTo(index)}
               className={cn(
-                "bg-muted relative size-16 shrink-0 overflow-hidden rounded-lg ring-2 ring-transparent",
+                "bg-muted relative size-16 shrink-0 overflow-hidden rounded-lg ring-2 ring-transparent transition-colors duration-150",
                 current === index && "ring-primary",
               )}
             >
-              <Image src={image.url} alt="" fill className="object-cover" />
+              <Image
+                src={image.url}
+                alt=""
+                fill
+                sizes="64px"
+                className="object-cover"
+              />
             </button>
           ))}
         </div>

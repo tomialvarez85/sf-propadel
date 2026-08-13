@@ -10,6 +10,8 @@ const EMPTY_SETTINGS: SiteSettingsFormValues = {
   textoEnvioGratis: "",
   textoCuotas: "",
   textoNosotros: "",
+  imagenGeneroHombre: null,
+  imagenGeneroMujer: null,
 };
 
 export async function getSiteSettingsForEdit(): Promise<SiteSettingsFormValues> {
@@ -29,6 +31,8 @@ export async function getSiteSettingsForEdit(): Promise<SiteSettingsFormValues> 
       textoEnvioGratis: settings.textoEnvioGratis ?? "",
       textoCuotas: settings.textoCuotas ?? "",
       textoNosotros: settings.textoNosotros ?? "",
+      imagenGeneroHombre: settings.imagenGeneroHombre,
+      imagenGeneroMujer: settings.imagenGeneroMujer,
     };
   } catch (error) {
     console.error("No se pudo cargar la configuración del sitio:", error);

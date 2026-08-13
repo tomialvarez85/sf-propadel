@@ -1,0 +1,267 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-12T00:00:00.000Z",
+  "title": "Design System: SF ProPadel",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "SF Orange",
+        "canonical": "oklch(0.646 0.222 41.116)",
+        "tonalRamp": [
+          "oklch(98% 0.016 73.684)",
+          "oklch(95.4% 0.038 75.164)",
+          "oklch(90.1% 0.076 70.697)",
+          "oklch(83.7% 0.128 66.29)",
+          "oklch(75% 0.183 55.934)",
+          "oklch(70.5% 0.213 47.604)",
+          "oklch(64.6% 0.222 41.116)",
+          "oklch(55.3% 0.195 38.402)",
+          "oklch(47% 0.157 37.304)",
+          "oklch(40.8% 0.123 38.172)",
+          "oklch(26.6% 0.079 36.259)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(0.145 0 0)",
+        "tonalRamp": [
+          "oklch(98.5% 0 none)",
+          "oklch(97% 0 none)",
+          "oklch(92.2% 0 none)",
+          "oklch(87% 0 none)",
+          "oklch(70.8% 0 none)",
+          "oklch(55.6% 0 none)",
+          "oklch(43.9% 0 none)",
+          "oklch(37.1% 0 none)",
+          "oklch(26.9% 0 none)",
+          "oklch(20.5% 0 none)",
+          "oklch(14.5% 0 none)"
+        ]
+      },
+      "destructive": {
+        "role": "error",
+        "displayName": "Destructive Red",
+        "canonical": "oklch(0.577 0.245 27.325)",
+        "tonalRamp": [
+          "oklch(97.1% 0.013 17.38)",
+          "oklch(93.6% 0.032 17.717)",
+          "oklch(88.5% 0.062 18.334)",
+          "oklch(80.8% 0.114 19.571)",
+          "oklch(70.4% 0.191 22.216)",
+          "oklch(63.7% 0.237 25.331)",
+          "oklch(57.7% 0.245 27.325)",
+          "oklch(50.5% 0.213 27.518)",
+          "oklch(44.4% 0.177 26.899)",
+          "oklch(39.6% 0.141 25.723)",
+          "oklch(25.8% 0.092 26.042)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero banner title, wordmark, and the singular product-detail price figure. Geist Sans, weight 800 — the loudest tier, used sparingly."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page/section titles and the product-detail <h1>. Geist Sans, weight 700 — up from 600."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card, dialog, sheet, and alert-dialog titles. Geist Sans, weight 500 — same weight as before, moved from system-ui to Geist Sans for heading-family consistency."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default UI copy: nav, descriptions, labels, table cells. System-ui, unchanged."
+      }
+    },
+    "shadows": [
+      {
+        "name": "hairline-ring",
+        "value": "0 0 0 1px oklch(0.145 0 0 / 0.1)",
+        "purpose": "Default separation for cards, dialog content, and popover/select/dropdown content at rest."
+      },
+      {
+        "name": "float-md",
+        "value": "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+        "purpose": "Hover state on product cards; resting elevation for open popovers/selects/dropdowns."
+      },
+      {
+        "name": "cta-lift",
+        "value": "0 10px 25px -5px oklch(0.646 0.222 41.116 / 0.25)",
+        "purpose": "Resting shadow on the primary \"Comprar por WhatsApp\" CTA only — a named, singular exception to the flat-by-default system, tinted with the brand color instead of neutral gray."
+      }
+    ],
+    "motion": [
+      {
+        "name": "duration-fast",
+        "value": "100ms",
+        "purpose": "Dialog/dropdown open-close animation duration (data-open/data-closed states)."
+      },
+      {
+        "name": "duration-standard",
+        "value": "200ms",
+        "purpose": "Hover/color transitions on buttons, links, and interactive surfaces."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary CTA",
+      "kind": "button",
+      "refersTo": "button-cta",
+      "description": "\"Comprar por WhatsApp\" — the single most important conversion element on the product page. Bigger, heavier, and the one button in the system with a resting shadow.",
+      "html": "<button class=\"ds-btn-cta\">Comprar por WhatsApp</button>",
+      "css": ".ds-btn-cta { background: oklch(0.646 0.222 41.116); color: oklch(0.985 0 0); height: 48px; padding: 0 24px; border-radius: 10px; font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 1rem; font-weight: 700; border: none; box-shadow: 0 10px 25px -5px oklch(0.646 0.222 41.116 / 0.25); transition: background 0.2s, box-shadow 0.2s; } .ds-btn-cta:hover { background: oklch(0.646 0.222 41.116 / 0.8); } .ds-btn-cta:focus-visible { outline: none; box-shadow: 0 0 0 3px oklch(0.646 0.222 41.116 / 0.5); }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary action / unselected option chip (e.g. product variant selector). Unchanged.",
+      "html": "<button class=\"ds-btn-outline\">M</button>",
+      "css": ".ds-btn-outline { background: oklch(1 0 0); color: oklch(0.145 0 0); height: 32px; padding: 0 10px; border-radius: 10px; border: 1px solid oklch(0.922 0 0); font-size: 0.875rem; font-weight: 500; transition: background 0.2s; } .ds-btn-outline:hover { background: oklch(0.97 0 0); }"
+    },
+    {
+      "name": "Discount Badge",
+      "kind": "chip",
+      "refersTo": "badge-primary",
+      "description": "Discount percentage on product cards — moved from destructive red to a solid orange fill (a markdown is good news, not a warning). Small and bounded, so it's the one fill allowed to repeat across a grid.",
+      "html": "<span class=\"ds-badge-primary\">-20%</span>",
+      "css": ".ds-badge-primary { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 26px; background: oklch(0.646 0.222 41.116); color: oklch(0.985 0 0); font-size: 0.75rem; font-weight: 600; }"
+    },
+    {
+      "name": "Detail Page Price",
+      "kind": "custom",
+      "refersTo": "price-emphasis",
+      "description": "The one price in the system that earns a solid fill — appears exactly once per product-detail page, unlike the repeated card price which stays plain text.",
+      "html": "<div class=\"ds-price-emphasis\">$96.000</div>",
+      "css": ".ds-price-emphasis { display: inline-flex; align-items: center; background: oklch(0.646 0.222 41.116); color: oklch(0.985 0 0); border-radius: 8px; padding: 4px 12px; font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 800; font-size: 2.25rem; letter-spacing: -0.02em; }"
+    },
+    {
+      "name": "Product Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "The most-instantiated component in the system: square photo, orange discount badge, bigger/bolder price (plain text, no fill), installment copy.",
+      "html": "<div class=\"ds-product-card\"><div class=\"ds-product-card-media\"><span class=\"ds-badge-primary\">-20%</span></div><div class=\"ds-product-card-body\"><h3 class=\"ds-product-card-title\">Paleta Head Extreme</h3><div class=\"ds-product-card-price-row\"><span class=\"ds-product-card-price-old\">$120.000</span><span class=\"ds-product-card-price\">$96.000</span></div><span class=\"ds-product-card-installments\">3 cuotas de $32.000</span></div></div>",
+      "css": ".ds-product-card { background: oklch(1 0 0); border-radius: 14px; box-shadow: 0 0 0 1px oklch(0.145 0 0 / 0.1); overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; transition: box-shadow 0.2s; } .ds-product-card:hover { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); } .ds-product-card-media { position: relative; aspect-ratio: 1 / 1; background: oklch(0.97 0 0); padding: 8px; } .ds-badge-primary { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 26px; background: oklch(0.646 0.222 41.116); color: oklch(0.985 0 0); font-size: 0.75rem; font-weight: 600; } .ds-product-card-body { display: flex; flex-direction: column; gap: 4px; padding: 12px 16px 16px; } .ds-product-card-title { font-size: 0.875rem; font-weight: 500; color: oklch(0.145 0 0); margin: 0; } .ds-product-card-price-row { display: flex; align-items: baseline; gap: 8px; } .ds-product-card-price-old { font-size: 0.75rem; color: oklch(0.556 0 0); text-decoration: line-through; } .ds-product-card-price { font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 1.25rem; font-weight: 800; color: oklch(0.145 0 0); } .ds-product-card-installments { font-size: 0.75rem; color: oklch(0.556 0 0); }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Standard text field — search, forms. Unchanged.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Buscar productos...\" />",
+      "css": ".ds-input { height: 32px; width: 100%; padding: 4px 10px; border-radius: 10px; border: 1px solid oklch(0.922 0 0); background: transparent; color: oklch(0.145 0 0); font-size: 0.875rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; } .ds-input::placeholder { color: oklch(0.556 0 0); } .ds-input:focus-visible { border-color: oklch(0.646 0.222 41.116); box-shadow: 0 0 0 3px oklch(0.646 0.222 41.116 / 0.5); }"
+    },
+    {
+      "name": "Site Header",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Sticky header — wordmark split into ink + orange, now set in Geist Sans at display weight (800), up from inherited body weight.",
+      "html": "<header class=\"ds-header\"><a class=\"ds-header-logo\" href=\"/\">SF <span class=\"ds-header-logo-accent\">ProPadel</span></a><nav class=\"ds-header-nav\"><a class=\"ds-header-link\" href=\"#\">Paletas</a><a class=\"ds-header-link\" href=\"#\">Indumentaria</a></nav></header>",
+      "css": ".ds-header { display: flex; align-items: center; gap: 24px; padding: 16px 24px; background: oklch(1 0 0); border-bottom: 1px solid oklch(0.922 0 0); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; } .ds-header-logo { font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; color: oklch(0.145 0 0); text-decoration: none; } .ds-header-logo-accent { color: oklch(0.646 0.222 41.116); } .ds-header-nav { display: flex; gap: 24px; } .ds-header-link { font-size: 0.875rem; font-weight: 500; color: oklch(0.145 0 0); text-decoration: none; transition: color 0.2s; } .ds-header-link:hover { color: oklch(0.646 0.222 41.116); }"
+    },
+    {
+      "name": "Hero Banner (Angled Corner)",
+      "kind": "custom",
+      "refersTo": "hero-motif",
+      "description": "One of two instances of the Angled Corner motif: a clipped bottom-right corner traced with a thin diagonal orange line. The second instance is the Ofertas Highlight Band below — the family stays at exactly two, not a free-standing pattern.",
+      "html": "<div class=\"ds-hero\"><div class=\"ds-hero-cut\"></div><h1 class=\"ds-hero-title\">Todo para tu juego</h1></div>",
+      "css": ".ds-hero { position: relative; aspect-ratio: 16 / 5; overflow: hidden; background: oklch(0.145 0 0); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 28px), calc(100% - 28px) 100%, 0 100%); display: flex; align-items: flex-end; padding: 24px; } .ds-hero-cut { position: absolute; right: 0; bottom: 0; width: 40px; height: 40px; background: linear-gradient(135deg, transparent 48%, oklch(0.646 0.222 41.116) 50%, oklch(0.646 0.222 41.116) 55%, transparent 57%); } .ds-hero-title { font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 800; letter-spacing: -0.02em; font-size: 2rem; color: oklch(0.985 0 0); margin: 0; }"
+    },
+    {
+      "name": "Ofertas Highlight Band",
+      "kind": "custom",
+      "refersTo": "section-highlight-fill",
+      "description": "Second instance of the Angled Corner family, and the ambient-wash exception to the One Accent Rule: a full-width diagonal cut on the bottom edge of the homepage's Ofertas section, filled with a 6%-alpha orange wash (not the same fill class as the CTA/price plates) and traced with a thin solid-orange line at the cut. Solves a real audit finding: Ofertas and Destacados were visually identical.",
+      "html": "<section class=\"ds-ofertas\"><div class=\"ds-ofertas-edge\"></div><div class=\"ds-ofertas-fill\"></div><div class=\"ds-ofertas-content\"><h2>Ofertas</h2></div></section>",
+      "css": ".ds-ofertas { position: relative; } .ds-ofertas-edge, .ds-ofertas-fill { position: absolute; inset: 0; } .ds-ofertas-edge { background: oklch(0.646 0.222 41.116); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 44px), 0 100%); } .ds-ofertas-fill { background: oklch(0.646 0.222 41.116 / 0.06); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 40px), 0 100%); } .ds-ofertas-content { position: relative; padding: 40px 24px 64px; }"
+    },
+    {
+      "name": "Court-Line Field",
+      "kind": "custom",
+      "refersTo": "bg-court-lines",
+      "description": "Storefront-only background texture: diagonal 1px ink hairlines every 28px along the same 45deg direction as the Angled Corner motif, at 12% alpha (up from 7%, and from an orthogonal boundary+cross pattern) after an audit found the original too faint to register. Pure CSS repeating-linear-gradient, no SVG. Applied on the (site) layout wrapper, not <body>, so the admin dashboard never inherits it.",
+      "html": "<div class=\"ds-court-field\"><p>Contenido de la p&#225;gina renderiza encima, sin interacci&#243;n con la textura.</p></div>",
+      "css": ".ds-court-field { background-color: oklch(1 0 0); background-repeat: repeat; background-image: repeating-linear-gradient(45deg, transparent 0px, transparent 27px, oklch(0.145 0 0 / 0.12) 27px, oklch(0.145 0 0 / 0.12) 28px); padding: 24px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Black-and-Orange Storefront, Turned Up",
+    "overview": "SF ProPadel still runs on the stock shadcn/ui \"New York\" foundation — near-white surfaces, near-black ink, radix-driven components — with the same single deliberate customization at its core: one vibrant orange accent (oklch(0.646 0.222 41.116), Tailwind orange-600) against a neutral (0-chroma) black-and-white base. That discipline does not change. What changes is confidence at the moments that matter most: the system now has a real display voice (Geist Sans, activated for every heading tier instead of sitting unused in code), heavier type weight at the top of the hierarchy (700-800, not 600), and permission for the orange accent to take a bigger, solid-fill turn at the two places a padel shop lives or dies on — the price and the buy button. Everywhere else — nav, backgrounds, filters, form chrome — keeps the original restraint untouched. This is amplification of what the brand already owns, not a new brand.\n\nTypography now pairs two families on purpose: Geist Sans carries every heading tier (display, headline, and title), system-ui carries body copy. That is a deliberate pairing, not the old accidental dormancy — Geist Sans was loaded via next/font from the start and simply never wired up; it is now the system's actual display voice.\n\nDepth stays flat by default — the hairline ring is still the system's primary separation technique — with one new, narrow exception: the primary CTA button now earns a soft, brand-tinted resting shadow, because it is the single element on the page most responsible for revenue and it should look like it.",
+    "keyCharacteristics": [
+      "One accent color (orange) — still the only saturated hue — but no longer confined to thin text/border/badge moments: the product price and the primary CTA now earn real, solid-fill presence.",
+      "Near-black, not pure black — oklch(0.145 0 0), matching Tailwind's neutral-950 — unchanged.",
+      "Flat-by-default surfaces; the hairline ring is still the default separator. The primary CTA is the one named exception that earns a resting shadow.",
+      "A deliberate two-family type pairing: Geist Sans for every heading tier (display/headline/title), system-ui for body — replacing the prior single-stack restraint now that Geist Sans is actually wired in.",
+      "Light mode only, by deliberate product decision, not oversight — see The Light-Only Rule."
+    ],
+    "rules": [
+      {
+        "name": "The One Accent Rule, Amended",
+        "body": "Orange is still the only saturated color in the system, and it is still rare almost everywhere. Large-surface fills (detail-page price, primary CTA) stay singular — once per page, never on a repeated grid element. The discount badge is the one small-surface exception allowed to repeat, since a bounded pill marker is a different weight class from a large price plate. The Ofertas section's 6%-alpha ambient wash is a third category: too faint to read as the accent showing up, reserved for zoning a large area.",
+        "section": "colors"
+      },
+      {
+        "name": "The Near-Black Rule",
+        "body": "\"Black\" in this system is always oklch(0.145 0 0) (the --foreground / ink token), not #000. The one exception is literal black/50-black/60 used as a translucent gradient scrim behind text overlaid on photography — that's an image-legibility technique, not a surface color, and should not be reused as a fill.",
+        "section": "colors"
+      },
+      {
+        "name": "The Light-Only Rule",
+        "body": "SF ProPadel ships in light mode only, on purpose — a deliberate product decision, not an unfinished corner. The .dark tokens in globals.css are a shadcn-scaffold leftover, not wired to any theme provider or toggle. Every device this system ships (Court-Line texture, Angled Corner motif, Ofertas ambient wash, CTA shadow) was tuned against a white ground only and has not been checked against dark. Adding dark mode later means a real design pass, not flipping on the inherited tokens.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two-Voice Rule",
+        "body": "Geist Sans speaks for every heading (display/headline/title); system-ui speaks for everything else (body/label). Never mix them within the same role.",
+        "section": "typography"
+      },
+      {
+        "name": "The Ring-Over-Shadow Rule",
+        "body": "Default separation between a surface and its background is a 1px ring-foreground/10 hairline. Shadows are reserved for floating layers (popovers, open dropdowns) and hover feedback — they are not the resting state for static content like cards.",
+        "section": "elevation"
+      },
+      {
+        "name": "The One Lifted Element Rule",
+        "body": "The primary \"Comprar por WhatsApp\" CTA is the single static element in the system permitted a resting shadow — a soft, brand-tinted lift, not a neutral gray shadow. Named and singular; does not extend to other buttons, cards, or panels.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Whisper Texture Rule",
+        "body": "Background texture is always ink at ≤ 14% alpha (raised from 8% after an audit found the original too faint), never the brand accent. Current value is 12%. If the texture becomes loud enough to compete with photography or body text, it is too strong.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Angled Corner Family Rule",
+        "body": "The Angled Corner motif now appears in exactly two places (hero banner, Ofertas band), sharing one 45deg diagonal language with the Court-Line texture. A third instance needs the same bar the second one cleared: a real compositional problem it solves, not decoration for its own sake.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do use Geist Sans for every heading tier (display/headline/title) and system-ui for body/label — never mix a role's typeface.",
+      "Do reserve the large orange solid-fill treatment for the two named singular moments (detail-page price, primary CTA) — never apply it to a repeated grid element. The small discount badge is the one exception allowed to repeat.",
+      "Do use oklch(0.145 0 0) (\"ink\") wherever the brand needs a \"black\" surface or text color — the footer's inverted block is the reference example.",
+      "Do default new surfaces to a 1px ring-foreground/10 hairline for separation before reaching for a shadow — the CTA's resting shadow is the one named exception, not a precedent.",
+      "Do keep buttons/inputs/selects at rounded-lg (10px) and cards/dialogs/imagery at rounded-xl (14px).",
+      "Do reserve red (oklch(0.577 0.245 27.325)) strictly for error/stock-outage signals — no longer for the discount badge, which now reads in orange."
+    ],
+    "donts": [
+      "Don't introduce a second saturated accent color — the system is still intentionally one-hue.",
+      "Don't let the large price/CTA fill exceptions spread to repeated elements (card grids, list rows) — that erodes the rarity that makes them work.",
+      "Don't use literal #000 as a fill or text color; use the ink token, and reserve raw black only for translucent image scrims (black/50-black/60).",
+      "Don't extend the CTA's resting shadow to other buttons, cards, or panels — it is a named, singular exception.",
+      "Don't set body copy in Geist Sans or a heading in system-ui — the two-voice pairing only works if each voice stays in its lane.",
+      "Don't add a third instance of the angled-corner motif, or a second ambient-wash surface, without a real layout problem it solves.",
+      "Don't apply the court-line texture (or any background texture) in orange, above 14% alpha, or on the admin dashboard."
+    ]
+  }
+}

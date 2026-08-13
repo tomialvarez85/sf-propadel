@@ -13,7 +13,7 @@ export default async function SiteLayout({
   ]);
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="bg-court-lines flex min-h-screen flex-col">
       <SiteHeader categories={categories} settings={settings} />
       <main className="flex-1">{children}</main>
       <SiteFooter settings={settings} />

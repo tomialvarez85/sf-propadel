@@ -42,6 +42,20 @@ export async function getMainCategories(): Promise<HomeCategory[]> {
   }
 }
 
+export async function getCategoryBySlug(
+  slug: string,
+): Promise<HomeCategory | null> {
+  try {
+    return await prisma.category.findUnique({
+      where: { slug },
+      select: { id: true, nombre: true, slug: true, imagen: true },
+    });
+  } catch (error) {
+    console.error("No se pudo cargar la categoría:", error);
+    return null;
+  }
+}
+
 async function getProducts(
   where: Prisma.ProductWhereInput,
 ): Promise<ProductCardData[]> {

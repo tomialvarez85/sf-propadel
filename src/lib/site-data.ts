@@ -37,6 +37,8 @@ export type SiteSettingsData = {
   textoEnvioGratis: string | null;
   textoCuotas: string | null;
   textoNosotros: string | null;
+  imagenGeneroHombre: string | null;
+  imagenGeneroMujer: string | null;
 } | null;
 
 export async function getSiteSettings(): Promise<SiteSettingsData> {

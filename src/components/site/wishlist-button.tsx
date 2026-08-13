@@ -29,7 +29,10 @@ export function WishlistButton({
         className={className}
       >
         <Heart
-          className={cn(favorite && "fill-destructive text-destructive")}
+          className={cn(
+            "transition-colors duration-200",
+            favorite && "fill-destructive text-destructive animate-heart-pop",
+          )}
         />
         {favorite ? "En favoritos" : "Agregar a favoritos"}
       </Button>
@@ -48,8 +51,8 @@ export function WishlistButton({
     >
       <Heart
         className={cn(
-          "size-4",
-          favorite && "fill-destructive text-destructive",
+          "size-4 transition-colors duration-200",
+          favorite && "fill-destructive text-destructive animate-heart-pop",
         )}
       />
     </Button>

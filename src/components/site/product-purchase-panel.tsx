@@ -2,10 +2,12 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { WishlistButton } from "@/components/site/wishlist-button";
+import { useCart } from "@/hooks/use-cart";
 import { cn } from "@/lib/utils";
 import { formatCurrency, getDiscountPercent, INSTALLMENTS } from "@/lib/format";
 
@@ -85,6 +87,23 @@ export function ProductPurchasePanel({
     return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
   }, [whatsapp, nombre, variantGroups, selected]);
 
+  const { addItem } = useCart();
+
+  function handleAddToCart() {
+    addItem({
+      productId: id,
+      nombre,
+      slug,
+      precio,
+      imagen,
+      variants: selectedVariants.map((variant) => ({
+        tipo: variant.tipo,
+        valor: variant.valor,
+      })),
+    });
+    toast.success("Agregado al carrito", { description: nombre });
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-start justify-between gap-4">
@@ -95,7 +114,9 @@ export function ProductPurchasePanel({
           >
             {brand.nombre}
           </Link>
-          <h1 className="text-2xl font-semibold tracking-tight">{nombre}</h1>
+          <h1 className="font-heading text-2xl font-bold tracking-[-0.015em]">
+            {nombre}
+          </h1>
         </div>
         <WishlistButton
           product={{ id, nombre, slug, precio, precioAnterior, stock, imagen }}
@@ -104,18 +125,18 @@ export function ProductPurchasePanel({
         />
       </div>
 
-      <div className="flex flex-col gap-1">
-        <div className="flex items-baseline gap-2">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
           {discountPercent !== null && (
             <span className="text-muted-foreground text-base line-through">
               {formatCurrency(precioAnterior!)}
             </span>
           )}
-          <span className="text-3xl font-semibold">
+          <span className="font-heading bg-primary text-primary-foreground inline-flex items-center rounded-md px-3 py-1 text-3xl font-extrabold tracking-[-0.02em] sm:text-4xl">
             {formatCurrency(precio)}
           </span>
           {discountPercent !== null && (
-            <Badge variant="destructive">-{discountPercent}%</Badge>
+            <Badge variant="lime">-{discountPercent}%</Badge>
           )}
         </div>
         <span className="text-muted-foreground text-sm">
@@ -152,28 +173,46 @@ export function ProductPurchasePanel({
 
       <p
         className={cn(
-          "text-sm font-medium",
-          effectiveStock <= 0
-            ? "text-destructive"
-            : effectiveStock <= 3
-              ? "text-destructive"
-              : "text-muted-foreground",
+          "text-sm font-medium transition-colors duration-200",
+          effectiveStock <= 3 ? "text-destructive" : "text-muted-foreground",
         )}
       >
         {stockLabel}
       </p>
 
-      {whatsappHref && effectiveStock > 0 ? (
-        <Button asChild size="lg" className="w-full sm:w-auto">
-          <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+        <Button
+          type="button"
+          size="lg"
+          disabled={effectiveStock <= 0}
+          onClick={handleAddToCart}
+          className="font-heading h-12 w-full px-6 text-base font-bold shadow-lg shadow-primary/25 sm:w-auto"
+        >
+          Agregar al carrito
+        </Button>
+
+        {whatsappHref && effectiveStock > 0 ? (
+          <Button
+            asChild
+            variant="outline"
+            size="lg"
+            className="font-heading h-12 w-full px-6 text-base font-bold sm:w-auto"
+          >
+            <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
+              Comprar por WhatsApp
+            </a>
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            size="lg"
+            disabled
+            className="font-heading h-12 w-full px-6 text-base font-bold sm:w-auto"
+          >
             Comprar por WhatsApp
-          </a>
-        </Button>
-      ) : (
-        <Button size="lg" disabled className="w-full sm:w-auto">
-          Comprar por WhatsApp
-        </Button>
-      )}
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

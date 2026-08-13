@@ -1,4 +1,4 @@
-import { PrismaClient } from "../src/generated/prisma";
+import { Genero, PrismaClient } from "../src/generated/prisma";
 
 const prisma = new PrismaClient();
 
@@ -101,6 +101,7 @@ async function main() {
       descripcion: "Remera técnica transpirable para jugar con comodidad.",
       precio: 35000,
       stock: 30,
+      genero: Genero.HOMBRE,
       destacado: false,
       enOferta: false,
       categoryId: indumentaria.id,
@@ -119,6 +120,7 @@ async function main() {
       precio: 28000,
       precioAnterior: 34000,
       stock: 20,
+      genero: Genero.MUJER,
       destacado: false,
       enOferta: true,
       categoryId: indumentaria.id,
@@ -135,6 +137,7 @@ async function main() {
       descripcion: "Campera liviana rompeviento para entrada en calor.",
       precio: 62000,
       stock: 15,
+      genero: Genero.UNISEX,
       destacado: true,
       enOferta: false,
       categoryId: indumentaria.id,
@@ -150,6 +153,7 @@ async function main() {
       descripcion: "Zapatillas de alta estabilidad para superficies de pádel.",
       precio: 145000,
       stock: 14,
+      genero: Genero.HOMBRE,
       destacado: true,
       enOferta: false,
       categoryId: calzado.id,
@@ -169,6 +173,7 @@ async function main() {
       precio: 130000,
       precioAnterior: 155000,
       stock: 9,
+      genero: Genero.MUJER,
       destacado: false,
       enOferta: true,
       categoryId: calzado.id,

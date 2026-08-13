@@ -1,4 +1,4 @@
-import type { Prisma } from "@/generated/prisma";
+import type { Genero, Prisma } from "@/generated/prisma";
 import type { ProductCardData } from "@/components/site/product-card";
 import { prisma } from "@/lib/prisma";
 import { type SortOption } from "@/lib/product-sort-options";
@@ -15,6 +15,7 @@ const ORDER_BY: Record<SortOption, Prisma.ProductOrderByWithRelationInput[]> = {
 export type ProductListingParams = {
   categoryIds?: string[];
   brandIds?: string[];
+  genero?: Genero;
   precioMin?: number;
   precioMax?: number;
   soloOfertas?: boolean;
@@ -49,6 +50,7 @@ async function queryProductListing(
       ? { categoryId: { in: params.categoryIds } }
       : {}),
     ...(params.brandIds?.length ? { brandId: { in: params.brandIds } } : {}),
+    ...(params.genero ? { genero: params.genero } : {}),
     ...(params.soloOfertas ? { enOferta: true } : {}),
     ...(params.precioMin != null || params.precioMax != null
       ? {
@@ -102,6 +104,66 @@ async function queryProductListing(
 }
 
 export type FilterOption = { id: string; nombre: string; slug: string };
+
+/**
+ * Static per-facet counts (how many active products match each category/
+ * brand/género), scoped to the current category if any. Deliberately NOT a
+ * full faceted-search count that also reacts to the other currently-active
+ * filters (marca/género/precio/oferta) — that would need a count query per
+ * facet combination. This is the "how many products are there in general"
+ * number, same idea as a catalog sidebar, not a live-narrowing count.
+ */
+export type FilterFacetCounts = {
+  categoryCounts: Record<string, number>;
+  brandCounts: Record<string, number>;
+  generoCounts: Partial<Record<Genero, number>>;
+};
+
+export async function getFilterFacetCounts(
+  categoryIds?: string[],
+): Promise<FilterFacetCounts> {
+  try {
+    const scopedWhere: Prisma.ProductWhereInput = {
+      activo: true,
+      ...(categoryIds?.length ? { categoryId: { in: categoryIds } } : {}),
+    };
+
+    const [categoryGroups, brandGroups, generoGroups] = await Promise.all([
+      prisma.product.groupBy({
+        by: ["categoryId"],
+        where: { activo: true },
+        _count: true,
+      }),
+      prisma.product.groupBy({
+        by: ["brandId"],
+        where: scopedWhere,
+        _count: true,
+      }),
+      prisma.product.groupBy({
+        by: ["genero"],
+        where: scopedWhere,
+        _count: true,
+      }),
+    ]);
+
+    return {
+      categoryCounts: Object.fromEntries(
+        categoryGroups.map((group) => [group.categoryId, group._count]),
+      ),
+      brandCounts: Object.fromEntries(
+        brandGroups.map((group) => [group.brandId, group._count]),
+      ),
+      generoCounts: Object.fromEntries(
+        generoGroups
+          .filter((group) => group.genero !== null)
+          .map((group) => [group.genero as Genero, group._count]),
+      ),
+    };
+  } catch (error) {
+    console.error("No se pudieron calcular los contadores de filtros:", error);
+    return { categoryCounts: {}, brandCounts: {}, generoCounts: {} };
+  }
+}
 
 export async function getBrandOptions(): Promise<FilterOption[]> {
   try {
