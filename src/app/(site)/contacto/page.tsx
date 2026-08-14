@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 
 import { ContactForm } from "@/components/site/contact-form";
+import { LocationMap } from "@/components/site/location-map";
 import { Card, CardContent } from "@/components/ui/card";
 import { getSiteSettings } from "@/lib/site-data";
 
@@ -112,15 +113,7 @@ export default async function ContactoPage() {
             </div>
 
             {settings?.direccion && (
-              <div className="overflow-hidden rounded-lg">
-                <iframe
-                  title="Ubicación de SF ProPadel"
-                  src={`https://www.google.com/maps?q=${encodeURIComponent(settings.direccion)}&output=embed`}
-                  className="h-40 w-full border-0"
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                />
-              </div>
+              <LocationMap direccion={settings.direccion} className="h-40" />
             )}
           </div>
         )}

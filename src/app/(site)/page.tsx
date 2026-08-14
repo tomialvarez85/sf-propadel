@@ -1,5 +1,6 @@
 import { CategoryTiles, type CategoryTile } from "@/components/site/category-tiles";
 import { HeroCarousel } from "@/components/site/hero-carousel";
+import { VisitUs } from "@/components/site/visit-us";
 import {
   ProductCard,
   type ProductCardData,
@@ -114,6 +115,8 @@ export default async function HomePage() {
         tone="wash"
         layout="carousel"
       />
+
+      <VisitUs settings={settings} />
     </>
   );
 }

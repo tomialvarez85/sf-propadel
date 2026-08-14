@@ -141,6 +141,25 @@ export function SiteSettingsForm({
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="horarioAtencion"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Horario de atención</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      rows={3}
+                      placeholder={"Lun a Vie: 9 a 19hs\nSáb: 9 a 13hs"}
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </CardContent>
         </Card>
 

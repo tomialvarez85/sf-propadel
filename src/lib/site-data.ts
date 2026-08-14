@@ -34,6 +34,7 @@ export type SiteSettingsData = {
   facebook: string | null;
   email: string | null;
   direccion: string | null;
+  horarioAtencion: string | null;
   textoEnvioGratis: string | null;
   textoCuotas: string | null;
   textoNosotros: string | null;

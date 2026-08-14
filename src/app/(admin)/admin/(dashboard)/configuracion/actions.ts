@@ -27,6 +27,7 @@ function normalizeSettingsData(
     facebook: data.facebook || null,
     email: data.email || null,
     direccion: data.direccion || null,
+    horarioAtencion: data.horarioAtencion || null,
     textoEnvioGratis: data.textoEnvioGratis || null,
     textoCuotas: data.textoCuotas || null,
     textoNosotros: data.textoNosotros || null,

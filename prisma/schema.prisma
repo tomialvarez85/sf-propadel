@@ -103,6 +103,7 @@ model SiteSettings {
   facebook         String?
   email            String?
   direccion        String?
+  horarioAtencion  String?
   textoEnvioGratis String?
   textoCuotas      String?
   textoNosotros    String?
