@@ -1,14 +1,18 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { deleteBrand } from "@/app/(admin)/admin/(dashboard)/marcas/actions";
-import { ImagePlaceholder } from "@/components/image-placeholder";
+import {
+  deleteBrand,
+  updateBrandImage,
+  updateBrandNombre,
+} from "@/app/(admin)/admin/(dashboard)/marcas/actions";
+import { InlineTextCell } from "@/components/admin/inline-edit-cell";
+import { InlineImageCell } from "@/components/admin/inline-image-cell";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -53,15 +57,23 @@ function BrandRow({ brand }: { brand: BrandListItem }) {
     <>
       <TableRow>
         <TableCell>
-          <div className="bg-muted relative size-10 overflow-hidden rounded-md">
-            {brand.logo ? (
-              <Image src={brand.logo} alt="" fill className="object-contain" />
-            ) : (
-              <ImagePlaceholder iconClassName="size-4" />
-            )}
-          </div>
+          <InlineImageCell
+            label={brand.nombre}
+            imageUrl={brand.logo}
+            folder="brands"
+            fit="contain"
+            onSave={(url) => updateBrandImage(brand.id, url)}
+            successMessage="Logo actualizado"
+          />
         </TableCell>
-        <TableCell className="font-medium">{brand.nombre}</TableCell>
+        <TableCell className="font-medium">
+          <InlineTextCell
+            value={brand.nombre}
+            onSave={(value) => updateBrandNombre(brand.id, value)}
+            requiredError="Ingresá un nombre."
+            successMessage="Nombre actualizado"
+          />
+        </TableCell>
         <TableCell className="text-muted-foreground">/{brand.slug}</TableCell>
         <TableCell>
           <Badge variant="secondary">

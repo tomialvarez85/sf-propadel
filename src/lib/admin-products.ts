@@ -10,6 +10,7 @@ export type ProductListItem = {
   stock: number;
   activo: boolean;
   imagen: string | null;
+  imageCount: number;
   categoryId: string;
   categoryNombre: string;
   brandId: string;
@@ -94,6 +95,7 @@ export async function getProductList(
             take: 1,
             select: { url: true },
           },
+          _count: { select: { images: true } },
         },
       }),
       prisma.product.count({ where }),
@@ -109,6 +111,7 @@ export async function getProductList(
         stock: product.stock,
         activo: product.activo,
         imagen: product.images[0]?.url ?? null,
+        imageCount: product._count.images,
         categoryId: product.categoryId,
         categoryNombre: product.category.nombre,
         brandId: product.brandId,

@@ -111,6 +111,51 @@ export async function updateCategory(
   return { success: true };
 }
 
+export async function updateCategoryNombre(
+  id: string,
+  nombre: string,
+): Promise<ActionResult> {
+  const admin = await getCurrentAdminUser();
+  if (!admin) return { success: false, error: "No autorizado." };
+
+  const trimmed = nombre.trim();
+  if (trimmed.length < 2) {
+    return { success: false, error: "Ingresá un nombre." };
+  }
+
+  try {
+    await prisma.category.update({ where: { id }, data: { nombre: trimmed } });
+  } catch (error) {
+    console.error("No se pudo actualizar el nombre de la categoría:", error);
+    return { success: false, error: "No se pudo guardar el cambio." };
+  }
+
+  revalidateCategoryPaths();
+  return { success: true };
+}
+
+export async function updateCategoryImage(
+  id: string,
+  imagen: string,
+): Promise<ActionResult> {
+  const admin = await getCurrentAdminUser();
+  if (!admin) return { success: false, error: "No autorizado." };
+
+  if (!imagen.trim()) {
+    return { success: false, error: "Falta la URL de la imagen." };
+  }
+
+  try {
+    await prisma.category.update({ where: { id }, data: { imagen } });
+  } catch (error) {
+    console.error("No se pudo actualizar la imagen de la categoría:", error);
+    return { success: false, error: "No se pudo guardar la imagen." };
+  }
+
+  revalidateCategoryPaths();
+  return { success: true };
+}
+
 export async function deleteCategory(id: string): Promise<ActionResult> {
   const admin = await getCurrentAdminUser();
   if (!admin) return { success: false, error: "No autorizado." };

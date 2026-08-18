@@ -88,6 +88,51 @@ export async function updateBrand(
   return { success: true };
 }
 
+export async function updateBrandNombre(
+  id: string,
+  nombre: string,
+): Promise<ActionResult> {
+  const admin = await getCurrentAdminUser();
+  if (!admin) return { success: false, error: "No autorizado." };
+
+  const trimmed = nombre.trim();
+  if (trimmed.length < 2) {
+    return { success: false, error: "Ingresá un nombre." };
+  }
+
+  try {
+    await prisma.brand.update({ where: { id }, data: { nombre: trimmed } });
+  } catch (error) {
+    console.error("No se pudo actualizar el nombre de la marca:", error);
+    return { success: false, error: "No se pudo guardar el cambio." };
+  }
+
+  revalidateBrandPaths();
+  return { success: true };
+}
+
+export async function updateBrandImage(
+  id: string,
+  logo: string,
+): Promise<ActionResult> {
+  const admin = await getCurrentAdminUser();
+  if (!admin) return { success: false, error: "No autorizado." };
+
+  if (!logo.trim()) {
+    return { success: false, error: "Falta la URL del logo." };
+  }
+
+  try {
+    await prisma.brand.update({ where: { id }, data: { logo } });
+  } catch (error) {
+    console.error("No se pudo actualizar el logo de la marca:", error);
+    return { success: false, error: "No se pudo guardar el logo." };
+  }
+
+  revalidateBrandPaths();
+  return { success: true };
+}
+
 export async function deleteBrand(id: string): Promise<ActionResult> {
   const admin = await getCurrentAdminUser();
   if (!admin) return { success: false, error: "No autorizado." };

@@ -209,6 +209,47 @@ export async function updateProductField(
   return { success: true };
 }
 
+/**
+ * Replaces only the primary (lowest `orden`) image — the quick edit from
+ * the products table/cards. Products with several images keep the rest
+ * untouched; full gallery add/reorder/remove still lives in "Editar".
+ */
+export async function updateProductPrimaryImage(
+  productId: string,
+  url: string,
+): Promise<ActionResult> {
+  const admin = await getCurrentAdminUser();
+  if (!admin) return { success: false, error: "No autorizado." };
+
+  if (!url.trim()) {
+    return { success: false, error: "Falta la URL de la imagen." };
+  }
+
+  try {
+    const primary = await prisma.productImage.findFirst({
+      where: { productId },
+      orderBy: { orden: "asc" },
+    });
+
+    if (primary) {
+      await prisma.productImage.update({
+        where: { id: primary.id },
+        data: { url },
+      });
+    } else {
+      await prisma.productImage.create({
+        data: { productId, url, orden: 0 },
+      });
+    }
+  } catch (error) {
+    console.error("No se pudo actualizar la imagen del producto:", error);
+    return { success: false, error: "No se pudo guardar la imagen." };
+  }
+
+  revalidateProductPaths();
+  return { success: true };
+}
+
 export async function toggleProductActivo(
   id: string,
   activo: boolean,

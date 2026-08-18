@@ -5,10 +5,6 @@ import { Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 import {
-  updateProductField,
-  type ProductEditableField,
-} from "@/app/(admin)/admin/(dashboard)/productos/actions";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -17,6 +13,8 @@ import {
 } from "@/components/ui/select";
 import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
+
+type SaveResult = { success: boolean; error?: string };
 
 const displayClassName =
   "group/cell focus-visible:ring-ring/50 -mx-2 flex w-full cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-left outline-none transition-colors hover:bg-muted focus-visible:ring-3 disabled:cursor-wait";
@@ -32,14 +30,26 @@ function EditIcon({ isPending }: { isPending: boolean }) {
   );
 }
 
-/** Inline text field — click to edit, Enter/blur saves, Escape cancels. */
+/**
+ * Inline text field — click to edit, Enter/blur saves, Escape cancels.
+ * Entity-agnostic: the caller supplies `onSave`, so this same component
+ * backs Nombre across products, categories, and brands, and Título/Link on
+ * banners.
+ */
 export function InlineTextCell({
-  productId,
   value,
+  onSave,
+  successMessage = "Cambio guardado",
+  required = true,
+  requiredError = "Este campo no puede estar vacío.",
   className,
 }: {
-  productId: string;
   value: string;
+  onSave: (value: string) => Promise<SaveResult>;
+  successMessage?: string;
+  /** Set false for optional fields (e.g. banner título/link) — empty saves as "". */
+  required?: boolean;
+  requiredError?: string;
   className?: string;
 }) {
   const [current, setCurrent] = useState(value);
@@ -65,8 +75,8 @@ export function InlineTextCell({
     settledRef.current = true;
 
     const trimmed = draft.trim();
-    if (!trimmed) {
-      toast.error("El nombre no puede estar vacío.");
+    if (required && !trimmed) {
+      toast.error(requiredError);
       setDraft(current);
       setEditing(false);
       return;
@@ -77,14 +87,14 @@ export function InlineTextCell({
     const previous = current;
     setCurrent(trimmed);
     startTransition(async () => {
-      const result = await updateProductField(productId, "nombre", trimmed);
+      const result = await onSave(trimmed);
       if (!result.success) {
         setCurrent(previous);
         setDraft(previous);
-        toast.error(result.error);
+        toast.error(result.error ?? "No se pudo guardar el cambio.");
         return;
       }
-      toast.success("Nombre actualizado");
+      toast.success(successMessage);
     });
   }
 
@@ -129,24 +139,32 @@ export function InlineTextCell({
       disabled={isPending}
       className={cn(displayClassName, isPending && "opacity-50", className)}
     >
-      <span className="truncate">{current}</span>
+      <span className="truncate">
+        {current || <span className="text-muted-foreground">—</span>}
+      </span>
       <EditIcon isPending={isPending} />
     </button>
   );
 }
 
-/** Inline number field (precio/stock) — same click-to-edit pattern as
- * InlineTextCell, but numeric input + field-specific validation/formatting. */
+/** Inline number field — same click-to-edit pattern as InlineTextCell, but
+ * numeric input with caller-supplied validation/formatting (precio/stock on
+ * products today, easy to reuse for any other numeric column later). */
 export function InlineNumberCell({
-  productId,
-  field,
   value,
+  onSave,
+  validate,
   format = "integer",
+  step = "1",
+  successMessage = "Cambio guardado",
 }: {
-  productId: string;
-  field: "precio" | "stock";
   value: number;
+  onSave: (value: number) => Promise<SaveResult>;
+  /** Return an error message to block the save, or null when valid. */
+  validate?: (value: number) => string | null;
   format?: "currency" | "integer";
+  step?: string;
+  successMessage?: string;
 }) {
   const [current, setCurrent] = useState(value);
   const [editing, setEditing] = useState(false);
@@ -169,15 +187,9 @@ export function InlineNumberCell({
     settledRef.current = true;
 
     const parsed = Number(draft);
-
-    if (field === "precio" && (!Number.isFinite(parsed) || parsed <= 0)) {
-      toast.error("El precio tiene que ser un número mayor a cero.");
-      setDraft(String(current));
-      setEditing(false);
-      return;
-    }
-    if (field === "stock" && (!Number.isInteger(parsed) || parsed < 0)) {
-      toast.error("El stock tiene que ser un número entero, cero o mayor.");
+    const validationError = validate?.(parsed);
+    if (validationError) {
+      toast.error(validationError);
       setDraft(String(current));
       setEditing(false);
       return;
@@ -189,14 +201,14 @@ export function InlineNumberCell({
     const previous = current;
     setCurrent(parsed);
     startTransition(async () => {
-      const result = await updateProductField(productId, field, parsed);
+      const result = await onSave(parsed);
       if (!result.success) {
         setCurrent(previous);
         setDraft(String(previous));
-        toast.error(result.error);
+        toast.error(result.error ?? "No se pudo guardar el cambio.");
         return;
       }
-      toast.success(field === "precio" ? "Precio actualizado" : "Stock actualizado");
+      toast.success(successMessage);
     });
   }
 
@@ -212,7 +224,7 @@ export function InlineNumberCell({
         ref={inputRef}
         type="number"
         min={0}
-        step={field === "precio" ? "0.01" : "1"}
+        step={step}
         value={draft}
         onChange={(event) => setDraft(event.target.value)}
         onBlur={commit}
@@ -249,21 +261,22 @@ export function InlineNumberCell({
   );
 }
 
-/** Inline select field (categoría/marca) — click to reveal a real Select,
- * saves as soon as an option is picked. */
+/** Inline select field — click to reveal a real Select, saves as soon as an
+ * option is picked. Backs categoría/marca on products, and (elsewhere)
+ * categoría padre — anywhere a row picks one option from a fixed list. */
 export function InlineSelectCell({
-  productId,
-  field,
   valueId,
   valueLabel,
   options,
+  onSave,
+  successMessage = "Cambio guardado",
   className,
 }: {
-  productId: string;
-  field: Extract<ProductEditableField, "categoryId" | "brandId">;
   valueId: string;
   valueLabel: string;
   options: { id: string; nombre: string }[];
+  onSave: (id: string) => Promise<SaveResult>;
+  successMessage?: string;
   className?: string;
 }) {
   const [current, setCurrent] = useState({ id: valueId, nombre: valueLabel });
@@ -278,15 +291,13 @@ export function InlineSelectCell({
     const previous = current;
     setCurrent(nextOption);
     startTransition(async () => {
-      const result = await updateProductField(productId, field, nextId);
+      const result = await onSave(nextId);
       if (!result.success) {
         setCurrent(previous);
-        toast.error(result.error);
+        toast.error(result.error ?? "No se pudo guardar el cambio.");
         return;
       }
-      toast.success(
-        field === "categoryId" ? "Categoría actualizada" : "Marca actualizada",
-      );
+      toast.success(successMessage);
     });
   }
 

@@ -1,20 +1,23 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { deleteProduct } from "@/app/(admin)/admin/(dashboard)/productos/actions";
-import { ImagePlaceholder } from "@/components/image-placeholder";
+import {
+  deleteProduct,
+  toggleProductActivo,
+  updateProductField,
+} from "@/app/(admin)/admin/(dashboard)/productos/actions";
 import {
   InlineNumberCell,
   InlineSelectCell,
   InlineTextCell,
 } from "@/components/admin/inline-edit-cell";
-import { ProductStatusBadge } from "@/components/admin/product-status-badge";
+import { ProductImageCell } from "@/components/admin/product-image-cell";
+import { StatusToggleBadge } from "@/components/admin/status-toggle-badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -84,18 +87,6 @@ function useDeleteProduct(product: ProductListItem) {
   return { confirmOpen, setConfirmOpen, deleteDialog };
 }
 
-function ProductThumbnail({ product }: { product: ProductListItem }) {
-  return (
-    <div className="bg-muted relative size-10 shrink-0 overflow-hidden rounded-md">
-      {product.imagen ? (
-        <Image src={product.imagen} alt="" fill className="object-cover" />
-      ) : (
-        <ImagePlaceholder iconClassName="size-4" />
-      )}
-    </div>
-  );
-}
-
 /** Desktop table row — used for the `md:table` layout. */
 function ProductTableRow({
   product,
@@ -112,45 +103,72 @@ function ProductTableRow({
     <>
       <TableRow>
         <TableCell>
-          <ProductThumbnail product={product} />
+          <ProductImageCell
+            productId={product.id}
+            productName={product.nombre}
+            imageUrl={product.imagen}
+            imageCount={product.imageCount}
+          />
         </TableCell>
         <TableCell className="font-medium">
-          <InlineTextCell productId={product.id} value={product.nombre} />
-        </TableCell>
-        <TableCell className="text-muted-foreground">
-          <InlineSelectCell
-            productId={product.id}
-            field="categoryId"
-            valueId={product.categoryId}
-            valueLabel={product.categoryNombre}
-            options={categories}
+          <InlineTextCell
+            value={product.nombre}
+            onSave={(value) => updateProductField(product.id, "nombre", value)}
+            requiredError="El nombre no puede estar vacío."
+            successMessage="Nombre actualizado"
           />
         </TableCell>
         <TableCell className="text-muted-foreground">
           <InlineSelectCell
-            productId={product.id}
-            field="brandId"
+            valueId={product.categoryId}
+            valueLabel={product.categoryNombre}
+            options={categories}
+            onSave={(id) => updateProductField(product.id, "categoryId", id)}
+            successMessage="Categoría actualizada"
+          />
+        </TableCell>
+        <TableCell className="text-muted-foreground">
+          <InlineSelectCell
             valueId={product.brandId}
             valueLabel={product.brandNombre}
             options={brands}
+            onSave={(id) => updateProductField(product.id, "brandId", id)}
+            successMessage="Marca actualizada"
           />
         </TableCell>
         <TableCell>
           <InlineNumberCell
-            productId={product.id}
-            field="precio"
             value={product.precio}
             format="currency"
+            step="0.01"
+            validate={(n) =>
+              !Number.isFinite(n) || n <= 0
+                ? "El precio tiene que ser un número mayor a cero."
+                : null
+            }
+            onSave={(n) => updateProductField(product.id, "precio", n)}
+            successMessage="Precio actualizado"
           />
         </TableCell>
         <TableCell>
-          <InlineNumberCell productId={product.id} field="stock" value={product.stock} />
+          <InlineNumberCell
+            value={product.stock}
+            validate={(n) =>
+              !Number.isInteger(n) || n < 0
+                ? "El stock tiene que ser un número entero, cero o mayor."
+                : null
+            }
+            onSave={(n) => updateProductField(product.id, "stock", n)}
+            successMessage="Stock actualizado"
+          />
         </TableCell>
         <TableCell>
-          <ProductStatusBadge
-            id={product.id}
-            nombre={product.nombre}
-            initialActivo={product.activo}
+          <StatusToggleBadge
+            label={product.nombre}
+            initialActive={product.activo}
+            onToggle={(next) => toggleProductActivo(product.id, next)}
+            activeMessage="Producto activado"
+            inactiveMessage="Producto desactivado"
           />
         </TableCell>
         <TableCell>
@@ -197,29 +215,36 @@ function ProductCard({
   return (
     <li className="border-border flex flex-col gap-3 border-b py-4 last:border-b-0">
       <div className="flex items-start gap-3">
-        <ProductThumbnail product={product} />
+        <ProductImageCell
+          productId={product.id}
+          productName={product.nombre}
+          imageUrl={product.imagen}
+          imageCount={product.imageCount}
+        />
         <div className="min-w-0 flex-1">
           <InlineTextCell
-            productId={product.id}
             value={product.nombre}
+            onSave={(value) => updateProductField(product.id, "nombre", value)}
+            requiredError="El nombre no puede estar vacío."
+            successMessage="Nombre actualizado"
             className="font-medium"
           />
           <div className="text-muted-foreground flex items-center gap-1 text-xs">
             <InlineSelectCell
-              productId={product.id}
-              field="categoryId"
               valueId={product.categoryId}
               valueLabel={product.categoryNombre}
               options={categories}
+              onSave={(id) => updateProductField(product.id, "categoryId", id)}
+              successMessage="Categoría actualizada"
               className="w-auto"
             />
             <span aria-hidden>·</span>
             <InlineSelectCell
-              productId={product.id}
-              field="brandId"
               valueId={product.brandId}
               valueLabel={product.brandNombre}
               options={brands}
+              onSave={(id) => updateProductField(product.id, "brandId", id)}
+              successMessage="Marca actualizada"
               className="w-auto"
             />
           </div>
@@ -228,22 +253,39 @@ function ProductCard({
 
       <div className="flex items-center justify-between text-sm">
         <InlineNumberCell
-          productId={product.id}
-          field="precio"
           value={product.precio}
           format="currency"
+          step="0.01"
+          validate={(n) =>
+            !Number.isFinite(n) || n <= 0
+              ? "El precio tiene que ser un número mayor a cero."
+              : null
+          }
+          onSave={(n) => updateProductField(product.id, "precio", n)}
+          successMessage="Precio actualizado"
         />
         <div className="flex items-center gap-1 text-muted-foreground">
           <span>Stock:</span>
-          <InlineNumberCell productId={product.id} field="stock" value={product.stock} />
+          <InlineNumberCell
+            value={product.stock}
+            validate={(n) =>
+              !Number.isInteger(n) || n < 0
+                ? "El stock tiene que ser un número entero, cero o mayor."
+                : null
+            }
+            onSave={(n) => updateProductField(product.id, "stock", n)}
+            successMessage="Stock actualizado"
+          />
         </div>
       </div>
 
       <div className="flex items-center justify-between">
-        <ProductStatusBadge
-          id={product.id}
-          nombre={product.nombre}
-          initialActivo={product.activo}
+        <StatusToggleBadge
+          label={product.nombre}
+          initialActive={product.activo}
+          onToggle={(next) => toggleProductActivo(product.id, next)}
+          activeMessage="Producto activado"
+          inactiveMessage="Producto desactivado"
         />
         <div className="flex items-center gap-1">
           <Button asChild variant="ghost" size="icon-sm" className="size-10">

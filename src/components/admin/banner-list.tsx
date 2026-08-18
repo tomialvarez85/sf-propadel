@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowUp, Pencil, Trash2 } from "lucide-react";
@@ -10,7 +9,14 @@ import { toast } from "sonner";
 import {
   deleteBanner,
   moveBanner,
+  toggleBannerActivo,
+  updateBannerImage,
+  updateBannerLink,
+  updateBannerTitulo,
 } from "@/app/(admin)/admin/(dashboard)/banners/actions";
+import { InlineTextCell } from "@/components/admin/inline-edit-cell";
+import { InlineImageCell } from "@/components/admin/inline-image-cell";
+import { StatusToggleBadge } from "@/components/admin/status-toggle-badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,7 +27,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -74,22 +79,40 @@ function BannerRow({
     <>
       <TableRow>
         <TableCell>
-          <div className="bg-muted relative h-10 w-16 overflow-hidden rounded-md">
-            <Image src={banner.imagen} alt="" fill className="object-cover" />
-          </div>
+          <InlineImageCell
+            label={banner.titulo ?? "banner"}
+            imageUrl={banner.imagen}
+            folder="banners"
+            recommendedMinSize={{ width: 1920, height: 1080 }}
+            thumbnailClassName="h-10 w-16"
+            onSave={(url) => updateBannerImage(banner.id, url)}
+            successMessage="Imagen actualizada"
+          />
         </TableCell>
         <TableCell className="font-medium">
-          {banner.titulo || (
-            <span className="text-muted-foreground">Sin título</span>
-          )}
+          <InlineTextCell
+            value={banner.titulo ?? ""}
+            onSave={(value) => updateBannerTitulo(banner.id, value)}
+            required={false}
+            successMessage="Título actualizado"
+          />
         </TableCell>
-        <TableCell className="text-muted-foreground max-w-48 truncate">
-          {banner.link || "—"}
+        <TableCell className="text-muted-foreground max-w-48">
+          <InlineTextCell
+            value={banner.link ?? ""}
+            onSave={(value) => updateBannerLink(banner.id, value)}
+            required={false}
+            successMessage="Link actualizado"
+          />
         </TableCell>
         <TableCell>
-          <Badge variant={banner.activo ? "default" : "secondary"}>
-            {banner.activo ? "Activo" : "Inactivo"}
-          </Badge>
+          <StatusToggleBadge
+            label={banner.titulo ?? "banner"}
+            initialActive={banner.activo}
+            onToggle={(next) => toggleBannerActivo(banner.id, next)}
+            activeMessage="Banner activado"
+            inactiveMessage="Banner desactivado"
+          />
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-1">

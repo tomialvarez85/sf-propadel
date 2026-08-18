@@ -1,14 +1,18 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { deleteCategory } from "@/app/(admin)/admin/(dashboard)/categorias/actions";
-import { ImagePlaceholder } from "@/components/image-placeholder";
+import {
+  deleteCategory,
+  updateCategoryImage,
+  updateCategoryNombre,
+} from "@/app/(admin)/admin/(dashboard)/categorias/actions";
+import { InlineTextCell } from "@/components/admin/inline-edit-cell";
+import { InlineImageCell } from "@/components/admin/inline-image-cell";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -53,16 +57,22 @@ function CategoryRow({
         className="border-border flex items-center gap-3 border-b py-2.5 last:border-0"
         style={{ paddingLeft: depth * 28 }}
       >
-        <div className="bg-muted relative size-10 shrink-0 overflow-hidden rounded-md">
-          {node.imagen ? (
-            <Image src={node.imagen} alt="" fill className="object-cover" />
-          ) : (
-            <ImagePlaceholder iconClassName="size-4" />
-          )}
-        </div>
+        <InlineImageCell
+          label={node.nombre}
+          imageUrl={node.imagen}
+          folder="categories"
+          onSave={(url) => updateCategoryImage(node.id, url)}
+          successMessage="Imagen de categoría actualizada"
+        />
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium">{node.nombre}</p>
+          <InlineTextCell
+            value={node.nombre}
+            onSave={(value) => updateCategoryNombre(node.id, value)}
+            requiredError="Ingresá un nombre."
+            successMessage="Nombre actualizado"
+            className="text-sm font-medium"
+          />
           <p className="text-muted-foreground truncate text-xs">/{node.slug}</p>
         </div>
 

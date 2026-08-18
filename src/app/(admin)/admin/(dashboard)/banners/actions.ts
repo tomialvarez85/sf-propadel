@@ -81,6 +81,88 @@ export async function updateBanner(
   return { success: true };
 }
 
+export async function updateBannerTitulo(
+  id: string,
+  titulo: string,
+): Promise<ActionResult> {
+  const admin = await getCurrentAdminUser();
+  if (!admin) return { success: false, error: "No autorizado." };
+
+  try {
+    await prisma.banner.update({
+      where: { id },
+      data: { titulo: titulo.trim() || null },
+    });
+  } catch (error) {
+    console.error("No se pudo actualizar el título del banner:", error);
+    return { success: false, error: "No se pudo guardar el cambio." };
+  }
+
+  revalidateBannerPaths();
+  return { success: true };
+}
+
+export async function updateBannerLink(
+  id: string,
+  link: string,
+): Promise<ActionResult> {
+  const admin = await getCurrentAdminUser();
+  if (!admin) return { success: false, error: "No autorizado." };
+
+  try {
+    await prisma.banner.update({
+      where: { id },
+      data: { link: link.trim() || null },
+    });
+  } catch (error) {
+    console.error("No se pudo actualizar el link del banner:", error);
+    return { success: false, error: "No se pudo guardar el cambio." };
+  }
+
+  revalidateBannerPaths();
+  return { success: true };
+}
+
+export async function updateBannerImage(
+  id: string,
+  imagen: string,
+): Promise<ActionResult> {
+  const admin = await getCurrentAdminUser();
+  if (!admin) return { success: false, error: "No autorizado." };
+
+  if (!imagen.trim()) {
+    return { success: false, error: "Falta la URL de la imagen." };
+  }
+
+  try {
+    await prisma.banner.update({ where: { id }, data: { imagen } });
+  } catch (error) {
+    console.error("No se pudo actualizar la imagen del banner:", error);
+    return { success: false, error: "No se pudo guardar la imagen." };
+  }
+
+  revalidateBannerPaths();
+  return { success: true };
+}
+
+export async function toggleBannerActivo(
+  id: string,
+  activo: boolean,
+): Promise<ActionResult> {
+  const admin = await getCurrentAdminUser();
+  if (!admin) return { success: false, error: "No autorizado." };
+
+  try {
+    await prisma.banner.update({ where: { id }, data: { activo } });
+  } catch (error) {
+    console.error("No se pudo actualizar el estado del banner:", error);
+    return { success: false, error: "No se pudo actualizar el estado." };
+  }
+
+  revalidateBannerPaths();
+  return { success: true };
+}
+
 export async function deleteBanner(id: string): Promise<ActionResult> {
   const admin = await getCurrentAdminUser();
   if (!admin) return { success: false, error: "No autorizado." };
