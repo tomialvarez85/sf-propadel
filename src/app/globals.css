@@ -92,15 +92,6 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
-  /* Court-Line Field: storefront-only background texture (see DESIGN.md > Shapes). Diagonal hairlines at 12% ink alpha — same 45deg direction as the hero's Angled Corner, so the two signature devices share one geometric language. Never orange, never on the admin dashboard. */
-  --pattern-court-lines: repeating-linear-gradient(
-    45deg,
-    transparent 0px,
-    transparent 27px,
-    oklch(0.145 0 0 / 0.12) 27px,
-    oklch(0.145 0 0 / 0.12) 28px
-  );
-
   /* Real header height, measured by SiteHeader via ResizeObserver and written onto
      :root at runtime (see header.tsx) — the header's own height isn't static, since the
      promo bar is conditional and mobile adds an extra search row. This fallback only
@@ -177,11 +168,6 @@
   html {
     @apply font-sans;
   }
-}
-
-@utility bg-court-lines {
-  background-image: var(--pattern-court-lines);
-  background-repeat: repeat;
 }
 
 @utility hero-corner-cut {

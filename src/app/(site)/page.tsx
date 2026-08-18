@@ -23,18 +23,16 @@ import { getSiteSettings } from "@/lib/site-data";
 function ProductSection({
   title,
   products,
-  tone = "plain",
   layout = "grid",
 }: {
   title: string;
   products: ProductCardData[];
-  tone?: "plain" | "wash";
   layout?: "grid" | "carousel";
 }) {
   if (products.length === 0) return null;
 
   return (
-    <section className={tone === "wash" ? "bg-lime" : undefined}>
+    <section>
       <div className="mx-auto max-w-6xl px-6 py-12">
         <h2 className="font-heading mb-6 text-2xl font-bold tracking-[-0.015em]">
           {title}
@@ -103,16 +101,10 @@ export default async function HomePage() {
 
       <CategoryTiles tiles={categoryTiles} />
 
-      <ProductSection
-        title="Ofertas"
-        products={ofertas}
-        tone="wash"
-        layout="carousel"
-      />
+      <ProductSection title="Ofertas" products={ofertas} layout="carousel" />
       <ProductSection
         title="Destacados"
         products={destacados}
-        tone="wash"
         layout="carousel"
       />
 

@@ -14,7 +14,7 @@ export function VisitUs({ settings }: { settings: SiteSettingsData }) {
     : null;
 
   return (
-    <section className="bg-muted">
+    <section>
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-6 py-16 lg:grid-cols-2 lg:items-center">
         <LocationMap direccion={direccion} className="h-64 lg:h-80" />
 

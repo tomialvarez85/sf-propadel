@@ -16,7 +16,7 @@ export default async function AdminDashboardLayout({
   }
 
   return (
-    <div className="bg-muted/30 flex min-h-screen">
+    <div className="bg-white flex min-h-screen">
       <aside className="border-border bg-background hidden w-60 shrink-0 flex-col border-r md:flex">
         <div className="border-border border-b px-6 py-4">
           <span className="text-base font-semibold tracking-tight">
