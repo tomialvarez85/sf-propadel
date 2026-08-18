@@ -48,8 +48,8 @@ export function ProductCard({ product }: { product: ProductCardData }) {
   }
 
   return (
-    <div className="relative">
-      <Card className="gap-3 overflow-hidden py-0 transition-shadow hover:shadow-md">
+    <div className="relative h-full">
+      <Card className="h-full gap-3 overflow-hidden py-0 transition-shadow hover:shadow-md">
         <Link
           href={`/productos/${product.slug}`}
           className="focus-visible:ring-ring/50 block rounded-t-xl outline-none focus-visible:ring-3"
@@ -75,17 +75,17 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           </div>
 
           <CardContent className="flex flex-col gap-1 pb-2">
-            <h3 className="line-clamp-2 text-sm font-medium">
+            <h3 className="line-clamp-2 min-h-10 text-sm font-medium">
               {product.nombre}
             </h3>
 
-            <div className="flex items-baseline gap-2">
+            <div className="flex flex-wrap items-baseline gap-2">
               {discountPercent !== null && (
                 <span className="text-muted-foreground text-xs line-through">
                   {formatCurrency(product.precioAnterior!)}
                 </span>
               )}
-              <span className="font-heading text-xl font-extrabold tracking-[-0.01em]">
+              <span className="font-heading text-xl font-extrabold tracking-[-0.01em] break-words">
                 {formatCurrency(product.precio)}
               </span>
             </div>
@@ -97,7 +97,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           </CardContent>
         </Link>
 
-        <div className="px-4 pb-4">
+        <div className="mt-auto px-4 pb-4">
           <Button
             type="button"
             variant="outline"
