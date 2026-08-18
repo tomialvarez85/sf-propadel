@@ -60,8 +60,8 @@ export function ProductGallery({
         </CarouselContent>
         {images.length > 1 && (
           <>
-            <CarouselPrevious className="left-2" />
-            <CarouselNext className="right-2" />
+            <CarouselPrevious />
+            <CarouselNext />
           </>
         )}
       </Carousel>

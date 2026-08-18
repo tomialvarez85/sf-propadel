@@ -102,8 +102,10 @@ export function HeroCarousel({ banners }: { banners: HomeBanner[] }) {
           </CarouselItem>
         ))}
       </CarouselContent>
-      <CarouselPrevious className="left-2 z-20" />
-      <CarouselNext className="right-2 z-20" />
+      {/* z-20 to sit above the corner-cut gradient and title overlay, which
+          share that layer inside each slide. */}
+      <CarouselPrevious className="z-20" />
+      <CarouselNext className="z-20" />
       <Hero3DBackground />
     </Carousel>
   );

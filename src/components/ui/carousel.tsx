@@ -186,8 +186,16 @@ function CarouselPrevious({
       size={size}
       className={cn(
         "absolute touch-manipulation rounded-full size-10 md:size-7",
+        // Anchored inside the slide, over its top ~image zone — not centered
+        // on the whole slide. A fixed outside offset (the shadcn default)
+        // only clears the content when the page has real margin beyond the
+        // carousel's own container, which isn't true here below ~1152px
+        // (the padded max-w-6xl sections have zero outside margin there),
+        // so it either overlaps the next slide's content or renders
+        // off-screen. Sitting over the image at every breakpoint instead
+        // means one position works everywhere without per-usage tuning.
         orientation === "horizontal"
-          ? "inset-y-0 -left-12 my-auto"
+          ? "top-[38%] left-2 -translate-y-1/2"
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
         className,
       )}
@@ -217,7 +225,7 @@ function CarouselNext({
       className={cn(
         "absolute touch-manipulation rounded-full size-10 md:size-7",
         orientation === "horizontal"
-          ? "inset-y-0 -right-12 my-auto"
+          ? "top-[38%] right-2 -translate-y-1/2"
           : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
         className,
       )}
