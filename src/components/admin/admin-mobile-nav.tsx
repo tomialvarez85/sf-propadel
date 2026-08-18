@@ -19,7 +19,12 @@ export function AdminMobileNav() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Menú">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Menú"
+          className="size-11 md:size-8"
+        >
           <Menu className="size-5" />
         </Button>
       </SheetTrigger>

@@ -23,7 +23,7 @@ function BannerSlide({
   hide2DBallFallback: boolean;
 }) {
   const content = (
-    <div className="bg-muted hero-corner-cut relative w-full overflow-hidden h-[clamp(360px,calc(100vh_-_var(--header-height)),620px)] lg:h-[calc(100vh_-_var(--header-height))]">
+    <div className="bg-muted hero-corner-cut relative w-full overflow-hidden aspect-[16/9] lg:aspect-auto lg:h-[calc(100vh_-_var(--header-height))]">
       <Image
         src={banner.imagen}
         alt={banner.titulo ?? ""}

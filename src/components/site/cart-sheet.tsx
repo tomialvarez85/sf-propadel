@@ -61,7 +61,7 @@ export function CartSheet({ settings }: { settings: SiteSettingsData }) {
           variant="ghost"
           size="icon"
           aria-label="Carrito"
-          className="relative"
+          className="relative size-11 md:size-8"
         >
           <ShoppingBag className="size-5" />
           {hydrated && totalItems > 0 && (
@@ -123,7 +123,7 @@ export function CartSheet({ settings }: { settings: SiteSettingsData }) {
                           size="icon-sm"
                           aria-label="Quitar del carrito"
                           onClick={() => removeItem(item.lineId)}
-                          className="shrink-0"
+                          className="size-9 shrink-0"
                         >
                           <Trash2 className="text-muted-foreground size-4" />
                         </Button>
@@ -136,12 +136,13 @@ export function CartSheet({ settings }: { settings: SiteSettingsData }) {
                       )}
 
                       <div className="mt-1 flex items-end justify-between gap-2">
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-2">
                           <Button
                             type="button"
                             variant="outline"
                             size="icon-xs"
                             aria-label="Restar cantidad"
+                            className="size-8"
                             onClick={() =>
                               updateQuantity(item.lineId, item.quantity - 1)
                             }
@@ -156,6 +157,7 @@ export function CartSheet({ settings }: { settings: SiteSettingsData }) {
                             variant="outline"
                             size="icon-xs"
                             aria-label="Sumar cantidad"
+                            className="size-8"
                             onClick={() =>
                               updateQuantity(item.lineId, item.quantity + 1)
                             }
@@ -192,14 +194,18 @@ export function CartSheet({ settings }: { settings: SiteSettingsData }) {
                 <Button
                   asChild
                   size="lg"
-                  className="font-heading w-full text-base font-bold"
+                  className="font-heading h-12 w-full text-base font-bold"
                 >
                   <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
                     Finalizar por WhatsApp
                   </a>
                 </Button>
               ) : (
-                <Button size="lg" disabled className="font-heading w-full text-base font-bold">
+                <Button
+                  size="lg"
+                  disabled
+                  className="font-heading h-12 w-full text-base font-bold"
+                >
                   Finalizar por WhatsApp
                 </Button>
               )}

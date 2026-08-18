@@ -24,7 +24,13 @@ function WishlistHeaderLink() {
   const { items, hydrated } = useWishlist();
 
   return (
-    <Button variant="ghost" size="icon" aria-label="Favoritos" asChild>
+    <Button
+      variant="ghost"
+      size="icon"
+      aria-label="Favoritos"
+      className="size-11 md:size-8"
+      asChild
+    >
       <Link href="/favoritos" className="relative">
         <Heart className="size-5" />
         {hydrated && items.length > 0 && (
@@ -44,6 +50,7 @@ function AdminAccessLink() {
       size="icon"
       aria-label="Acceso administradores"
       title="Acceso administradores"
+      className="size-11 md:size-8"
       asChild
     >
       <Link href="/admin">
@@ -194,7 +201,12 @@ export function SiteHeader({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" aria-label="Menú">
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Menú"
+                className="size-11 md:size-8"
+              >
                 <Menu className="size-5" />
               </Button>
             </DropdownMenuTrigger>

@@ -96,7 +96,7 @@ export function ContactForm() {
 
         <Button
           type="submit"
-          className="w-full"
+          className="h-11 w-full"
           disabled={form.formState.isSubmitting}
         >
           {form.formState.isSubmitting ? "Enviando..." : "Enviar mensaje"}

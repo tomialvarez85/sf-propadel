@@ -93,13 +93,13 @@ export function LoginForm() {
 
         <Button
           type="submit"
-          className="w-full"
+          className="h-11 w-full"
           disabled={form.formState.isSubmitting}
         >
           {form.formState.isSubmitting ? "Ingresando..." : "Ingresar"}
         </Button>
 
-        <Button asChild variant="outline" className="w-full">
+        <Button asChild variant="outline" className="h-11 w-full">
           <Link href="/">Volver al sitio</Link>
         </Button>
       </form>
