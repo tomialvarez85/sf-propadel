@@ -96,7 +96,12 @@ export default async function AdminProductosPage(
 
       <Card>
         <CardContent>
-          <ProductList products={products} hasActiveFilters={total !== totalUnfiltered} />
+          <ProductList
+            products={products}
+            categories={categories}
+            brands={brands}
+            hasActiveFilters={total !== totalUnfiltered}
+          />
         </CardContent>
       </Card>
     </div>

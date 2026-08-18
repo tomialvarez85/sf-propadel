@@ -9,6 +9,11 @@ import { toast } from "sonner";
 
 import { deleteProduct } from "@/app/(admin)/admin/(dashboard)/productos/actions";
 import { ImagePlaceholder } from "@/components/image-placeholder";
+import {
+  InlineNumberCell,
+  InlineSelectCell,
+  InlineTextCell,
+} from "@/components/admin/inline-edit-cell";
 import { ProductStatusBadge } from "@/components/admin/product-status-badge";
 import {
   AlertDialog,
@@ -29,8 +34,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatCurrency } from "@/lib/format";
 import type { ProductListItem } from "@/lib/admin-products";
+
+export type InlineEditOption = { id: string; nombre: string };
 
 function useDeleteProduct(product: ProductListItem) {
   const router = useRouter();
@@ -91,7 +97,15 @@ function ProductThumbnail({ product }: { product: ProductListItem }) {
 }
 
 /** Desktop table row — used for the `md:table` layout. */
-function ProductTableRow({ product }: { product: ProductListItem }) {
+function ProductTableRow({
+  product,
+  categories,
+  brands,
+}: {
+  product: ProductListItem;
+  categories: InlineEditOption[];
+  brands: InlineEditOption[];
+}) {
   const { setConfirmOpen, deleteDialog } = useDeleteProduct(product);
 
   return (
@@ -100,15 +114,38 @@ function ProductTableRow({ product }: { product: ProductListItem }) {
         <TableCell>
           <ProductThumbnail product={product} />
         </TableCell>
-        <TableCell className="font-medium">{product.nombre}</TableCell>
-        <TableCell className="text-muted-foreground">
-          {product.categoryNombre}
+        <TableCell className="font-medium">
+          <InlineTextCell productId={product.id} value={product.nombre} />
         </TableCell>
         <TableCell className="text-muted-foreground">
-          {product.brandNombre}
+          <InlineSelectCell
+            productId={product.id}
+            field="categoryId"
+            valueId={product.categoryId}
+            valueLabel={product.categoryNombre}
+            options={categories}
+          />
         </TableCell>
-        <TableCell>{formatCurrency(product.precio)}</TableCell>
-        <TableCell>{product.stock}</TableCell>
+        <TableCell className="text-muted-foreground">
+          <InlineSelectCell
+            productId={product.id}
+            field="brandId"
+            valueId={product.brandId}
+            valueLabel={product.brandNombre}
+            options={brands}
+          />
+        </TableCell>
+        <TableCell>
+          <InlineNumberCell
+            productId={product.id}
+            field="precio"
+            value={product.precio}
+            format="currency"
+          />
+        </TableCell>
+        <TableCell>
+          <InlineNumberCell productId={product.id} field="stock" value={product.stock} />
+        </TableCell>
         <TableCell>
           <ProductStatusBadge
             id={product.id}
@@ -146,7 +183,15 @@ function ProductTableRow({ product }: { product: ProductListItem }) {
 /** Mobile stacked card — a table with 8 columns just hides everything but
  * "Imagen" and "Nombre" off-screen with no scroll affordance below md, so
  * mobile gets its own card layout instead of the same table. */
-function ProductCard({ product }: { product: ProductListItem }) {
+function ProductCard({
+  product,
+  categories,
+  brands,
+}: {
+  product: ProductListItem;
+  categories: InlineEditOption[];
+  brands: InlineEditOption[];
+}) {
   const { setConfirmOpen, deleteDialog } = useDeleteProduct(product);
 
   return (
@@ -154,16 +199,44 @@ function ProductCard({ product }: { product: ProductListItem }) {
       <div className="flex items-start gap-3">
         <ProductThumbnail product={product} />
         <div className="min-w-0 flex-1">
-          <p className="font-medium">{product.nombre}</p>
-          <p className="text-muted-foreground text-xs">
-            {product.categoryNombre} · {product.brandNombre}
-          </p>
+          <InlineTextCell
+            productId={product.id}
+            value={product.nombre}
+            className="font-medium"
+          />
+          <div className="text-muted-foreground flex items-center gap-1 text-xs">
+            <InlineSelectCell
+              productId={product.id}
+              field="categoryId"
+              valueId={product.categoryId}
+              valueLabel={product.categoryNombre}
+              options={categories}
+              className="w-auto"
+            />
+            <span aria-hidden>·</span>
+            <InlineSelectCell
+              productId={product.id}
+              field="brandId"
+              valueId={product.brandId}
+              valueLabel={product.brandNombre}
+              options={brands}
+              className="w-auto"
+            />
+          </div>
         </div>
       </div>
 
       <div className="flex items-center justify-between text-sm">
-        <span className="font-semibold">{formatCurrency(product.precio)}</span>
-        <span className="text-muted-foreground">Stock: {product.stock}</span>
+        <InlineNumberCell
+          productId={product.id}
+          field="precio"
+          value={product.precio}
+          format="currency"
+        />
+        <div className="flex items-center gap-1 text-muted-foreground">
+          <span>Stock:</span>
+          <InlineNumberCell productId={product.id} field="stock" value={product.stock} />
+        </div>
       </div>
 
       <div className="flex items-center justify-between">
@@ -200,9 +273,13 @@ function ProductCard({ product }: { product: ProductListItem }) {
 
 export function ProductList({
   products,
+  categories,
+  brands,
   hasActiveFilters = false,
 }: {
   products: ProductListItem[];
+  categories: InlineEditOption[];
+  brands: InlineEditOption[];
   hasActiveFilters?: boolean;
 }) {
   if (products.length === 0) {
@@ -219,7 +296,12 @@ export function ProductList({
     <>
       <ul className="md:hidden">
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard
+            key={product.id}
+            product={product}
+            categories={categories}
+            brands={brands}
+          />
         ))}
       </ul>
 
@@ -239,7 +321,12 @@ export function ProductList({
           </TableHeader>
           <TableBody>
             {products.map((product) => (
-              <ProductTableRow key={product.id} product={product} />
+              <ProductTableRow
+                key={product.id}
+                product={product}
+                categories={categories}
+                brands={brands}
+              />
             ))}
           </TableBody>
         </Table>

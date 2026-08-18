@@ -10,7 +10,9 @@ export type ProductListItem = {
   stock: number;
   activo: boolean;
   imagen: string | null;
+  categoryId: string;
   categoryNombre: string;
+  brandId: string;
   brandNombre: string;
 };
 
@@ -83,7 +85,9 @@ export async function getProductList(
           precio: true,
           stock: true,
           activo: true,
+          categoryId: true,
           category: { select: { nombre: true } },
+          brandId: true,
           brand: { select: { nombre: true } },
           images: {
             orderBy: { orden: "asc" },
@@ -105,7 +109,9 @@ export async function getProductList(
         stock: product.stock,
         activo: product.activo,
         imagen: product.images[0]?.url ?? null,
+        categoryId: product.categoryId,
         categoryNombre: product.category.nombre,
+        brandId: product.brandId,
         brandNombre: product.brand.nombre,
       })),
       total,
