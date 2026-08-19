@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import Autoplay from "embla-carousel-autoplay";
 
-import { Hero3DBackground } from "@/components/site/hero-3d-background";
 import {
   Carousel,
   CarouselContent,
@@ -12,16 +11,9 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { useHero3DCapability } from "@/hooks/use-hero-3d-capability";
 import type { HomeBanner } from "@/lib/home-data";
 
-function BannerSlide({
-  banner,
-  hide2DBallFallback,
-}: {
-  banner: HomeBanner;
-  hide2DBallFallback: boolean;
-}) {
+function BannerSlide({ banner }: { banner: HomeBanner }) {
   const content = (
     <div className="bg-muted hero-corner-cut relative w-full overflow-hidden h-[calc(100dvh_-_var(--header-height))]">
       <Image
@@ -41,29 +33,27 @@ function BannerSlide({
             "linear-gradient(135deg, transparent 48%, var(--color-lime) 50%, var(--color-lime) 55%, transparent 57%)",
         }}
       />
-      {!hide2DBallFallback && (
-        <svg
-          aria-hidden
-          viewBox="0 0 100 100"
-          className="hero-ball-bounce text-primary pointer-events-none absolute top-[18%] right-[22%] size-20 opacity-[0.18]"
-        >
-          <circle cx="50" cy="50" r="48" fill="currentColor" />
-          <path
-            d="M6 34 Q50 12 94 34"
-            fill="none"
-            stroke="var(--color-background)"
-            strokeWidth="3"
-            opacity="0.5"
-          />
-          <path
-            d="M6 66 Q50 88 94 66"
-            fill="none"
-            stroke="var(--color-background)"
-            strokeWidth="3"
-            opacity="0.5"
-          />
-        </svg>
-      )}
+      <svg
+        aria-hidden
+        viewBox="0 0 100 100"
+        className="hero-ball-bounce text-primary pointer-events-none absolute top-[18%] right-[22%] size-20 opacity-[0.18]"
+      >
+        <circle cx="50" cy="50" r="48" fill="currentColor" />
+        <path
+          d="M6 34 Q50 12 94 34"
+          fill="none"
+          stroke="var(--color-background)"
+          strokeWidth="3"
+          opacity="0.5"
+        />
+        <path
+          d="M6 66 Q50 88 94 66"
+          fill="none"
+          stroke="var(--color-background)"
+          strokeWidth="3"
+          opacity="0.5"
+        />
+      </svg>
       {banner.titulo && (
         <div className="absolute inset-0 z-20 flex items-end bg-gradient-to-t from-black/60 to-transparent p-6">
           <h2 className="font-heading text-xl font-extrabold tracking-[-0.02em] text-white sm:text-3xl">
@@ -87,8 +77,6 @@ function BannerSlide({
 }
 
 export function HeroCarousel({ banners }: { banners: HomeBanner[] }) {
-  const canRender3D = useHero3DCapability();
-
   return (
     <Carousel
       opts={{ loop: true }}
@@ -98,7 +86,7 @@ export function HeroCarousel({ banners }: { banners: HomeBanner[] }) {
       <CarouselContent>
         {banners.map((banner) => (
           <CarouselItem key={banner.id}>
-            <BannerSlide banner={banner} hide2DBallFallback={!!canRender3D} />
+            <BannerSlide banner={banner} />
           </CarouselItem>
         ))}
       </CarouselContent>
@@ -106,7 +94,6 @@ export function HeroCarousel({ banners }: { banners: HomeBanner[] }) {
           share that layer inside each slide. */}
       <CarouselPrevious className="z-20" />
       <CarouselNext className="z-20" />
-      <Hero3DBackground />
     </Carousel>
   );
 }
