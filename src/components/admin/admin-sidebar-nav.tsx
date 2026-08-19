@@ -6,6 +6,7 @@ import {
   Image as ImageIcon,
   LayoutDashboard,
   Package,
+  Receipt,
   Settings,
   Tag,
   Tags,
@@ -17,6 +18,7 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/productos", label: "Productos", icon: Package },
+  { href: "/admin/pedidos", label: "Pedidos", icon: Receipt },
   { href: "/admin/categorias", label: "Categorías", icon: Tags },
   { href: "/admin/marcas", label: "Marcas", icon: Tag },
   { href: "/admin/banners", label: "Banners", icon: ImageIcon },

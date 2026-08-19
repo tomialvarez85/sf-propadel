@@ -26,6 +26,7 @@ function normalizeSettingsData(
     instagram: data.instagram || null,
     facebook: data.facebook || null,
     email: data.email || null,
+    emailPedidos: data.emailPedidos || null,
     direccion: data.direccion || null,
     horarioAtencion: data.horarioAtencion || null,
     textoEnvioGratis: data.textoEnvioGratis || null,

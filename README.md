@@ -28,6 +28,44 @@ Copiá `.env.example` a `.env` y completá los valores reales. En Vercel se conf
 | `NEXT_PUBLIC_SUPABASE_URL`      | URL del proyecto, usada por el SDK de Supabase en el navegador (login de admin, subida de imágenes a Storage). Pública.                                                                                                                                                                                                                                                                                   | Supabase → Project Settings → API                                                                                                                                                                                                |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clave anónima pública, usada junto con la URL de arriba.                                                                                                                                                                                                                                                                                                                                                  | Supabase → Project Settings → API                                                                                                                                                                                                |
 | `SUPABASE_SERVICE_ROLE_KEY`     | **No se usa actualmente** en ninguna Server Action de este repo: las subidas de imágenes se hacen desde el cliente con la sesión del admin logueado, protegidas por políticas RLS del bucket de Storage. Solo hace falta si en el futuro se agrega una operación server-side que necesite bypassear RLS — en ese caso, nunca exponerla con el prefijo `NEXT_PUBLIC_` ni usarla desde un Client Component. | Supabase → Project Settings → API                                                                                                                                                                                                |
+| `RESEND_API_KEY`                | Envía el mail de aviso de pedido nuevo (`src/lib/email.ts`, `sendOrderNotificationEmail`). Ver "Emails de pedidos con Resend" más abajo para el paso a paso.                                                                                                                                                                                                                                             | resend.com → **API Keys** → **Create API Key**                                                                                                                                                                                   |
+| `RESEND_FROM_EMAIL`             | Opcional. Remitente del mail de pedido. Sin configurar, usa el sandbox de Resend (`onboarding@resend.dev`) — anda para probar, pero solo entrega al mail con el que te registraste en Resend. Ver la sección de abajo antes de ir a producción.                                                                                                                                                        | —                                                                                                                                                                                                                                  |
+
+## Emails de pedidos con Resend
+
+`src/lib/email.ts` manda un mail a `SiteSettings.emailPedidos` (configurable en `/admin/configuracion`) cada vez que se registra un pedido — hoy la función existe y se puede probar a mano, pero **todavía no está conectada al flujo del carrito**.
+
+### 1. Conseguir una API key gratis
+
+1. Creá una cuenta en [resend.com](https://resend.com) (el plan free alcanza para este uso — cientos de mails/mes).
+2. **API Keys** en el menú → **Create API Key** → nombre cualquiera, permisos "Sending access" → copiá la key (empieza con `re_`, solo se muestra una vez).
+3. Pegala en `.env` como `RESEND_API_KEY`.
+
+### 2. Remitente: sandbox vs dominio propio
+
+- **Para arrancar/probar, no hace falta nada más**: Resend da un remitente de pruebas (`onboarding@resend.dev`) que funciona sin configurar dominio. La limitación real: en este modo **solo entrega al mismo email con el que te registraste en Resend** — mandarle a cualquier otra dirección falla silenciosamente o rebota. Sirve para el mail de prueba manual de este paso, no para producción real (el dueño del negocio probablemente quiere recibir en su propio mail, no en el tuyo de prueba).
+- **Para producción, verificá un dominio propio**: Resend → **Domains** → **Add Domain** → cargás 2-3 registros DNS (`TXT`/`MX`/`CNAME` para SPF/DKIM) donde tengas el dominio del sitio (`sfpropadel.com.ar` o similar) → Resend valida en minutos a horas. Una vez verificado, remitente tipo `pedidos@sfpropadel.com.ar` puede mandarle a cualquier destinatario, y con SPF/DKIM configurados baja mucho el riesgo de caer en spam (mandar sin dominio verificado, o desde un dominio sin esos registros, es la causa más común de que estos avisos terminen en spam).
+- Configurado el dominio, seteá `RESEND_FROM_EMAIL="SF ProPadel <pedidos@tudominio.com>"` en `.env` (y en Vercel al deployar) — sin esa variable, sigue usando el sandbox.
+
+### 3. Probar que funciona
+
+Con `RESEND_API_KEY` en `.env` (y `SiteSettings.emailPedidos` cargado en `/admin/configuracion`, aunque sea con tu propio mail para la prueba), correr un envío de prueba puntual — pedile a Claude que lo corra, o a mano:
+
+```ts
+import { sendOrderNotificationEmail } from "@/lib/email";
+
+await sendOrderNotificationEmail({
+  id: "test-1",
+  nombreCliente: "Cliente de prueba",
+  emailCliente: "cliente@example.com",
+  telefonoCliente: "5491122334455",
+  total: 78000,
+  createdAt: new Date(),
+  items: [
+    { nombreProducto: "Paletero Nox Team Bag", variante: null, cantidad: 1, precioUnitario: 78000 },
+  ],
+});
+```
 
 ## Cómo correr el proyecto
 

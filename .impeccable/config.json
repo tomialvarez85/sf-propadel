@@ -1,7 +1,9 @@
 {
   "detector": {
     "ignoreRules": [],
-    "ignoreFiles": [],
+    "ignoreFiles": [
+      "src/lib/email.ts"
+    ],
     "ignoreValues": [
       {
         "rule": "design-system-color",

@@ -130,6 +130,30 @@ export function SiteSettingsForm({
 
             <FormField
               control={form.control}
+              name="emailPedidos"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email para notificación de pedidos</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="pedidos@sfpropadel.com.ar"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <p className="text-muted-foreground text-xs">
+                    A esta dirección llega un aviso cada vez que se registra
+                    un pedido nuevo. Puede ser la misma que el email de
+                    contacto o una distinta.
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="direccion"
               render={({ field }) => (
                 <FormItem>

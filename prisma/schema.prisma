@@ -63,8 +63,9 @@ model Product {
   brandId String
   brand   Brand  @relation(fields: [brandId], references: [id])
 
-  images   ProductImage[]
-  variants ProductVariant[]
+  images     ProductImage[]
+  variants   ProductVariant[]
+  orderItems OrderItem[]
 }
 
 model ProductImage {
@@ -102,6 +103,12 @@ model SiteSettings {
   instagram        String?
   facebook         String?
   email            String?
+  // Separate from `email` above on purpose: `email` is the public contact
+  // address shown on /contacto and the footer, emailPedidos is the internal
+  // inbox that gets a notification on every new order — conflating them
+  // would mean changing the public contact address silently rerouted order
+  // notifications too.
+  emailPedidos     String?
   direccion        String?
   horarioAtencion  String?
   textoEnvioGratis String?
@@ -113,6 +120,45 @@ model SiteSettings {
   // ya existente de la categoría real.
   imagenGeneroHombre String?
   imagenGeneroMujer  String?
+}
+
+enum OrderStatus {
+  PENDIENTE
+  CONFIRMADO
+  ENVIADO
+  CANCELADO
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  nombreCliente   String
+  emailCliente    String
+  telefonoCliente String?
+  total           Decimal     @db.Decimal(10, 2)
+  estado          OrderStatus @default(PENDIENTE)
+  createdAt       DateTime    @default(now())
+
+  items OrderItem[]
+}
+
+// Every product-identifying field here is a snapshot taken at sale time
+// (nombreProducto, variante, precioUnitario) — deliberately not a live read
+// through `product`, so a later price change or product edit never rewrites
+// order history. `productId` is optional with onDelete: SetNull for the same
+// reason in the other direction: deleting a product must not be blocked by,
+// or cascade into deleting, past orders that reference it.
+model OrderItem {
+  id             String  @id @default(cuid())
+  nombreProducto String
+  variante       String?
+  cantidad       Int
+  precioUnitario Decimal @db.Decimal(10, 2)
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 }
 
 model AdminUser {

@@ -5,6 +5,7 @@ export const siteSettingsSchema = z.object({
   instagram: z.string().trim().nullable().optional(),
   facebook: z.string().trim().nullable().optional(),
   email: z.string().trim().nullable().optional(),
+  emailPedidos: z.string().trim().nullable().optional(),
   direccion: z.string().trim().nullable().optional(),
   horarioAtencion: z.string().trim().nullable().optional(),
   textoEnvioGratis: z.string().trim().nullable().optional(),
