@@ -104,6 +104,19 @@
      a fixed ~8% of the banner's typical height at every breakpoint, instead of a px value
      that would need re-tuning any time the height formula changes. */
   --hero-corner-cut: 3.5vh;
+
+  /* WhatsApp float button's bottom offset (see DESIGN.md > Navigation). Rem, not vh/dvh —
+     the button's own jump between mobile browser UI states wasn't a viewport-height sizing
+     problem, it was position: fixed's containing block shifting under an address bar that
+     shows/hides, which a stable rem offset already avoids on its own. See bottom-safe-float
+     below for the other half of the fix (the safe-area gesture-bar inset). */
+  --whatsapp-float-offset: 1rem;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --whatsapp-float-offset: 1.5rem;
+  }
 }
 
 @media (min-width: 640px) {
@@ -168,6 +181,10 @@
   html {
     @apply font-sans;
   }
+}
+
+@utility bottom-safe-float {
+  bottom: calc(var(--whatsapp-float-offset) + env(safe-area-inset-bottom, 0px));
 }
 
 @utility hero-corner-cut {
