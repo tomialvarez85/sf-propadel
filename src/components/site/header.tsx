@@ -193,7 +193,7 @@ export function SiteHeader({
 
         <div className="ml-auto flex items-center gap-1 md:ml-0">
           <WishlistHeaderLink />
-          <CartSheet />
+          <CartSheet settings={settings} />
 
           <div aria-hidden className="bg-border mx-1 h-5 w-px" />
 

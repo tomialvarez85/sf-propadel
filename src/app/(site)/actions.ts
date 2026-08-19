@@ -3,7 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { sendOrderNotificationEmail } from "@/lib/email";
+import {
+  sendOrderConfirmationEmail,
+  sendOrderNotificationEmail,
+} from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 
 const checkoutItemSchema = z.object({
@@ -75,10 +78,11 @@ export async function createOrder(input: unknown): Promise<CheckoutResult> {
     };
   }
 
-  // The sale is saved from here on regardless of what happens next — a
-  // failed notification email must never roll back or hide a successful
-  // order from the customer. Log it so it can be resent manually.
-  const emailResult = await sendOrderNotificationEmail({
+  // The sale is saved from here on regardless of what happens to either
+  // email below — a failed send must never roll back or hide a successful
+  // order from the customer. Each failure is only logged, so it can be
+  // resent manually later.
+  const orderForEmail = {
     id: order.id,
     nombreCliente: order.nombreCliente,
     emailCliente: order.emailCliente,
@@ -91,11 +95,29 @@ export async function createOrder(input: unknown): Promise<CheckoutResult> {
       cantidad: item.cantidad,
       precioUnitario: item.precioUnitario.toNumber(),
     })),
-  });
+  };
 
-  if (!emailResult.success) {
+  const settings = await prisma.siteSettings.findUnique({ where: { id: 1 } });
+  const paymentInfo = {
+    alias: settings?.alias ?? null,
+    cbu: settings?.cbu ?? null,
+    titular: settings?.titular ?? null,
+    banco: settings?.banco ?? null,
+  };
+
+  const [ownerEmailResult, customerEmailResult] = await Promise.all([
+    sendOrderNotificationEmail(orderForEmail, settings?.emailPedidos),
+    sendOrderConfirmationEmail(orderForEmail, paymentInfo, settings?.whatsapp),
+  ]);
+
+  if (!ownerEmailResult.success) {
     console.error(
-      `Pedido ${order.id} guardado, pero falló el email de notificación: ${emailResult.error}`,
+      `Pedido ${order.id} guardado, pero falló el email al dueño: ${ownerEmailResult.error}`,
+    );
+  }
+  if (!customerEmailResult.success) {
+    console.error(
+      `Pedido ${order.id} guardado, pero falló el email al cliente: ${customerEmailResult.error}`,
     );
   }
 

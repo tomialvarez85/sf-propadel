@@ -5,7 +5,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { CheckCircle2, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+import {
+  Check,
+  CheckCircle2,
+  Copy,
+  Minus,
+  MessageCircle,
+  Plus,
+  ShoppingBag,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { createOrder } from "@/app/(site)/actions";
@@ -28,14 +37,21 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useCart } from "@/hooks/use-cart";
+import { useCart, type CartItem } from "@/hooks/use-cart";
 import { formatCurrency } from "@/lib/format";
+import type { SiteSettingsData } from "@/lib/site-data";
 import {
   checkoutFormSchema,
   type CheckoutFormValues,
 } from "@/lib/validations/checkout";
 
 type Step = "items" | "checkout" | "confirmation";
+
+type ConfirmedOrder = {
+  email: string;
+  items: CartItem[];
+  total: number;
+};
 
 function CartItemsList({
   items,
@@ -274,32 +290,154 @@ function CheckoutForm({
   );
 }
 
+function CopyField({ label, value }: { label: string; value: string }) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      toast.error("No se pudo copiar. Copiá el valor manualmente.");
+    }
+  }
+
+  return (
+    <div className="flex items-center justify-between gap-2 py-1.5">
+      <div className="min-w-0">
+        <p className="text-muted-foreground text-xs">{label}</p>
+        <p className="truncate text-base font-bold">{value}</p>
+      </div>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={handleCopy}
+        className="shrink-0"
+      >
+        {copied ? (
+          <>
+            <Check className="text-primary size-3.5" />
+            Copiado
+          </>
+        ) : (
+          <>
+            <Copy className="size-3.5" />
+            Copiar
+          </>
+        )}
+      </Button>
+    </div>
+  );
+}
+
 function OrderConfirmation({
-  email,
+  order,
+  settings,
   onClose,
 }: {
-  email: string;
+  order: ConfirmedOrder;
+  settings: SiteSettingsData;
   onClose: () => void;
 }) {
+  const paymentFields = [
+    { label: "Alias", value: settings?.alias },
+    { label: "CBU / CVU", value: settings?.cbu },
+    { label: "Titular", value: settings?.titular },
+    { label: "Banco", value: settings?.banco },
+  ].filter((field): field is { label: string; value: string } =>
+    Boolean(field.value),
+  );
+
+  const whatsappHref = settings?.whatsapp
+    ? `https://wa.me/${settings.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(
+        `Hola! Te mando el comprobante de mi pedido de ${formatCurrency(order.total)}.`,
+      )}`
+    : null;
+
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
-      <CheckCircle2 className="text-primary size-12" />
-      <h3 className="font-heading text-lg font-bold">¡Pedido recibido!</h3>
-      <p className="text-muted-foreground text-sm">
-        Te vamos a contactar a la brevedad a <strong>{email}</strong> para
-        coordinar el pago y la entrega.
+    <div className="flex flex-1 flex-col overflow-y-auto p-4">
+      <div className="flex flex-col items-center gap-2 py-2 text-center">
+        <CheckCircle2 className="text-primary size-10" />
+        <h3 className="font-heading text-lg font-bold">¡Pedido recibido!</h3>
+        <p className="text-muted-foreground text-sm">
+          Te vamos a contactar a la brevedad a <strong>{order.email}</strong>{" "}
+          para coordinar la entrega.
+        </p>
+      </div>
+
+      <div className="border-border mt-4 flex flex-col gap-2 border-t pt-4">
+        <p className="text-sm font-semibold">Resumen del pedido</p>
+        <ul className="flex flex-col gap-2">
+          {order.items.map((item) => (
+            <li key={item.lineId} className="flex items-center gap-2 text-sm">
+              <span className="flex-1 truncate">
+                {item.nombre}
+                {item.variants.length > 0 && (
+                  <span className="text-muted-foreground">
+                    {" "}
+                    ({item.variants.map((v) => v.valor).join(" / ")})
+                  </span>
+                )}{" "}
+                <span className="text-muted-foreground">x{item.quantity}</span>
+              </span>
+              <span className="shrink-0 font-medium">
+                {formatCurrency(item.precio * item.quantity)}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-1 flex items-center justify-between border-t pt-2 text-sm font-semibold">
+          <span>Total</span>
+          <span className="font-heading text-lg font-extrabold">
+            {formatCurrency(order.total)}
+          </span>
+        </div>
+      </div>
+
+      {paymentFields.length > 0 && (
+        <div className="bg-muted mt-4 flex flex-col gap-1 rounded-lg p-3">
+          <p className="text-sm font-semibold">Datos para transferir</p>
+          <div className="divide-border divide-y">
+            {paymentFields.map((field) => (
+              <CopyField
+                key={field.label}
+                label={field.label}
+                value={field.value}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <p className="text-muted-foreground mt-4 text-sm">
+        Transferí el total y mandanos el comprobante por WhatsApp para
+        confirmar tu pedido más rápido.
       </p>
-      <Button onClick={onClose} className="mt-2 w-fit">
+
+      {whatsappHref && (
+        <Button asChild variant="outline" className="mt-3 w-full">
+          <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
+            <MessageCircle className="size-4" />
+            Enviar comprobante por WhatsApp
+          </a>
+        </Button>
+      )}
+
+      <Button onClick={onClose} className="mt-4 w-full">
         Seguir comprando
       </Button>
     </div>
   );
 }
 
-export function CartSheet() {
+export function CartSheet({ settings }: { settings: SiteSettingsData }) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<Step>("items");
-  const [confirmedEmail, setConfirmedEmail] = useState("");
+  const [confirmedOrder, setConfirmedOrder] = useState<ConfirmedOrder | null>(
+    null,
+  );
   const { items, hydrated, removeItem, updateQuantity, totalItems, totalPrice, clearCart } =
     useCart();
 
@@ -312,7 +450,9 @@ export function CartSheet() {
   }
 
   function handleOrderSuccess(email: string) {
-    setConfirmedEmail(email);
+    // Snapshot before clearing — the confirmation screen still needs to
+    // show what was bought after the cart itself goes empty.
+    setConfirmedOrder({ email, items, total: totalPrice });
     clearCart();
     setStep("confirmation");
   }
@@ -347,9 +487,10 @@ export function CartSheet() {
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>
 
-        {step === "confirmation" ? (
+        {step === "confirmation" && confirmedOrder ? (
           <OrderConfirmation
-            email={confirmedEmail}
+            order={confirmedOrder}
+            settings={settings}
             onClose={() => setOpen(false)}
           />
         ) : items.length === 0 ? (

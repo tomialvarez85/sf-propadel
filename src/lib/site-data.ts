@@ -40,6 +40,10 @@ export type SiteSettingsData = {
   textoNosotros: string | null;
   imagenGeneroHombre: string | null;
   imagenGeneroMujer: string | null;
+  alias: string | null;
+  cbu: string | null;
+  titular: string | null;
+  banco: string | null;
 } | null;
 
 export async function getSiteSettings(): Promise<SiteSettingsData> {

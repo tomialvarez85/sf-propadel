@@ -13,6 +13,10 @@ export const siteSettingsSchema = z.object({
   textoNosotros: z.string().trim().nullable().optional(),
   imagenGeneroHombre: z.string().url().nullable().optional(),
   imagenGeneroMujer: z.string().url().nullable().optional(),
+  alias: z.string().trim().nullable().optional(),
+  cbu: z.string().trim().nullable().optional(),
+  titular: z.string().trim().nullable().optional(),
+  banco: z.string().trim().nullable().optional(),
 });
 
 export type SiteSettingsFormValues = z.infer<typeof siteSettingsSchema>;

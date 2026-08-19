@@ -120,6 +120,15 @@ model SiteSettings {
   // ya existente de la categoría real.
   imagenGeneroHombre String?
   imagenGeneroMujer  String?
+
+  // Transferencia bancaria (pago manual, ver checkout / src/lib/email.ts).
+  // Todos opcionales — no todos los negocios usan los mismos medios — y
+  // cada uno se muestra en la confirmación de pedido y en el mail al
+  // cliente solo si está cargado.
+  alias   String?
+  cbu     String?
+  titular String?
+  banco   String?
 }
 
 enum OrderStatus {

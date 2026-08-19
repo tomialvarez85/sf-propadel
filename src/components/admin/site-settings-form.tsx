@@ -189,6 +189,91 @@ export function SiteSettingsForm({
 
         <Card>
           <CardHeader>
+            <CardTitle>Datos de transferencia</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <p className="text-muted-foreground -mt-2 text-sm">
+              Se muestran en la confirmación del pedido y en el mail al
+              cliente después de finalizar la compra. Dejá vacío cualquiera
+              que no uses — solo se muestran los campos cargados.
+            </p>
+
+            <FormField
+              control={form.control}
+              name="alias"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Alias</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="sf.propadel.mp"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="cbu"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CBU / CVU</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="0000003100000000000000"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="titular"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Titular de la cuenta</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="SF ProPadel SRL"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="banco"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Banco</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Banco Galicia"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
             <CardTitle>Barra superior del header</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">

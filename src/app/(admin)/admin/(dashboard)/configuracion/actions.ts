@@ -34,6 +34,10 @@ function normalizeSettingsData(
     textoNosotros: data.textoNosotros || null,
     imagenGeneroHombre: data.imagenGeneroHombre || null,
     imagenGeneroMujer: data.imagenGeneroMujer || null,
+    alias: data.alias || null,
+    cbu: data.cbu || null,
+    titular: data.titular || null,
+    banco: data.banco || null,
   };
 }
 
