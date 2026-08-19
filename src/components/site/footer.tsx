@@ -15,7 +15,7 @@ export function SiteFooter({ settings }: { settings: SiteSettingsData }) {
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-6 py-12 sm:grid-cols-3">
         <div className="flex flex-col gap-3">
           <span className="font-heading text-xl font-extrabold tracking-[-0.02em]">
-            SF ProPadel
+            SFProPadel
           </span>
           <p className="text-primary-foreground/70 text-sm">
             Todo lo que necesitás para jugar al pádel.

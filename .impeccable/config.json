@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-color",
+        "value": "#25d366",
+        "createdAt": "2026-08-19T19:25:00.674Z",
+        "reason": "User confirmed #25D366 is intentional (WhatsApp brand color for floating CTA)"
+      }
+    ]
+  }
+}

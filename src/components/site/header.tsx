@@ -179,7 +179,7 @@ export function SiteHeader({
           href="/"
           className="font-heading shrink-0 text-xl font-extrabold tracking-[-0.02em] whitespace-nowrap"
         >
-          SF <span className="text-primary">ProPadel</span>
+          SF<span className="text-primary">ProPadel</span>
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
