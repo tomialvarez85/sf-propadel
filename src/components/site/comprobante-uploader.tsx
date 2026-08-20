@@ -24,9 +24,12 @@ function formatUploadedAt(date: Date) {
 export function ComprobanteUploader({
   orderId,
   uploadedAt: initialUploadedAt,
+  notifyOnUpload = false,
 }: {
   orderId: string;
   uploadedAt: Date | null;
+  /** Set on /pedido/[orderId] only — see saveComprobante in (site)/actions.ts. */
+  notifyOnUpload?: boolean;
 }) {
   const [uploadedAt, setUploadedAt] = useState(initialUploadedAt);
   const [uploading, setUploading] = useState(false);
@@ -37,7 +40,7 @@ export function ComprobanteUploader({
     setUploading(true);
     try {
       const path = await uploadComprobante(file, orderId);
-      const result = await saveComprobante(orderId, path);
+      const result = await saveComprobante(orderId, path, notifyOnUpload);
       if (!result.success) throw new Error(result.error);
       setUploadedAt(new Date());
       toast.success("Comprobante subido correctamente");

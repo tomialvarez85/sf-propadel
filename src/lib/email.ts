@@ -1,6 +1,8 @@
 import { Resend } from "resend";
 
 import { formatCurrency } from "@/lib/format";
+import { COMPROBANTES_BUCKET } from "@/lib/storage-constants";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -49,6 +51,51 @@ type SendResult = { success: true } | { success: false; error: string };
 
 function hasPaymentInfo(payment: PaymentInfo): boolean {
   return Boolean(payment.alias || payment.cbu || payment.titular || payment.banco);
+}
+
+// Resend caps a full email at 40MB including Base64-encoded attachments.
+// Our own upload cap is 5MB (see storage-constants.ts) so this ceiling is
+// mostly defensive — Base64 inflates size by ~33%, this leaves real margin
+// under the 40MB limit even if that upload cap is ever raised.
+const RESEND_ATTACHMENT_MAX_BYTES = 25 * 1024 * 1024;
+
+type ComprobanteAttachment = { filename: string; content: Buffer };
+
+/** Downloads a comprobante from the private bucket using the service role
+ * key (see src/lib/supabase/admin.ts — no user session exists in this
+ * server context, and the bucket's SELECT policy requires one). Never
+ * throws: returns null on any failure (download error, oversized file) so
+ * a broken attachment never blocks the email itself — callers fall back to
+ * the /admin/pedidos link already in the email body. */
+async function fetchComprobanteAttachment(
+  path: string,
+): Promise<ComprobanteAttachment | null> {
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin.storage
+      .from(COMPROBANTES_BUCKET)
+      .download(path);
+
+    if (error || !data) {
+      throw error ?? new Error("Descarga vacía.");
+    }
+
+    const content = Buffer.from(await data.arrayBuffer());
+    if (content.byteLength > RESEND_ATTACHMENT_MAX_BYTES) {
+      console.warn(
+        `Comprobante ${path} supera el límite de adjunto (${content.byteLength} bytes) — se envía el mail solo con el link.`,
+      );
+      return null;
+    }
+
+    return { filename: path.split("/").pop() || "comprobante", content };
+  } catch (error) {
+    console.error(
+      `No se pudo descargar el comprobante ${path} para adjuntarlo al mail:`,
+      error,
+    );
+    return null;
+  }
 }
 
 function itemsTableHtml(items: OrderItemForEmail[]): string {
@@ -165,6 +212,10 @@ export async function sendOrderNotificationEmail(
     };
   }
 
+  const attachment = order.comprobanteUrl
+    ? await fetchComprobanteAttachment(order.comprobanteUrl)
+    : null;
+
   const body = `
     <p style="margin:0 0 4px;font-size:13px;color:${INK_MUTED};">Cliente</p>
     <p style="margin:0 0 2px;font-size:16px;color:${INK};font-weight:700;">${order.nombreCliente}</p>
@@ -183,7 +234,10 @@ export async function sendOrderNotificationEmail(
 
     ${
       order.comprobanteUrl
-        ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:20px;">
+        ? `<p style="margin:20px 0 0;font-size:13px;color:${INK};">
+            ${attachment ? "El comprobante de pago está adjunto a este mail." : "El comprobante es grande para adjuntar — abrilo desde el panel."}
+          </p>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:12px;">
             <tr>
               <td style="background-color:${TEAL};border-radius:8px;">
                 <a href="${SITE_URL}/admin/pedidos" style="display:inline-block;padding:12px 20px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;">Ver comprobante en el panel</a>
@@ -203,6 +257,9 @@ export async function sendOrderNotificationEmail(
       to: recipientEmail,
       subject: `Nuevo pedido de ${order.nombreCliente} — ${formatCurrency(order.total)} (pendiente de pago)`,
       html: emailShellHtml("Nuevo pedido — pendiente de pago", body),
+      attachments: attachment
+        ? [{ filename: attachment.filename, content: attachment.content }]
+        : undefined,
     });
 
     if (error) {
@@ -290,6 +347,81 @@ export async function sendOrderConfirmationEmail(
   } catch (error) {
     console.error(
       `No se pudo enviar el mail de confirmación al cliente (pedido ${order.id}):`,
+      error,
+    );
+    return { success: false, error: "No se pudo enviar el email." };
+  }
+
+  return { success: true };
+}
+
+export type ReceiptUploadedNotice = {
+  id: string;
+  nombreCliente: string;
+  comprobanteUrl: string;
+};
+
+/** Follow-up notice for when a comprobante is uploaded AFTER order
+ * creation (via /pedido/[orderId]) — the owner already got the full order
+ * detail in sendOrderNotificationEmail, so this is deliberately just the
+ * "go check" nudge (+ attachment), not a resend of the whole order. */
+export async function sendReceiptUploadedEmail(
+  order: ReceiptUploadedNotice,
+  recipientEmail: string | null | undefined,
+): Promise<SendResult> {
+  if (!process.env.RESEND_API_KEY) {
+    console.error("RESEND_API_KEY no está configurada — no se envió el aviso de comprobante subido.");
+    return { success: false, error: "Falta configurar el envío de emails." };
+  }
+
+  if (!recipientEmail) {
+    console.error(
+      "No hay emailPedidos configurado en SiteSettings — no se envió el aviso de comprobante subido.",
+    );
+    return {
+      success: false,
+      error: "Falta configurar el email de notificación de pedidos en /admin/configuracion.",
+    };
+  }
+
+  const attachment = await fetchComprobanteAttachment(order.comprobanteUrl);
+
+  const body = `
+    <p style="margin:0 0 8px;font-size:16px;color:${INK};">
+      <strong>${order.nombreCliente}</strong> subió el comprobante de pago de un pedido pendiente.
+    </p>
+    <p style="margin:0;font-size:13px;color:${INK_MUTED};">
+      ${attachment ? "Lo encontrás adjunto a este mail." : "El archivo es grande para adjuntar — abrilo desde el panel."}
+    </p>
+
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:16px;">
+      <tr>
+        <td style="background-color:${TEAL};border-radius:8px;">
+          <a href="${SITE_URL}/admin/pedidos" style="display:inline-block;padding:12px 20px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;">Ver pedido en el panel</a>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:24px 0 0;font-size:12px;color:${INK_MUTED};">Pedido #${order.id}</p>`;
+
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: recipientEmail,
+      subject: `${order.nombreCliente} subió el comprobante de pago — pedido #${order.id.slice(-8)}`,
+      html: emailShellHtml("Comprobante subido", body),
+      attachments: attachment
+        ? [{ filename: attachment.filename, content: attachment.content }]
+        : undefined,
+    });
+
+    if (error) {
+      console.error("Resend devolvió un error al enviar el aviso de comprobante subido:", error);
+      return { success: false, error: error.message };
+    }
+  } catch (error) {
+    console.error(
+      `No se pudo enviar el aviso de comprobante subido (pedido ${order.id}):`,
       error,
     );
     return { success: false, error: "No se pudo enviar el email." };

@@ -1,4 +1,9 @@
 import { createClient } from "@/lib/supabase/client";
+import {
+  COMPROBANTES_BUCKET,
+  COMPROBANTE_ALLOWED_TYPES,
+  COMPROBANTE_MAX_SIZE_BYTES,
+} from "@/lib/storage-constants";
 
 export const UPLOADS_BUCKET = "product-images";
 
@@ -26,16 +31,6 @@ export async function uploadImage(file: File, folder: string): Promise<string> {
 
   return publicUrl;
 }
-
-export const COMPROBANTES_BUCKET = "comprobantes-pago";
-export const COMPROBANTE_MAX_SIZE_BYTES = 5 * 1024 * 1024;
-export const COMPROBANTE_ALLOWED_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-  "application/pdf",
-];
 
 /**
  * Uploads a payment receipt for an order (client-side, no auth required —

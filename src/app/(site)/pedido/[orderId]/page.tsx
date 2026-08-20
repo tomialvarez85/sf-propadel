@@ -85,6 +85,7 @@ export default async function PedidoPage(
       <ComprobanteUploader
         orderId={order.id}
         uploadedAt={order.comprobanteSubidoEn}
+        notifyOnUpload
       />
     </div>
   );

@@ -6,6 +6,7 @@ import { z } from "zod";
 import {
   sendOrderConfirmationEmail,
   sendOrderNotificationEmail,
+  sendReceiptUploadedEmail,
 } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 
@@ -131,18 +132,24 @@ export type SaveComprobanteResult =
   | { success: false; error: string };
 
 /** Persists the storage path of a comprobante the customer just uploaded
- * (checkout confirmation screen or /pedido/[orderId]). No re-notification —
- * showing up in /admin/pedidos and /pedido/[orderId] is enough. */
+ * (checkout confirmation screen or /pedido/[orderId]). `notifyOwner` is only
+ * true for the /pedido/[orderId] uploader — an upload made right at checkout
+ * is already covered by the order-creation email, so only a LATER upload
+ * needs its own "the client just added a receipt" nudge. Persisting the
+ * path always happens first, independent of that email, so a failed/slow
+ * send never hides the comprobante from /admin/pedidos. */
 export async function saveComprobante(
   orderId: string,
   path: string,
+  notifyOwner = false,
 ): Promise<SaveComprobanteResult> {
   if (!orderId || !path) {
     return { success: false, error: "Datos inválidos." };
   }
 
+  let order;
   try {
-    await prisma.order.update({
+    order = await prisma.order.update({
       where: { id: orderId },
       data: { comprobanteUrl: path, comprobanteSubidoEn: new Date() },
     });
@@ -153,5 +160,19 @@ export async function saveComprobante(
 
   revalidatePath("/admin/pedidos");
   revalidatePath(`/pedido/${orderId}`);
+
+  if (notifyOwner) {
+    const settings = await prisma.siteSettings.findUnique({ where: { id: 1 } });
+    const result = await sendReceiptUploadedEmail(
+      { id: order.id, nombreCliente: order.nombreCliente, comprobanteUrl: path },
+      settings?.emailPedidos,
+    );
+    if (!result.success) {
+      console.error(
+        `Pedido ${orderId}: comprobante guardado, pero falló el aviso al dueño: ${result.error}`,
+      );
+    }
+  }
+
   return { success: true };
 }
