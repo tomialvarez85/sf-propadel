@@ -98,17 +98,6 @@
      covers the instant before that effect runs on mount. */
   --header-height: 140px;
 
-  /* Angled Corner motif (hero banner only, see DESIGN.md > Shapes). The hero fills the
-     viewport below the header (calc(100dvh - var(--header-height)), see hero-carousel.tsx),
-     not a fixed length or an aspect-ratio tied to width — so the cut is expressed in dvh too
-     (not vh — same reasoning as the hero height itself: vh doesn't track the real-time
-     viewport as mobile browser chrome shows/hides, dvh does, and this needs to stay in sync
-     with the hero's own dvh-based height or the cut proportion would drift out of step with
-     it during a scroll-triggered address-bar transition), at a fixed ~8% of the banner's
-     typical height at every breakpoint, instead of a px value that would need re-tuning any
-     time the height formula changes. */
-  --hero-corner-cut: 3.5dvh;
-
   /* WhatsApp float button's bottom offset (see DESIGN.md > Navigation). Rem, not vh/dvh —
      the button's own jump between mobile browser UI states wasn't a viewport-height sizing
      problem, it was position: fixed's containing block shifting under an address bar that
@@ -120,24 +109,6 @@
 @media (min-width: 640px) {
   :root {
     --whatsapp-float-offset: 1.5rem;
-  }
-}
-
-@media (min-width: 640px) {
-  :root {
-    --hero-corner-cut: 4dvh;
-  }
-}
-
-@media (min-width: 768px) {
-  :root {
-    --hero-corner-cut: 4.5dvh;
-  }
-}
-
-@media (min-width: 1024px) {
-  :root {
-    --hero-corner-cut: 5.5dvh;
   }
 }
 
@@ -189,16 +160,6 @@
 
 @utility bottom-safe-float {
   bottom: calc(var(--whatsapp-float-offset) + env(safe-area-inset-bottom, 0px));
-}
-
-@utility hero-corner-cut {
-  clip-path: polygon(
-    0 0,
-    100% 0,
-    100% calc(100% - var(--hero-corner-cut)),
-    calc(100% - var(--hero-corner-cut)) 100%,
-    0 100%
-  );
 }
 
 @theme inline {

@@ -15,7 +15,7 @@ import type { HomeBanner } from "@/lib/home-data";
 
 function BannerSlide({ banner }: { banner: HomeBanner }) {
   const content = (
-    <div className="bg-muted hero-corner-cut relative w-full overflow-hidden h-[calc(100dvh_-_var(--header-height))]">
+    <div className="bg-muted relative w-full overflow-hidden h-[calc(100dvh_-_var(--header-height))]">
       <Image
         src={banner.imagen}
         alt={banner.titulo ?? ""}
@@ -25,14 +25,17 @@ function BannerSlide({ banner }: { banner: HomeBanner }) {
         sizes="(min-width: 1152px) 1152px, 100vw"
         className="object-cover"
       />
-      <div
+      {/* Angled Corner motif (see DESIGN.md > Shapes) — a solid-lime quarter-disc
+          pie slice centered on the true corner, curving concave into the image
+          instead of the old straight diagonal clip-path + traced accent line. */}
+      <svg
         aria-hidden
+        viewBox="0 0 1 1"
+        preserveAspectRatio="none"
         className="pointer-events-none absolute right-0 bottom-0 z-20 size-[18px] sm:size-6 md:size-[30px] lg:size-10"
-        style={{
-          background:
-            "linear-gradient(135deg, transparent 48%, var(--color-lime) 50%, var(--color-lime) 55%, transparent 57%)",
-        }}
-      />
+      >
+        <path d="M1,0 A1,1 0 0,0 0,1 L1,1 Z" fill="var(--color-lime)" />
+      </svg>
       <svg
         aria-hidden
         viewBox="0 0 100 100"
@@ -90,7 +93,7 @@ export function HeroCarousel({ banners }: { banners: HomeBanner[] }) {
           </CarouselItem>
         ))}
       </CarouselContent>
-      {/* z-20 to sit above the corner-cut gradient and title overlay, which
+      {/* z-20 to sit above the corner motif and title overlay, which
           share that layer inside each slide. */}
       <CarouselPrevious className="z-20" />
       <CarouselNext className="z-20" />
