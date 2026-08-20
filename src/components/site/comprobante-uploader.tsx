@@ -4,37 +4,24 @@ import { useRef, useState } from "react";
 import { CheckCircle2, Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
-import { saveComprobante } from "@/app/(site)/actions";
 import { Button } from "@/components/ui/button";
 import { uploadComprobante } from "@/lib/supabase/storage";
 import { cn } from "@/lib/utils";
 
-function formatUploadedAt(date: Date) {
-  return new Intl.DateTimeFormat("es-AR", {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(date);
-}
-
-/** Contingency-path uploader for /pedido/[orderId] only — attaches a
- * comprobante to an order that doesn't have one yet. The main checkout flow
- * uploads the file before the Order is even created (see createOrder in
- * (site)/actions.ts) and never reaches this component. */
+/** Uploads a comprobante straight to Storage and reports the resulting
+ * path back via onUploaded — this alone does NOT touch the Order or send
+ * any email. The caller (pedido-checkout-panel.tsx) decides what to do
+ * with that path: it stays staged until "Finalizar compra" persists it
+ * and fires the owner notification, exactly once, in finalizeOrder. */
 export function ComprobanteUploader({
   orderId,
-  uploadedAt: initialUploadedAt,
-  notifyOnUpload = true,
+  onUploaded,
 }: {
   orderId: string;
-  uploadedAt: Date | null;
-  /** Only used by the /pedido/[orderId] contingency path — the main
-   * checkout flow no longer renders this component at all, since it now
-   * uploads the comprobante before the Order exists. See saveComprobante
-   * in (site)/actions.ts. */
-  notifyOnUpload?: boolean;
+  onUploaded: (path: string) => void;
 }) {
-  const [uploadedAt, setUploadedAt] = useState(initialUploadedAt);
   const [uploading, setUploading] = useState(false);
+  const [uploadedName, setUploadedName] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -42,9 +29,8 @@ export function ComprobanteUploader({
     setUploading(true);
     try {
       const path = await uploadComprobante(file, orderId);
-      const result = await saveComprobante(orderId, path, notifyOnUpload);
-      if (!result.success) throw new Error(result.error);
-      setUploadedAt(new Date());
+      setUploadedName(file.name);
+      onUploaded(path);
       toast.success("Comprobante subido correctamente");
     } catch (error) {
       toast.error(
@@ -71,15 +57,13 @@ export function ComprobanteUploader({
   }
 
   return (
-    <div className="bg-muted mt-4 flex flex-col gap-2 rounded-lg p-3">
+    <div className="flex flex-col gap-2">
       <p className="text-sm font-semibold">Comprobante de pago</p>
 
-      {uploadedAt ? (
+      {uploadedName ? (
         <div className="flex items-center gap-2 text-sm">
           <CheckCircle2 className="text-primary size-4 shrink-0" />
-          <span className="text-muted-foreground">
-            Subido el {formatUploadedAt(uploadedAt)}
-          </span>
+          <span className="text-muted-foreground truncate">{uploadedName}</span>
           <Button
             type="button"
             variant="ghost"
@@ -88,7 +72,7 @@ export function ComprobanteUploader({
             disabled={uploading}
             onClick={() => inputRef.current?.click()}
           >
-            {uploading ? "Subiendo..." : "Subir otro"}
+            {uploading ? "Subiendo..." : "Cambiar archivo"}
           </Button>
         </div>
       ) : (

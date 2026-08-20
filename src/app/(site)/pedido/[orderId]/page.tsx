@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { ComprobanteUploader } from "@/components/site/comprobante-uploader";
-import { CopyField } from "@/components/site/copy-field";
+import { PedidoCheckoutPanel } from "@/components/site/pedido-checkout-panel";
 import { formatCurrency } from "@/lib/format";
 import { getPublicOrder } from "@/lib/order-public";
 import { getSiteSettings } from "@/lib/site-data";
@@ -11,13 +10,12 @@ export const metadata: Metadata = {
   title: "Tu pedido | SF ProPadel",
 };
 
-// Contingency page: checkout now requires the comprobante before an Order
-// can even be created (see createOrder in (site)/actions.ts), so every
-// order made through the site already has one. This still exists for the
-// rare case that isn't true (an order missing a comprobante for any
-// reason) — the uploader below only shows if order.comprobanteSubidoEn is
-// still null.
-
+// Step 2 of checkout — the ONLY place a comprobante gets attached to an
+// Order and the owner notification email fires (see finalizeOrder in
+// (site)/actions.ts). Step 1 (cart-sheet.tsx) only creates the Order and
+// redirects here; if the customer never returns, this Order just sits
+// PENDIENTE with no comprobante and nobody was emailed — but the link
+// keeps working whenever they come back to it.
 export default async function PedidoPage(
   props: PageProps<"/pedido/[orderId]">,
 ) {
@@ -78,21 +76,10 @@ export default async function PedidoPage(
         </div>
       </div>
 
-      {paymentFields.length > 0 && (
-        <div className="bg-muted mt-4 flex flex-col gap-1 rounded-lg p-3">
-          <p className="text-sm font-semibold">Datos para transferir</p>
-          <div className="divide-border divide-y">
-            {paymentFields.map((field) => (
-              <CopyField key={field.label} label={field.label} value={field.value} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      <ComprobanteUploader
+      <PedidoCheckoutPanel
         orderId={order.id}
-        uploadedAt={order.comprobanteSubidoEn}
-        notifyOnUpload
+        paymentFields={paymentFields}
+        alreadyFinalized={Boolean(order.comprobanteSubidoEn)}
       />
     </div>
   );

@@ -46,18 +46,29 @@ function formatDate(date: Date) {
   }).format(date);
 }
 
-function ComprobanteCell({ path }: { path: string | null }) {
+/** PENDIENTE covers two very different states now that checkout is
+ * split in two steps (see finalizeOrder in (site)/actions.ts): an order
+ * that hasn't even reached step 2 yet (no comprobante — nothing to review)
+ * vs one that has and is just waiting on the owner's ok. This label is
+ * what tells those apart at a glance in the table. */
+function comprobanteLabel(order: OrderListItem): string {
+  if (!order.comprobanteUrl) return "Esperando comprobante";
+  if (order.estado === "PENDIENTE") return "Pendiente de revisión";
+  return "Ver comprobante";
+}
+
+function ComprobanteCell({ order }: { order: OrderListItem }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const path = order.comprobanteUrl;
+  const label = comprobanteLabel(order);
 
   if (!path) {
     return (
-      <span
-        className="text-muted-foreground inline-flex items-center"
-        title="El cliente todavía no subió el comprobante"
-      >
-        <AlertCircle className="size-4" />
+      <span className="text-muted-foreground inline-flex items-center gap-1.5 text-xs">
+        <AlertCircle className="size-4 shrink-0" />
+        {label}
       </span>
     );
   }
@@ -88,10 +99,10 @@ function ComprobanteCell({ path }: { path: string | null }) {
       <button
         type="button"
         onClick={handleOpen}
-        className="text-primary inline-flex items-center hover:opacity-80"
-        title="Ver comprobante"
+        className="text-primary inline-flex items-center gap-1.5 text-xs hover:opacity-80"
       >
-        <CheckCircle2 className="size-4" />
+        <CheckCircle2 className="size-4 shrink-0" />
+        {label}
       </button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
@@ -168,7 +179,7 @@ export function OrderList({ orders }: { orders: OrderListItem[] }) {
                 {order.itemCount === 1 ? "producto" : "productos"}
               </span>
               <div className="flex items-center gap-3">
-                <ComprobanteCell path={order.comprobanteUrl} />
+                <ComprobanteCell order={order} />
                 <EstadoCell order={order} />
               </div>
             </div>
@@ -203,7 +214,7 @@ export function OrderList({ orders }: { orders: OrderListItem[] }) {
                 </TableCell>
                 <TableCell>{formatCurrency(order.total)}</TableCell>
                 <TableCell>
-                  <ComprobanteCell path={order.comprobanteUrl} />
+                  <ComprobanteCell order={order} />
                 </TableCell>
                 <TableCell>
                   <EstadoCell order={order} />
