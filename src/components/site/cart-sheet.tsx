@@ -1,23 +1,25 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
   CheckCircle2,
+  FileCheck2,
   Minus,
   MessageCircle,
   Plus,
   ShoppingBag,
   Trash2,
+  Upload,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { createOrder } from "@/app/(site)/actions";
 import { ImagePlaceholder } from "@/components/image-placeholder";
-import { ComprobanteUploader } from "@/components/site/comprobante-uploader";
 import { CopyField } from "@/components/site/copy-field";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -40,6 +42,11 @@ import {
 import { useCart, type CartItem } from "@/hooks/use-cart";
 import { formatCurrency } from "@/lib/format";
 import type { SiteSettingsData } from "@/lib/site-data";
+import {
+  COMPROBANTE_ALLOWED_TYPES,
+  COMPROBANTE_MAX_SIZE_BYTES,
+} from "@/lib/storage-constants";
+import { cn } from "@/lib/utils";
 import {
   checkoutFormSchema,
   type CheckoutFormValues,
@@ -160,18 +167,141 @@ function CartItemsList({
   );
 }
 
+function ComprobanteFilePicker({
+  file,
+  onSelect,
+}: {
+  file: File | null;
+  onSelect: (file: File | null) => void;
+}) {
+  const [dragOver, setDragOver] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function validateAndSelect(candidate: File) {
+    if (!COMPROBANTE_ALLOWED_TYPES.includes(candidate.type)) {
+      toast.error("Solo se aceptan imágenes (JPG, PNG, WEBP, GIF) o PDF.");
+      return;
+    }
+    if (candidate.size > COMPROBANTE_MAX_SIZE_BYTES) {
+      toast.error("El archivo no puede superar los 5MB.");
+      return;
+    }
+    onSelect(candidate);
+  }
+
+  function onInputChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const candidate = event.target.files?.[0];
+    event.target.value = "";
+    if (candidate) validateAndSelect(candidate);
+  }
+
+  function onDrop(event: React.DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setDragOver(false);
+    const candidate = event.dataTransfer.files?.[0];
+    if (candidate) validateAndSelect(candidate);
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <FormLabel>Comprobante de pago</FormLabel>
+
+      {file ? (
+        <div className="border-border flex items-center gap-2 rounded-md border p-3 text-sm">
+          <FileCheck2 className="text-primary size-4 shrink-0" />
+          <span className="flex-1 truncate">{file.name}</span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Quitar archivo"
+            onClick={() => onSelect(null)}
+          >
+            <X className="size-4" />
+          </Button>
+        </div>
+      ) : (
+        <div
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOver(true);
+          }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={onDrop}
+          className={cn(
+            "border-border flex flex-col items-center gap-2 rounded-md border border-dashed p-4 text-center transition-colors",
+            dragOver && "border-primary bg-muted",
+          )}
+        >
+          <Upload className="text-muted-foreground size-5" />
+          <p className="text-muted-foreground text-xs">
+            Transferí el total y subí el comprobante (imagen o PDF, máx.
+            5MB) — arrastralo acá o elegilo de tu dispositivo.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => inputRef.current?.click()}
+          >
+            Elegir archivo
+          </Button>
+        </div>
+      )}
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
+        hidden
+        onChange={onInputChange}
+      />
+    </div>
+  );
+}
+
+/** Payment data must be visible during checkout now, not just on the
+ * confirmation screen after — the customer has to transfer and attach the
+ * comprobante BEFORE the order (and thus the confirmation screen) exists. */
+function CheckoutPaymentInfo({ settings }: { settings: SiteSettingsData }) {
+  const paymentFields = [
+    { label: "Alias", value: settings?.alias },
+    { label: "CBU / CVU", value: settings?.cbu },
+    { label: "Titular", value: settings?.titular },
+    { label: "Banco", value: settings?.banco },
+  ].filter((field): field is { label: string; value: string } =>
+    Boolean(field.value),
+  );
+
+  if (paymentFields.length === 0) return null;
+
+  return (
+    <div className="bg-muted flex flex-col gap-1 rounded-lg p-3">
+      <p className="text-sm font-semibold">Datos para transferir</p>
+      <div className="divide-border divide-y">
+        {paymentFields.map((field) => (
+          <CopyField key={field.label} label={field.label} value={field.value} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function CheckoutForm({
   items,
   totalPrice,
+  settings,
   onBack,
   onSuccess,
 }: {
   items: ReturnType<typeof useCart>["items"];
   totalPrice: number;
+  settings: SiteSettingsData;
   onBack: () => void;
   onSuccess: (orderId: string, email: string) => void;
 }) {
   const [isPending, startTransition] = useTransition();
+  const [comprobanteFile, setComprobanteFile] = useState<File | null>(null);
 
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutFormSchema),
@@ -179,19 +309,27 @@ function CheckoutForm({
   });
 
   function onSubmit(values: CheckoutFormValues) {
+    if (!comprobanteFile) {
+      toast.error("Subí el comprobante de pago para confirmar el pedido.");
+      return;
+    }
+
     startTransition(async () => {
-      const result = await createOrder({
-        nombre: values.nombre,
-        email: values.email,
-        telefono: values.telefono || null,
-        items: items.map((item) => ({
-          productId: item.productId,
-          nombre: item.nombre,
-          precio: item.precio,
-          cantidad: item.quantity,
-          variantes: item.variants,
-        })),
-      });
+      const result = await createOrder(
+        {
+          nombre: values.nombre,
+          email: values.email,
+          telefono: values.telefono || null,
+          items: items.map((item) => ({
+            productId: item.productId,
+            nombre: item.nombre,
+            precio: item.precio,
+            cantidad: item.quantity,
+            variantes: item.variants,
+          })),
+        },
+        comprobanteFile,
+      );
 
       if (!result.success) {
         toast.error(result.error);
@@ -260,6 +398,13 @@ function CheckoutForm({
               </FormItem>
             )}
           />
+
+          <CheckoutPaymentInfo settings={settings} />
+
+          <ComprobanteFilePicker
+            file={comprobanteFile}
+            onSelect={setComprobanteFile}
+          />
         </div>
 
         <SheetFooter className="border-border border-t">
@@ -272,7 +417,7 @@ function CheckoutForm({
           <Button
             type="submit"
             size="lg"
-            disabled={isPending}
+            disabled={isPending || !comprobanteFile}
             className="font-heading h-12 w-full text-base font-bold"
           >
             {isPending ? "Confirmando..." : "Confirmar pedido"}
@@ -300,18 +445,9 @@ function OrderConfirmation({
   settings: SiteSettingsData;
   onClose: () => void;
 }) {
-  const paymentFields = [
-    { label: "Alias", value: settings?.alias },
-    { label: "CBU / CVU", value: settings?.cbu },
-    { label: "Titular", value: settings?.titular },
-    { label: "Banco", value: settings?.banco },
-  ].filter((field): field is { label: string; value: string } =>
-    Boolean(field.value),
-  );
-
   const whatsappHref = settings?.whatsapp
     ? `https://wa.me/${settings.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(
-        `Hola! Te mando el comprobante de mi pedido de ${formatCurrency(order.total)}.`,
+        "Hola! Tengo una consulta sobre mi pedido.",
       )}`
     : null;
 
@@ -355,33 +491,19 @@ function OrderConfirmation({
         </div>
       </div>
 
-      {paymentFields.length > 0 && (
-        <div className="bg-muted mt-4 flex flex-col gap-1 rounded-lg p-3">
-          <p className="text-sm font-semibold">Datos para transferir</p>
-          <div className="divide-border divide-y">
-            {paymentFields.map((field) => (
-              <CopyField
-                key={field.label}
-                label={field.label}
-                value={field.value}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      <ComprobanteUploader orderId={order.orderId} uploadedAt={null} />
-
-      <p className="text-muted-foreground mt-4 text-sm">
-        También podés mandarnos el comprobante por WhatsApp para confirmar
-        tu pedido más rápido.
-      </p>
+      <div className="bg-muted mt-4 flex items-center gap-2 rounded-lg p-3 text-sm">
+        <CheckCircle2 className="text-primary size-4 shrink-0" />
+        <span>
+          Recibimos tu comprobante de pago — te contactamos en cuanto lo
+          verifiquemos.
+        </span>
+      </div>
 
       {whatsappHref && (
         <Button asChild variant="outline" className="mt-3 w-full">
           <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
             <MessageCircle className="size-4" />
-            Enviar comprobante por WhatsApp
+            Escribirnos por WhatsApp
           </a>
         </Button>
       )}
@@ -471,6 +593,7 @@ export function CartSheet({ settings }: { settings: SiteSettingsData }) {
           <CheckoutForm
             items={items}
             totalPrice={totalPrice}
+            settings={settings}
             onBack={() => setStep("items")}
             onSuccess={handleOrderSuccess}
           />

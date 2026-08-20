@@ -287,12 +287,16 @@ export async function sendOrderConfirmationEmail(
     return { success: false, error: "Falta configurar el envío de emails." };
   }
 
+  // Checkout now requires the comprobante before the Order can even be
+  // created, so this is normally always true — the missing-comprobante
+  // branch below only matters for the /pedido/[orderId] contingency path
+  // (an order that reached this point without one some other way).
+  const pedidoHref = `${SITE_URL}/pedido/${order.id}`;
   const whatsappHref = whatsapp
     ? `https://wa.me/${whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(
-        `Hola! Te mando el comprobante de mi pedido de ${formatCurrency(order.total)}.`,
+        `Hola! Tengo una consulta sobre mi pedido #${order.id.slice(-8)}.`,
       )}`
     : null;
-  const pedidoHref = `${SITE_URL}/pedido/${order.id}`;
 
   const body = `
     <p style="margin:0 0 8px;font-size:16px;color:${INK};">Hola ${order.nombreCliente}, ¡gracias por tu pedido!</p>
@@ -301,24 +305,29 @@ export async function sendOrderConfirmationEmail(
     ${itemsTableHtml(order.items)}
     ${paymentInfoHtml(payment)}
 
-    <p style="margin:20px 0 0;font-size:14px;color:${INK};">
-      Transferí el total y subí el comprobante de pago para confirmar tu pedido más rápido.
-    </p>
-
-    <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:16px;">
-      <tr>
-        <td style="background-color:${TEAL};border-radius:8px;">
-          <a href="${pedidoHref}" style="display:inline-block;padding:12px 20px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;">Subir comprobante de pago</a>
-        </td>
-      </tr>
-    </table>
+    ${
+      order.comprobanteUrl
+        ? `<p style="margin:20px 0 0;font-size:14px;color:${INK};">
+            Recibimos tu comprobante de pago — te contactamos en cuanto lo verifiquemos.
+          </p>`
+        : `<p style="margin:20px 0 0;font-size:14px;color:${INK};">
+            Transferí el total y subí el comprobante de pago para confirmar tu pedido.
+          </p>
+          <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:16px;">
+            <tr>
+              <td style="background-color:${TEAL};border-radius:8px;">
+                <a href="${pedidoHref}" style="display:inline-block;padding:12px 20px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;">Subir comprobante de pago</a>
+              </td>
+            </tr>
+          </table>`
+    }
 
     ${
       whatsappHref
         ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:12px;">
             <tr>
               <td style="background-color:#25D366;border-radius:8px;">
-                <a href="${whatsappHref}" style="display:inline-block;padding:12px 20px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;">Enviar comprobante por WhatsApp</a>
+                <a href="${whatsappHref}" style="display:inline-block;padding:12px 20px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;">Escribirnos por WhatsApp</a>
               </td>
             </tr>
           </table>`

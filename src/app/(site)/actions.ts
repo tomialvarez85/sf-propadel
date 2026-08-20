@@ -9,6 +9,12 @@ import {
   sendReceiptUploadedEmail,
 } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
+import {
+  COMPROBANTES_BUCKET,
+  COMPROBANTE_ALLOWED_TYPES,
+  COMPROBANTE_MAX_SIZE_BYTES,
+} from "@/lib/storage-constants";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const checkoutItemSchema = z.object({
   productId: z.string(),
@@ -33,12 +39,59 @@ export type CheckoutResult =
   | { success: true; orderId: string }
   | { success: false; error: string };
 
-export async function createOrder(input: unknown): Promise<CheckoutResult> {
+/** Comprobante is now mandatory at checkout (see cart-sheet.tsx — the
+ * "Confirmar pedido" button stays disabled until a file is attached), so
+ * the order is only ever created with comprobanteUrl already set: upload
+ * first (a), create the Order with that path in the same insert (b), only
+ * then send the owner email (c) — guaranteeing it always ships with the
+ * attachment already in place, instead of racing a later, optional upload.
+ * If the upload fails, nothing else happens: no Order, no emails. */
+export async function createOrder(
+  input: unknown,
+  comprobanteFile: File,
+): Promise<CheckoutResult> {
   const parsed = checkoutSchema.safeParse(input);
   if (!parsed.success) {
     return {
       success: false,
       error: parsed.error.issues[0]?.message ?? "Datos inválidos.",
+    };
+  }
+
+  if (!comprobanteFile || comprobanteFile.size === 0) {
+    return {
+      success: false,
+      error: "Subí el comprobante de pago para confirmar el pedido.",
+    };
+  }
+  if (!COMPROBANTE_ALLOWED_TYPES.includes(comprobanteFile.type)) {
+    return {
+      success: false,
+      error: "Solo se aceptan imágenes (JPG, PNG, WEBP, GIF) o PDF.",
+    };
+  }
+  if (comprobanteFile.size > COMPROBANTE_MAX_SIZE_BYTES) {
+    return { success: false, error: "El archivo no puede superar los 5MB." };
+  }
+
+  // (a) Upload first — no session exists here to gate this on, same as the
+  // rest of the checkout flow, so this uses the service role client rather
+  // than relying on the public INSERT policy from a server context.
+  const admin = createAdminClient();
+  const extension = comprobanteFile.name.split(".").pop() || "bin";
+  const comprobantePath = `checkout/${crypto.randomUUID()}.${extension}`;
+
+  try {
+    const bytes = Buffer.from(await comprobanteFile.arrayBuffer());
+    const { error: uploadError } = await admin.storage
+      .from(COMPROBANTES_BUCKET)
+      .upload(comprobantePath, bytes, { contentType: comprobanteFile.type });
+    if (uploadError) throw uploadError;
+  } catch (error) {
+    console.error("No se pudo subir el comprobante de pago:", error);
+    return {
+      success: false,
+      error: "No se pudo subir el comprobante. Probá de nuevo.",
     };
   }
 
@@ -48,6 +101,7 @@ export async function createOrder(input: unknown): Promise<CheckoutResult> {
     0,
   );
 
+  // (b) Create the order with comprobanteUrl already set.
   let order;
   try {
     order = await prisma.order.create({
@@ -56,6 +110,8 @@ export async function createOrder(input: unknown): Promise<CheckoutResult> {
         emailCliente: email,
         telefonoCliente: telefono || null,
         total,
+        comprobanteUrl: comprobantePath,
+        comprobanteSubidoEn: new Date(),
         items: {
           create: items.map((item) => ({
             productId: item.productId,
@@ -73,13 +129,20 @@ export async function createOrder(input: unknown): Promise<CheckoutResult> {
     });
   } catch (error) {
     console.error("No se pudo registrar el pedido:", error);
+    // Order creation failed after the upload succeeded — remove the now
+    // orphaned file rather than leaving it in Storage with nothing
+    // pointing to it.
+    await admin.storage
+      .from(COMPROBANTES_BUCKET)
+      .remove([comprobantePath])
+      .catch(() => {});
     return {
       success: false,
       error: "No se pudo registrar el pedido. Probá de nuevo.",
     };
   }
 
-  // The sale is saved from here on regardless of what happens to either
+  // (c) The sale is saved from here on regardless of what happens to either
   // email below — a failed send must never roll back or hide a successful
   // order from the customer. Each failure is only logged, so it can be
   // resent manually later.
@@ -131,17 +194,18 @@ export type SaveComprobanteResult =
   | { success: true }
   | { success: false; error: string };
 
-/** Persists the storage path of a comprobante the customer just uploaded
- * (checkout confirmation screen or /pedido/[orderId]). `notifyOwner` is only
- * true for the /pedido/[orderId] uploader — an upload made right at checkout
- * is already covered by the order-creation email, so only a LATER upload
- * needs its own "the client just added a receipt" nudge. Persisting the
- * path always happens first, independent of that email, so a failed/slow
- * send never hides the comprobante from /admin/pedidos. */
+/** Contingency path only — the main checkout flow now uploads the
+ * comprobante before the Order even exists (see createOrder above), so
+ * every order created through checkout already has one. This still backs
+ * /pedido/[orderId], kept as a fallback for the rare order that reaches
+ * /admin/pedidos without a comprobante (e.g. a future admin-created order,
+ * or a customer who needs to attach a different file after the fact).
+ * `notifyOwner` defaults true here since, unlike checkout, there is no
+ * order-creation email this could ride along with. */
 export async function saveComprobante(
   orderId: string,
   path: string,
-  notifyOwner = false,
+  notifyOwner = true,
 ): Promise<SaveComprobanteResult> {
   if (!orderId || !path) {
     return { success: false, error: "Datos inválidos." };

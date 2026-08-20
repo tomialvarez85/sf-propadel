@@ -11,6 +11,13 @@ export const metadata: Metadata = {
   title: "Tu pedido | SF ProPadel",
 };
 
+// Contingency page: checkout now requires the comprobante before an Order
+// can even be created (see createOrder in (site)/actions.ts), so every
+// order made through the site already has one. This still exists for the
+// rare case that isn't true (an order missing a comprobante for any
+// reason) — the uploader below only shows if order.comprobanteSubidoEn is
+// still null.
+
 export default async function PedidoPage(
   props: PageProps<"/pedido/[orderId]">,
 ) {

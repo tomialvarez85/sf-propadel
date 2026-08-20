@@ -16,19 +16,21 @@ function formatUploadedAt(date: Date) {
   }).format(date);
 }
 
-/** Comprobante uploader shared by the checkout confirmation screen
- * (cart-sheet.tsx) and /pedido/[orderId] — same upload flow either way,
- * since both are just different entry points into "attach a comprobante to
- * this order". Upload is always optional: closing without uploading is
- * fine, /pedido/[orderId] exists precisely so it can be done later. */
+/** Contingency-path uploader for /pedido/[orderId] only — attaches a
+ * comprobante to an order that doesn't have one yet. The main checkout flow
+ * uploads the file before the Order is even created (see createOrder in
+ * (site)/actions.ts) and never reaches this component. */
 export function ComprobanteUploader({
   orderId,
   uploadedAt: initialUploadedAt,
-  notifyOnUpload = false,
+  notifyOnUpload = true,
 }: {
   orderId: string;
   uploadedAt: Date | null;
-  /** Set on /pedido/[orderId] only — see saveComprobante in (site)/actions.ts. */
+  /** Only used by the /pedido/[orderId] contingency path — the main
+   * checkout flow no longer renders this component at all, since it now
+   * uploads the comprobante before the Order exists. See saveComprobante
+   * in (site)/actions.ts. */
   notifyOnUpload?: boolean;
 }) {
   const [uploadedAt, setUploadedAt] = useState(initialUploadedAt);
@@ -105,7 +107,7 @@ export function ComprobanteUploader({
           <Upload className="text-muted-foreground size-5" />
           <p className="text-muted-foreground text-xs">
             Subí tu comprobante (imagen o PDF, máx. 5MB) — arrastralo acá o
-            elegilo de tu dispositivo. Es opcional, podés hacerlo más tarde.
+            elegilo de tu dispositivo.
           </p>
           <Button
             type="button"
