@@ -89,6 +89,7 @@ export async function createOrder(input: unknown): Promise<CheckoutResult> {
     telefonoCliente: order.telefonoCliente,
     total: order.total.toNumber(),
     createdAt: order.createdAt,
+    comprobanteUrl: order.comprobanteUrl,
     items: order.items.map((item) => ({
       nombreProducto: item.nombreProducto,
       variante: item.variante,
@@ -123,4 +124,34 @@ export async function createOrder(input: unknown): Promise<CheckoutResult> {
 
   revalidatePath("/admin/pedidos");
   return { success: true, orderId: order.id };
+}
+
+export type SaveComprobanteResult =
+  | { success: true }
+  | { success: false; error: string };
+
+/** Persists the storage path of a comprobante the customer just uploaded
+ * (checkout confirmation screen or /pedido/[orderId]). No re-notification —
+ * showing up in /admin/pedidos and /pedido/[orderId] is enough. */
+export async function saveComprobante(
+  orderId: string,
+  path: string,
+): Promise<SaveComprobanteResult> {
+  if (!orderId || !path) {
+    return { success: false, error: "Datos inválidos." };
+  }
+
+  try {
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { comprobanteUrl: path, comprobanteSubidoEn: new Date() },
+    });
+  } catch (error) {
+    console.error(`No se pudo guardar el comprobante del pedido ${orderId}:`, error);
+    return { success: false, error: "No se pudo guardar el comprobante." };
+  }
+
+  revalidatePath("/admin/pedidos");
+  revalidatePath(`/pedido/${orderId}`);
+  return { success: true };
 }

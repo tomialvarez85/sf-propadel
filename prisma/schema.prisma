@@ -147,6 +147,14 @@ model Order {
   estado          OrderStatus @default(PENDIENTE)
   createdAt       DateTime    @default(now())
 
+  // Comprobante de transferencia subido por el cliente (bucket privado
+  // "comprobantes-pago" — ver src/lib/supabase/storage.ts). comprobanteUrl
+  // guarda el PATH dentro del bucket, no una URL pública: el bucket exige
+  // sesión autenticada para leer, así que la vista siempre pide una signed
+  // URL nueva en el momento (admin) en vez de confiar en un link fijo.
+  comprobanteUrl       String?
+  comprobanteSubidoEn  DateTime?
+
   items OrderItem[]
 }
 

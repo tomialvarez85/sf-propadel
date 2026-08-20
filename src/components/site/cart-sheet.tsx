@@ -6,9 +6,7 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
-  Check,
   CheckCircle2,
-  Copy,
   Minus,
   MessageCircle,
   Plus,
@@ -19,6 +17,8 @@ import { toast } from "sonner";
 
 import { createOrder } from "@/app/(site)/actions";
 import { ImagePlaceholder } from "@/components/image-placeholder";
+import { ComprobanteUploader } from "@/components/site/comprobante-uploader";
+import { CopyField } from "@/components/site/copy-field";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Form,
@@ -48,6 +48,7 @@ import {
 type Step = "items" | "checkout" | "confirmation";
 
 type ConfirmedOrder = {
+  orderId: string;
   email: string;
   items: CartItem[];
   total: number;
@@ -168,7 +169,7 @@ function CheckoutForm({
   items: ReturnType<typeof useCart>["items"];
   totalPrice: number;
   onBack: () => void;
-  onSuccess: (email: string) => void;
+  onSuccess: (orderId: string, email: string) => void;
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -197,7 +198,7 @@ function CheckoutForm({
         return;
       }
 
-      onSuccess(values.email);
+      onSuccess(result.orderId, values.email);
     });
   }
 
@@ -290,48 +291,6 @@ function CheckoutForm({
   );
 }
 
-function CopyField({ label, value }: { label: string; value: string }) {
-  const [copied, setCopied] = useState(false);
-
-  async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(value);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {
-      toast.error("No se pudo copiar. Copiá el valor manualmente.");
-    }
-  }
-
-  return (
-    <div className="flex items-center justify-between gap-2 py-1.5">
-      <div className="min-w-0">
-        <p className="text-muted-foreground text-xs">{label}</p>
-        <p className="truncate text-base font-bold">{value}</p>
-      </div>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={handleCopy}
-        className="shrink-0"
-      >
-        {copied ? (
-          <>
-            <Check className="text-primary size-3.5" />
-            Copiado
-          </>
-        ) : (
-          <>
-            <Copy className="size-3.5" />
-            Copiar
-          </>
-        )}
-      </Button>
-    </div>
-  );
-}
-
 function OrderConfirmation({
   order,
   settings,
@@ -411,9 +370,11 @@ function OrderConfirmation({
         </div>
       )}
 
+      <ComprobanteUploader orderId={order.orderId} uploadedAt={null} />
+
       <p className="text-muted-foreground mt-4 text-sm">
-        Transferí el total y mandanos el comprobante por WhatsApp para
-        confirmar tu pedido más rápido.
+        También podés mandarnos el comprobante por WhatsApp para confirmar
+        tu pedido más rápido.
       </p>
 
       {whatsappHref && (
@@ -449,10 +410,10 @@ export function CartSheet({ settings }: { settings: SiteSettingsData }) {
     }
   }
 
-  function handleOrderSuccess(email: string) {
+  function handleOrderSuccess(orderId: string, email: string) {
     // Snapshot before clearing — the confirmation screen still needs to
     // show what was bought after the cart itself goes empty.
-    setConfirmedOrder({ email, items, total: totalPrice });
+    setConfirmedOrder({ orderId, email, items, total: totalPrice });
     clearCart();
     setStep("confirmation");
   }

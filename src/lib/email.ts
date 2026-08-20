@@ -11,6 +11,8 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM_EMAIL =
   process.env.RESEND_FROM_EMAIL || "SF ProPadel <onboarding@resend.dev>";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
 const TEAL = "#0e5865";
 const LIME = "#bccd0f";
 const INK = "#0a0a0a";
@@ -32,6 +34,7 @@ export type OrderForEmail = {
   telefonoCliente: string | null;
   total: number;
   createdAt: Date;
+  comprobanteUrl: string | null;
   items: OrderItemForEmail[];
 };
 
@@ -178,6 +181,18 @@ export async function sendOrderNotificationEmail(
 
     ${itemsTableHtml(order.items)}
 
+    ${
+      order.comprobanteUrl
+        ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:20px;">
+            <tr>
+              <td style="background-color:${TEAL};border-radius:8px;">
+                <a href="${SITE_URL}/admin/pedidos" style="display:inline-block;padding:12px 20px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;">Ver comprobante en el panel</a>
+              </td>
+            </tr>
+          </table>`
+        : `<p style="margin:20px 0 0;font-size:13px;color:${INK_MUTED};">El cliente todavía no subió el comprobante de pago.</p>`
+    }
+
     <p style="margin:24px 0 0;font-size:12px;color:${INK_MUTED};">
       Pedido #${order.id} · ${order.createdAt.toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" })}
     </p>`;
@@ -220,6 +235,7 @@ export async function sendOrderConfirmationEmail(
         `Hola! Te mando el comprobante de mi pedido de ${formatCurrency(order.total)}.`,
       )}`
     : null;
+  const pedidoHref = `${SITE_URL}/pedido/${order.id}`;
 
   const body = `
     <p style="margin:0 0 8px;font-size:16px;color:${INK};">Hola ${order.nombreCliente}, ¡gracias por tu pedido!</p>
@@ -229,12 +245,20 @@ export async function sendOrderConfirmationEmail(
     ${paymentInfoHtml(payment)}
 
     <p style="margin:20px 0 0;font-size:14px;color:${INK};">
-      Transferí el total y mandanos el comprobante por WhatsApp para confirmar tu pedido más rápido.
+      Transferí el total y subí el comprobante de pago para confirmar tu pedido más rápido.
     </p>
+
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:16px;">
+      <tr>
+        <td style="background-color:${TEAL};border-radius:8px;">
+          <a href="${pedidoHref}" style="display:inline-block;padding:12px 20px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;">Subir comprobante de pago</a>
+        </td>
+      </tr>
+    </table>
 
     ${
       whatsappHref
-        ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:16px;">
+        ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:12px;">
             <tr>
               <td style="background-color:#25D366;border-radius:8px;">
                 <a href="${whatsappHref}" style="display:inline-block;padding:12px 20px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;">Enviar comprobante por WhatsApp</a>

@@ -9,6 +9,7 @@ export type OrderListItem = {
   estado: OrderStatus;
   createdAt: Date;
   itemCount: number;
+  comprobanteUrl: string | null;
 };
 
 export async function getOrderList(): Promise<OrderListItem[]> {
@@ -22,6 +23,7 @@ export async function getOrderList(): Promise<OrderListItem[]> {
         total: true,
         estado: true,
         createdAt: true,
+        comprobanteUrl: true,
         _count: { select: { items: true } },
       },
     });
@@ -34,6 +36,7 @@ export async function getOrderList(): Promise<OrderListItem[]> {
       estado: order.estado,
       createdAt: order.createdAt,
       itemCount: order._count.items,
+      comprobanteUrl: order.comprobanteUrl,
     }));
   } catch (error) {
     console.error("No se pudieron cargar los pedidos:", error);

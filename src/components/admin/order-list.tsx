@@ -1,7 +1,18 @@
 "use client";
 
+import { useState } from "react";
+import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+
 import { updateOrderEstado } from "@/app/(admin)/admin/(dashboard)/pedidos/actions";
 import { InlineSelectCell } from "@/components/admin/inline-edit-cell";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -11,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/format";
+import { getComprobanteSignedUrl } from "@/lib/supabase/storage";
 import type { OrderListItem } from "@/lib/admin-orders";
 
 const ESTADO_OPTIONS = [
@@ -32,6 +44,82 @@ function formatDate(date: Date) {
     dateStyle: "short",
     timeStyle: "short",
   }).format(date);
+}
+
+function ComprobanteCell({ path }: { path: string | null }) {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+
+  if (!path) {
+    return (
+      <span
+        className="text-muted-foreground inline-flex items-center"
+        title="El cliente todavía no subió el comprobante"
+      >
+        <AlertCircle className="size-4" />
+      </span>
+    );
+  }
+
+  const isPdf = path.toLowerCase().endsWith(".pdf");
+
+  async function handleOpen() {
+    setOpen(true);
+    if (signedUrl) return;
+    setLoading(true);
+    try {
+      const url = await getComprobanteSignedUrl(path!);
+      setSignedUrl(url);
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "No se pudo cargar el comprobante.",
+      );
+      setOpen(false);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={handleOpen}
+        className="text-primary inline-flex items-center hover:opacity-80"
+        title="Ver comprobante"
+      >
+        <CheckCircle2 className="size-4" />
+      </button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Comprobante de pago</DialogTitle>
+          </DialogHeader>
+          {loading ? (
+            <div className="flex items-center justify-center py-10">
+              <Loader2 className="text-muted-foreground size-6 animate-spin" />
+            </div>
+          ) : signedUrl && isPdf ? (
+            <Button asChild variant="outline">
+              <a href={signedUrl} target="_blank" rel="noopener noreferrer">
+                Abrir PDF
+              </a>
+            </Button>
+          ) : signedUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- signed URL, expires in minutes, not an optimizable static asset
+            <img
+              src={signedUrl}
+              alt="Comprobante de pago"
+              className="max-h-[70vh] w-full rounded-md object-contain"
+            />
+          ) : null}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 }
 
 function EstadoCell({ order }: { order: OrderListItem }) {
@@ -79,7 +167,10 @@ export function OrderList({ orders }: { orders: OrderListItem[] }) {
                 {formatDate(order.createdAt)} · {order.itemCount}{" "}
                 {order.itemCount === 1 ? "producto" : "productos"}
               </span>
-              <EstadoCell order={order} />
+              <div className="flex items-center gap-3">
+                <ComprobanteCell path={order.comprobanteUrl} />
+                <EstadoCell order={order} />
+              </div>
             </div>
           </li>
         ))}
@@ -93,6 +184,7 @@ export function OrderList({ orders }: { orders: OrderListItem[] }) {
               <TableHead>Email</TableHead>
               <TableHead>Productos</TableHead>
               <TableHead>Total</TableHead>
+              <TableHead>Comprobante</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead>Fecha</TableHead>
             </TableRow>
@@ -110,6 +202,9 @@ export function OrderList({ orders }: { orders: OrderListItem[] }) {
                   {order.itemCount}
                 </TableCell>
                 <TableCell>{formatCurrency(order.total)}</TableCell>
+                <TableCell>
+                  <ComprobanteCell path={order.comprobanteUrl} />
+                </TableCell>
                 <TableCell>
                   <EstadoCell order={order} />
                 </TableCell>
