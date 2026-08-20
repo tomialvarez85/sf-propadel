@@ -22,6 +22,26 @@ export async function getActiveBanners(): Promise<HomeBanner[]> {
   }
 }
 
+export type HomeTestimonial = {
+  id: string;
+  nombreCliente: string;
+  comentario: string;
+  avatarUrl: string | null;
+};
+
+export async function getActiveTestimonials(): Promise<HomeTestimonial[]> {
+  try {
+    return await prisma.testimonial.findMany({
+      where: { activo: true },
+      orderBy: { orden: "asc" },
+      select: { id: true, nombreCliente: true, comentario: true, avatarUrl: true },
+    });
+  } catch (error) {
+    console.error("No se pudieron cargar los testimonios:", error);
+    return [];
+  }
+}
+
 export type HomeCategory = {
   id: string;
   nombre: string;

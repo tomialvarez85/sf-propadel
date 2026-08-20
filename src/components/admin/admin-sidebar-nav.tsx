@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Image as ImageIcon,
   LayoutDashboard,
+  MessageSquareQuote,
   Package,
   Receipt,
   Settings,
@@ -22,6 +23,11 @@ const NAV_ITEMS = [
   { href: "/admin/categorias", label: "Categorías", icon: Tags },
   { href: "/admin/marcas", label: "Marcas", icon: Tag },
   { href: "/admin/banners", label: "Banners", icon: ImageIcon },
+  {
+    href: "/admin/testimonios",
+    label: "Testimonios",
+    icon: MessageSquareQuote,
+  },
   {
     href: "/admin/configuracion",
     label: "Configuración del sitio",

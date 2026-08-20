@@ -1,6 +1,6 @@
 import { CategoryTiles, type CategoryTile } from "@/components/site/category-tiles";
 import { HeroCarousel } from "@/components/site/hero-carousel";
-import { VisitUs } from "@/components/site/visit-us";
+import { TestimonialsSection } from "@/components/site/testimonials-section";
 import {
   ProductCard,
   type ProductCardData,
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/carousel";
 import {
   getActiveBanners,
+  getActiveTestimonials,
   getCategoryBySlug,
   getDestacadoProducts,
   getOfertaProducts,
@@ -65,13 +66,14 @@ function ProductSection({
 }
 
 export default async function HomePage() {
-  const [banners, settings, accesorios, ofertas, destacados] =
+  const [banners, settings, accesorios, ofertas, destacados, testimonials] =
     await Promise.all([
       getActiveBanners(),
       getSiteSettings(),
       getCategoryBySlug("accesorios"),
       getOfertaProducts(),
       getDestacadoProducts(),
+      getActiveTestimonials(),
     ]);
 
   const categoryTiles: CategoryTile[] = [
@@ -108,7 +110,7 @@ export default async function HomePage() {
         layout="carousel"
       />
 
-      <VisitUs settings={settings} />
+      <TestimonialsSection testimonials={testimonials} />
     </>
   );
 }

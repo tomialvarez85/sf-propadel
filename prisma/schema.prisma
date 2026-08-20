@@ -96,6 +96,18 @@ model Banner {
   activo Boolean @default(true)
 }
 
+// Curated by the owner in /admin/testimonios — no public submission form,
+// same trust model as Banner (admin-only content, not user-generated).
+model Testimonial {
+  id            String   @id @default(cuid())
+  nombreCliente String
+  comentario    String
+  avatarUrl     String?
+  orden         Int      @default(0)
+  activo        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+}
+
 // Singleton: siempre se lee/escribe la fila con id 1 (upsert desde la app).
 model SiteSettings {
   id               Int     @id @default(1)
