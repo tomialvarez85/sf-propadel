@@ -7,7 +7,15 @@ export const checkoutFormSchema = z.object({
     .trim()
     .min(1, "Ingresá tu email")
     .email("Ingresá un email válido"),
-  telefono: z.string().trim().nullable().optional(),
+  telefono: z
+    .string()
+    .trim()
+    .min(1, "Ingresá tu teléfono")
+    .regex(/^\+?[\d\s()-]+$/, "Ingresá un teléfono válido")
+    .refine(
+      (value) => value.replace(/\D/g, "").length >= 8,
+      "Ingresá un teléfono válido",
+    ),
 });
 
 export type CheckoutFormValues = z.infer<typeof checkoutFormSchema>;

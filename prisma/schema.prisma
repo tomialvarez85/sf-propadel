@@ -142,7 +142,7 @@ model Order {
   id              String      @id @default(cuid())
   nombreCliente   String
   emailCliente    String
-  telefonoCliente String?
+  telefonoCliente String
   total           Decimal     @db.Decimal(10, 2)
   estado          OrderStatus @default(PENDIENTE)
   createdAt       DateTime    @default(now())

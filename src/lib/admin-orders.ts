@@ -5,6 +5,7 @@ export type OrderListItem = {
   id: string;
   nombreCliente: string;
   emailCliente: string;
+  telefonoCliente: string;
   total: number;
   estado: OrderStatus;
   createdAt: Date;
@@ -20,6 +21,7 @@ export async function getOrderList(): Promise<OrderListItem[]> {
         id: true,
         nombreCliente: true,
         emailCliente: true,
+        telefonoCliente: true,
         total: true,
         estado: true,
         createdAt: true,
@@ -32,6 +34,7 @@ export async function getOrderList(): Promise<OrderListItem[]> {
       id: order.id,
       nombreCliente: order.nombreCliente,
       emailCliente: order.emailCliente,
+      telefonoCliente: order.telefonoCliente,
       total: order.total.toNumber(),
       estado: order.estado,
       createdAt: order.createdAt,

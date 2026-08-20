@@ -167,7 +167,7 @@ function CheckoutForm({
       const result = await createOrder({
         nombre: values.nombre,
         email: values.email,
-        telefono: values.telefono || null,
+        telefono: values.telefono,
         items: items.map((item) => ({
           productId: item.productId,
           nombre: item.nombre,
@@ -231,14 +231,11 @@ function CheckoutForm({
             name="telefono"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Teléfono (opcional)</FormLabel>
+                <FormLabel>
+                  Teléfono <span className="text-destructive">*</span>
+                </FormLabel>
                 <FormControl>
-                  <Input
-                    type="tel"
-                    placeholder="11 2233 4455"
-                    {...field}
-                    value={field.value ?? ""}
-                  />
+                  <Input type="tel" placeholder="351 123-4567" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

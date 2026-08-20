@@ -21,7 +21,15 @@ const checkoutSchema = z.object({
     .trim()
     .min(1, "Ingresá tu email")
     .email("Ingresá un email válido"),
-  telefono: z.string().trim().nullable().optional(),
+  telefono: z
+    .string()
+    .trim()
+    .min(1, "Ingresá tu teléfono")
+    .regex(/^\+?[\d\s()-]+$/, "Ingresá un teléfono válido")
+    .refine(
+      (value) => value.replace(/\D/g, "").length >= 8,
+      "Ingresá un teléfono válido",
+    ),
   items: z.array(checkoutItemSchema).min(1, "El carrito está vacío."),
 });
 
@@ -56,7 +64,7 @@ export async function createOrder(input: unknown): Promise<CheckoutResult> {
       data: {
         nombreCliente: nombre,
         emailCliente: email,
-        telefonoCliente: telefono || null,
+        telefonoCliente: telefono,
         total,
         items: {
           create: items.map((item) => ({
