@@ -166,7 +166,7 @@ export function SiteHeader({
   return (
     <header
       ref={headerRef}
-      className="border-border bg-background sticky top-0 z-50 border-b"
+      className="border-border bg-lime sticky top-0 z-50 border-b"
     >
       {topBarText && (
         <div className="bg-primary text-primary-foreground px-6 py-2 text-center text-xs font-medium">

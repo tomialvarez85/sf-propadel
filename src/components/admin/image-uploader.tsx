@@ -12,7 +12,6 @@ import {
   ImageIcon,
   Info,
   Loader2,
-  Sparkles,
   Sun,
   Upload,
   X,
@@ -30,6 +29,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -98,6 +98,40 @@ function getCroppedBlob(
   });
 }
 
+/** Composites a (presumably transparent-background) image over solid white
+ * — the background-removal model outputs a transparent PNG, but the
+ * product grid's own container is already white, so a transparent cutout
+ * would just show whatever sits behind it there instead of a clean,
+ * consistent white card. */
+function compositeOnWhite(blob: Blob): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    createImageBitmap(blob)
+      .then((bitmap) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = bitmap.width;
+        canvas.height = bitmap.height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          bitmap.close();
+          reject(new Error("No se pudo componer la imagen"));
+          return;
+        }
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(bitmap, 0, 0);
+        bitmap.close();
+        canvas.toBlob(
+          (result) =>
+            result
+              ? resolve(result)
+              : reject(new Error("No se pudo componer la imagen")),
+          "image/png",
+        );
+      })
+      .catch(reject);
+  });
+}
+
 function PhotoGuidePopover() {
   const tips = [
     {
@@ -134,6 +168,28 @@ function PhotoGuidePopover() {
         <p className="font-heading mb-3 text-sm font-medium">
           Cómo sacar buenas fotos de producto
         </p>
+
+        {/* Visual reference, not just text tips — a plain product shape,
+            centered, on a clean neutral ground with a soft even shadow.
+            The better the contrast between product and background here,
+            the better the automatic background removal result later. */}
+        <svg
+          viewBox="0 0 280 160"
+          className="border-border mb-3 w-full rounded-lg border"
+          aria-label="Ejemplo de foto ideal: producto centrado sobre fondo neutro liso"
+        >
+          <rect width="280" height="160" fill="oklch(0.97 0.002 213)" />
+          <ellipse cx="140" cy="126" rx="46" ry="8" fill="oklch(0.145 0 0 / 0.08)" />
+          <g fill="none" stroke="oklch(0.556 0 0)" strokeWidth="3">
+            <ellipse cx="140" cy="76" rx="34" ry="42" />
+            <line x1="140" y1="118" x2="140" y2="140" strokeWidth="6" strokeLinecap="round" />
+          </g>
+        </svg>
+        <p className="text-muted-foreground -mt-2 mb-3 text-xs">
+          Producto solo, centrado, fondo liso — así rinde mejor la remoción
+          automática de fondo.
+        </p>
+
         <div className="flex flex-col gap-3">
           {tips.map((tip) => {
             const Icon = tip.icon;
@@ -157,6 +213,13 @@ function PhotoGuidePopover() {
   );
 }
 
+type ReviewState = {
+  originalBlob: Blob;
+  originalUrl: string;
+  processedBlob: Blob;
+  processedUrl: string;
+};
+
 export function ImageUploader({
   value,
   onChange,
@@ -178,7 +241,14 @@ export function ImageUploader({
    * (banners, categories, brands) that need their own aspect ratios.
    */
   cropAspect?: number;
-  /** Shows the optional "Quitar fondo automáticamente" step in the crop dialog. */
+  /**
+   * Turns on automatic background removal for this uploader, composited
+   * onto solid white — the default for product photos (mostly standalone
+   * objects: paletas, bolsos, accesorios). The crop dialog shows a
+   * "Mantener fondo original" checkbox to opt out per-photo, for
+   * indumentaria puesta en modelos where background removal doesn't make
+   * sense.
+   */
   allowBackgroundRemoval?: boolean;
 }) {
   const [uploading, setUploading] = useState(false);
@@ -192,13 +262,28 @@ export function ImageUploader({
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
+  const [keepOriginalBackground, setKeepOriginalBackground] = useState(false);
   const [removingBackground, setRemovingBackground] = useState(false);
+  const [bgProgress, setBgProgress] = useState<{
+    current: number;
+    total: number;
+  } | null>(null);
+  const [review, setReview] = useState<ReviewState | null>(null);
 
   function resetCropState() {
     if (cropSrc) URL.revokeObjectURL(cropSrc);
     setCropSrc(null);
     setCrop(undefined);
     setCompletedCrop(undefined);
+    setKeepOriginalBackground(false);
+  }
+
+  function resetReview() {
+    if (review) {
+      URL.revokeObjectURL(review.originalUrl);
+      URL.revokeObjectURL(review.processedUrl);
+    }
+    setReview(null);
   }
 
   async function finishUpload(blob: Blob) {
@@ -286,25 +371,31 @@ export function ImageUploader({
     });
   }
 
-  async function handleRemoveBackground() {
-    if (!imageRef.current || !completedCrop) return;
+  async function runBackgroundRemoval(croppedBlob: Blob) {
     setRemovingBackground(true);
+    setBgProgress(null);
     try {
-      const croppedBlob = await getCroppedBlob(imageRef.current, completedCrop);
       const { removeBackground } = await import("@imgly/background-removal");
-      const resultBlob = await removeBackground(croppedBlob);
-      const url = URL.createObjectURL(resultBlob);
-      // Swap the crop preview for the background-removed result: from here
-      // on, "confirm" just uploads this blob directly instead of re-cropping.
+      const cutout = await removeBackground(croppedBlob, {
+        progress: (_key, current, total) => setBgProgress({ current, total }),
+      });
+      const processedBlob = await compositeOnWhite(cutout);
       resetCropState();
-      setCropSrc(url);
-      await uploadWithOptionalSizeCheck(resultBlob);
+      setReview({
+        originalBlob: croppedBlob,
+        originalUrl: URL.createObjectURL(croppedBlob),
+        processedBlob,
+        processedUrl: URL.createObjectURL(processedBlob),
+      });
     } catch {
       toast.error(
-        "No se pudo quitar el fondo automáticamente. Probá recortar y subir la foto tal cual.",
+        "No se pudo quitar el fondo automáticamente. Se sube la foto tal cual.",
       );
+      resetCropState();
+      await uploadWithOptionalSizeCheck(croppedBlob);
     } finally {
       setRemovingBackground(false);
+      setBgProgress(null);
     }
   }
 
@@ -312,6 +403,10 @@ export function ImageUploader({
     if (!imageRef.current || !completedCrop) return;
     try {
       const blob = await getCroppedBlob(imageRef.current, completedCrop);
+      if (allowBackgroundRemoval && !keepOriginalBackground) {
+        await runBackgroundRemoval(blob);
+        return;
+      }
       resetCropState();
       await uploadWithOptionalSizeCheck(blob);
     } catch (error) {
@@ -321,11 +416,23 @@ export function ImageUploader({
     }
   }
 
+  async function confirmReview(useProcessed: boolean) {
+    if (!review) return;
+    const chosen = useProcessed ? review.processedBlob : review.originalBlob;
+    resetReview();
+    await uploadWithOptionalSizeCheck(chosen);
+  }
+
   function confirmLowResUpload() {
     const pending = lowResWarning;
     setLowResWarning(null);
     if (pending) void finishUpload(pending.blob);
   }
+
+  const bgProgressPercent =
+    bgProgress && bgProgress.total > 0
+      ? Math.min(100, Math.round((bgProgress.current / bgProgress.total) * 100))
+      : null;
 
   return (
     <div className="flex items-center gap-4">
@@ -411,42 +518,123 @@ export function ImageUploader({
 
               {allowBackgroundRemoval && (
                 <div className="border-border bg-muted/50 flex flex-col gap-2 rounded-lg border p-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="w-fit"
-                    disabled={removingBackground || !completedCrop}
-                    onClick={handleRemoveBackground}
-                  >
-                    {removingBackground ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <Sparkles className="size-4" />
-                    )}
-                    Quitar fondo automáticamente
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="keep-original-bg"
+                      checked={keepOriginalBackground}
+                      onCheckedChange={(checked) =>
+                        setKeepOriginalBackground(checked === true)
+                      }
+                    />
+                    <label htmlFor="keep-original-bg" className="text-sm">
+                      Mantener fondo original
+                    </label>
+                  </div>
                   <p className="text-muted-foreground text-xs">
-                    Opcional. Funciona mejor con productos solos (paletas,
-                    accesorios, calzado) sobre fondo simple — no se recomienda
-                    para indumentaria puesta en modelos. Sube la foto
-                    directamente al terminar.
+                    Por defecto quitamos el fondo automáticamente y lo
+                    reemplazamos por blanco sólido — funciona mejor con
+                    productos solos (paletas, accesorios, calzado). Activá
+                    esto para indumentaria puesta en modelos, donde no se
+                    recomienda quitar el fondo.
                   </p>
+                  {removingBackground && (
+                    <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                      <Loader2 className="size-3.5 animate-spin" />
+                      {bgProgressPercent !== null
+                        ? `Quitando fondo... ${bgProgressPercent}%`
+                        : "Quitando fondo..."}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           )}
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={resetCropState}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={resetCropState}
+              disabled={removingBackground}
+            >
               Cancelar
             </Button>
             <Button
               type="button"
-              disabled={!completedCrop || uploading}
+              disabled={!completedCrop || uploading || removingBackground}
               onClick={handleConfirmCrop}
             >
-              {uploading ? "Subiendo..." : "Confirmar recorte y subir"}
+              {removingBackground
+                ? "Procesando..."
+                : uploading
+                  ? "Subiendo..."
+                  : "Confirmar recorte"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={review !== null}
+        onOpenChange={(open) => !open && resetReview()}
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>¿Usar la foto sin fondo?</DialogTitle>
+          </DialogHeader>
+
+          {review && (
+            <div className="flex flex-col gap-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-muted-foreground text-xs font-medium">
+                    Original
+                  </span>
+                  <div className="border-border bg-muted relative aspect-square overflow-hidden rounded-lg border">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- blob: URL, not an optimizable static asset */}
+                    <img
+                      src={review.originalUrl}
+                      alt="Foto original"
+                      className="size-full object-contain"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-muted-foreground text-xs font-medium">
+                    Fondo removido
+                  </span>
+                  <div className="border-border relative aspect-square overflow-hidden rounded-lg border bg-white">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- blob: URL, not an optimizable static asset */}
+                    <img
+                      src={review.processedUrl}
+                      alt="Foto con fondo removido"
+                      className="size-full object-contain"
+                    />
+                  </div>
+                </div>
+              </div>
+              <p className="text-muted-foreground text-xs">
+                Si el recorte salió mal (bordes muy finos o transparentes,
+                como en un protector de borde), mantené la foto original.
+              </p>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={uploading}
+              onClick={() => confirmReview(false)}
+            >
+              Usar foto original
+            </Button>
+            <Button
+              type="button"
+              disabled={uploading}
+              onClick={() => confirmReview(true)}
+            >
+              {uploading ? "Subiendo..." : "Usar sin fondo"}
             </Button>
           </DialogFooter>
         </DialogContent>

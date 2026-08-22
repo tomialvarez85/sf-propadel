@@ -15,7 +15,7 @@ import type { HomeTestimonial } from "@/lib/home-data";
 
 function TestimonialCard({ testimonial }: { testimonial: HomeTestimonial }) {
   return (
-    <div className="bg-primary-foreground/5 flex h-full flex-col gap-4 rounded-xl p-6">
+    <div className="bg-primary flex h-full flex-col gap-4 rounded-xl p-6">
       <Quote className="text-lime size-8 shrink-0" fill="currentColor" />
       <p className="text-primary-foreground flex-1 text-sm leading-relaxed">
         {testimonial.comentario}
@@ -59,13 +59,13 @@ export function TestimonialsSection({
   if (testimonials.length === 0) return null;
 
   return (
-    <section className="bg-primary">
+    <section>
       <div className="mx-auto max-w-6xl px-6 py-16">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="font-heading text-primary-foreground text-2xl font-bold tracking-[-0.015em]">
+          <h2 className="font-heading text-2xl font-bold tracking-[-0.015em]">
             Qué dicen de nosotros
           </h2>
-          <p className="text-primary-foreground/70 mt-2">
+          <p className="text-muted-foreground mt-2">
             La opinión de quienes ya juegan con nosotros.
           </p>
         </div>
@@ -95,7 +95,7 @@ export function TestimonialsSection({
                   "size-2 rounded-full transition-colors duration-150",
                   current === index
                     ? "bg-lime"
-                    : "bg-primary-foreground/30 hover:bg-primary-foreground/50",
+                    : "bg-muted-foreground/30 hover:bg-muted-foreground/50",
                 )}
               />
             ))}

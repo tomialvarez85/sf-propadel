@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CreditCard, MessageCircle, ShieldCheck, Truck } from "lucide-react";
+import { MessageCircle, ShieldCheck, Truck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { getBrandOptions } from "@/lib/product-query";
@@ -42,11 +42,6 @@ export default async function NosotrosPage() {
       title: "Envíos a todo el país",
       text: "Hacemos llegar tu pedido estés donde estés.",
     },
-    {
-      icon: CreditCard,
-      title: "Cuotas sin interés",
-      text: "Pagá como prefieras, sin recargo, en todos los medios de pago.",
-    },
   ];
 
   return (
@@ -67,7 +62,7 @@ export default async function NosotrosPage() {
           Por qué elegirnos
         </h2>
 
-        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
           {reasons.map((reason) => {
             const Icon = reason.icon;
             return (
