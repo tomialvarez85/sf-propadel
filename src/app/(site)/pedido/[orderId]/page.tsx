@@ -30,12 +30,13 @@ export default async function PedidoPage(
   }
 
   const paymentFields = [
-    { label: "Alias", value: settings?.alias },
-    { label: "CBU / CVU", value: settings?.cbu },
-    { label: "Titular", value: settings?.titular },
-    { label: "Banco", value: settings?.banco },
-  ].filter((field): field is { label: string; value: string } =>
-    Boolean(field.value),
+    { label: "Alias", value: settings?.alias, copyable: true },
+    { label: "CBU / CVU", value: settings?.cbu, copyable: true },
+    { label: "Titular", value: settings?.titular, copyable: false },
+    { label: "Banco", value: settings?.banco, copyable: false },
+  ].filter(
+    (field): field is { label: string; value: string; copyable: boolean } =>
+      Boolean(field.value),
   );
 
   return (

@@ -190,9 +190,14 @@ function emailShellHtml(headerLabel: string, bodyHtml: string): string {
 </html>`;
 }
 
-/** Notifies the store owner — includes an explicit PENDIENTE DE PAGO flag
- * (subject + body) so it's clear the transfer hasn't been confirmed yet and
- * the order isn't ready to prepare/ship. */
+/** Notifies the store owner. Only ever fires from finalizeOrder, after the
+ * customer has already uploaded a comprobante — so this distinguishes two
+ * separate things instead of collapsing them into one "pendiente de pago"
+ * label: the *payment* (already made, the comprobante is the proof) vs.
+ * the *order's own estado* (still Pendiente in the system until the owner
+ * verifies and flips it to Confirmado in /admin/pedidos). The no-comprobante
+ * branch only matters for the /pedido/[orderId] contingency path — see
+ * saveComprobante in (site)/actions.ts. */
 export async function sendOrderNotificationEmail(
   order: OrderForEmail,
   recipientEmail: string | null | undefined,
@@ -221,14 +226,25 @@ export async function sendOrderNotificationEmail(
     <p style="margin:0 0 2px;font-size:16px;color:${INK};font-weight:700;">${order.nombreCliente}</p>
     <p style="margin:0;font-size:14px;color:${INK_MUTED};">${order.emailCliente}${order.telefonoCliente ? ` · ${order.telefonoCliente}` : ""}</p>
 
-    <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:16px;">
-      <tr>
-        <td style="background-color:${LIME};color:${INK};font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;">PENDIENTE DE PAGO</td>
-      </tr>
-    </table>
-    <p style="margin:8px 0 0;font-size:13px;color:${INK_MUTED};">
-      Todavía no confirmó la transferencia — no prepares el envío hasta verificar el pago y pasar el pedido a Confirmado en /admin/pedidos.
-    </p>
+    ${
+      order.comprobanteUrl
+        ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:16px;">
+            <tr>
+              <td style="background-color:${LIME};color:${INK};font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;">COMPROBANTE ADJUNTO — A CONFIRMAR</td>
+            </tr>
+          </table>
+          <p style="margin:8px 0 0;font-size:13px;color:${INK_MUTED};">
+            El cliente ya transfirió y subió el comprobante de pago. El pedido sigue en estado <strong>Pendiente</strong> en el sistema hasta que lo verifiques y lo pases a <strong>Confirmado</strong> en /admin/pedidos.
+          </p>`
+        : `<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:16px;">
+            <tr>
+              <td style="background-color:${INK_MUTED};color:#ffffff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;">SIN COMPROBANTE</td>
+            </tr>
+          </table>
+          <p style="margin:8px 0 0;font-size:13px;color:${INK_MUTED};">
+            El cliente todavía no subió el comprobante de pago — no prepares el envío hasta confirmarlo.
+          </p>`
+    }
 
     ${itemsTableHtml(order.items)}
 
@@ -244,19 +260,26 @@ export async function sendOrderNotificationEmail(
               </td>
             </tr>
           </table>`
-        : `<p style="margin:20px 0 0;font-size:13px;color:${INK_MUTED};">El cliente todavía no subió el comprobante de pago.</p>`
+        : ""
     }
 
     <p style="margin:24px 0 0;font-size:12px;color:${INK_MUTED};">
       Pedido #${order.id} · ${order.createdAt.toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" })}
     </p>`;
 
+  const subject = order.comprobanteUrl
+    ? `Nuevo pedido de ${order.nombreCliente} — ${formatCurrency(order.total)} (comprobante adjunto, a confirmar)`
+    : `Nuevo pedido de ${order.nombreCliente} — ${formatCurrency(order.total)} (sin comprobante)`;
+  const headerLabel = order.comprobanteUrl
+    ? "Nuevo pedido — comprobante adjunto"
+    : "Nuevo pedido — sin comprobante";
+
   try {
     const { error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: recipientEmail,
-      subject: `Nuevo pedido de ${order.nombreCliente} — ${formatCurrency(order.total)} (pendiente de pago)`,
-      html: emailShellHtml("Nuevo pedido — pendiente de pago", body),
+      subject,
+      html: emailShellHtml(headerLabel, body),
       attachments: attachment
         ? [{ filename: attachment.filename, content: attachment.content }]
         : undefined,

@@ -6,7 +6,18 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 
-export function CopyField({ label, value }: { label: string; value: string }) {
+export function CopyField({
+  label,
+  value,
+  copyable = true,
+}: {
+  label: string;
+  value: string;
+  /** Alias/CBU need a copy button — the customer pastes them into their
+   * bank app. Titular/Banco are just confirmation details, nothing to
+   * paste, so they render as plain text with no button. */
+  copyable?: boolean;
+}) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -25,25 +36,27 @@ export function CopyField({ label, value }: { label: string; value: string }) {
         <p className="text-muted-foreground text-xs">{label}</p>
         <p className="truncate text-base font-bold">{value}</p>
       </div>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={handleCopy}
-        className="shrink-0"
-      >
-        {copied ? (
-          <>
-            <Check className="text-primary size-3.5" />
-            Copiado
-          </>
-        ) : (
-          <>
-            <Copy className="size-3.5" />
-            Copiar
-          </>
-        )}
-      </Button>
+      {copyable && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleCopy}
+          className="shrink-0"
+        >
+          {copied ? (
+            <>
+              <Check className="text-primary size-3.5" />
+              Copiado
+            </>
+          ) : (
+            <>
+              <Copy className="size-3.5" />
+              Copiar
+            </>
+          )}
+        </Button>
+      )}
     </div>
   );
 }

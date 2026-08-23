@@ -9,7 +9,7 @@ import { ComprobanteUploader } from "@/components/site/comprobante-uploader";
 import { CopyField } from "@/components/site/copy-field";
 import { Button } from "@/components/ui/button";
 
-type PaymentField = { label: string; value: string };
+type PaymentField = { label: string; value: string; copyable?: boolean };
 
 /** Owns step 2 of checkout: payment info + comprobante upload + "Finalizar
  * compra". The button stays disabled until a comprobante is staged
@@ -57,7 +57,12 @@ export function PedidoCheckoutPanel({
           <p className="text-sm font-semibold">Datos para transferir</p>
           <div className="divide-border divide-y">
             {paymentFields.map((field) => (
-              <CopyField key={field.label} label={field.label} value={field.value} />
+              <CopyField
+                key={field.label}
+                label={field.label}
+                value={field.value}
+                copyable={field.copyable}
+              />
             ))}
           </div>
         </div>
