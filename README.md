@@ -165,3 +165,15 @@ Las imágenes (productos, banners, categorías, marcas, logo, etc.) se suben des
 `prisma/seed.ts` (`npx prisma db seed`) carga categorías, marcas, productos, banners y una fila de `SiteSettings` **de prueba** — imágenes placeholder de `placehold.co`, WhatsApp y email falsos, dirección ficticia. Sirve para tener datos con los que trabajar en desarrollo.
 
 **No correrlo contra la base de producción.** Sobreescribiría (vía `upsert`) los datos reales de `SiteSettings`, categorías y marcas que el dueño del negocio haya cargado, y mezclaría productos de prueba con el catálogo real. La app en producción arranca con la base vacía (después de `migrate deploy`) y se carga a mano desde `/admin`.
+
+### Imágenes placeholder de demo
+
+`scripts/seed-placeholder-images.ts` (`npx tsx scripts/seed-placeholder-images.ts`) reemplaza el placeholder gris de `placehold.co` de los 12 productos del seed por fotos de stock genéricas (sin marca) de [Pexels](https://www.pexels.com/api/), agrupadas por categoría (paletas, indumentaria, calzado, accesorios, bolsos). Sirve para mostrarle el catálogo a un cliente con aspecto visual completo mientras se consiguen las fotos reales — **no son las fotos reales del producto y hay que reemplazarlas antes de cualquier lanzamiento público.** No pisa productos que ya tengan una foto real cargada (cualquier imagen que no sea de `placehold.co`).
+
+Requiere una API key gratis de Pexels:
+1. Entrar a https://www.pexels.com/api/ y crear una cuenta gratis (o loguearse).
+2. Completar el formulario corto de "Get Started" (para qué se va a usar — alcanza con algo como "demo images for an e-commerce catalog").
+3. La key se genera al instante, sin aprobación ni espera.
+4. Agregarla a `.env` como `PEXELS_API_KEY="..."` (nunca commitear este archivo — ya está en `.gitignore`).
+
+Licencia de Pexels: uso comercial libre, sin costo, atribución no obligatoria pero valorada — el script imprime el nombre del fotógrafo y el link de cada foto usada por si se quiere acreditar.
