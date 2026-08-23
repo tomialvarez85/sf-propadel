@@ -6,7 +6,6 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { WishlistButton } from "@/components/site/wishlist-button";
 import { useCart } from "@/hooks/use-cart";
 import { cn } from "@/lib/utils";
 import { formatCurrency, getDiscountPercent, INSTALLMENTS } from "@/lib/format";
@@ -106,23 +105,16 @@ export function ProductPurchasePanel({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <Link
-            href={`/productos?marca=${brand.slug}`}
-            className="text-muted-foreground hover:text-primary text-sm"
-          >
-            {brand.nombre}
-          </Link>
-          <h1 className="font-heading text-2xl font-bold tracking-[-0.015em]">
-            {nombre}
-          </h1>
-        </div>
-        <WishlistButton
-          product={{ id, nombre, slug, precio, precioAnterior, stock, imagen }}
-          variant="label"
-          className="shrink-0"
-        />
+      <div>
+        <Link
+          href={`/productos?marca=${brand.slug}`}
+          className="text-muted-foreground hover:text-primary text-sm"
+        >
+          {brand.nombre}
+        </Link>
+        <h1 className="font-heading text-2xl font-bold tracking-[-0.015em]">
+          {nombre}
+        </h1>
       </div>
 
       <div className="flex flex-col gap-2">

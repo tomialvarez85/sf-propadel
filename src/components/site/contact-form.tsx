@@ -1,5 +1,6 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -14,22 +15,34 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  contactFormSchema,
+  type ContactFormValues,
+} from "@/lib/validations/contact";
 
-type ContactFormValues = {
-  nombre: string;
-  email: string;
-  mensaje: string;
-};
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-export function ContactForm() {
+/** No backend for this form — submitting it just builds a wa.me message
+ * from the fields and hands the customer off to WhatsApp, the same
+ * pattern used everywhere else on the site (product detail, floating
+ * button) instead of storing an email inquiry. */
+export function ContactForm({ whatsapp }: { whatsapp: string | null }) {
   const form = useForm<ContactFormValues>({
+    resolver: zodResolver(contactFormSchema),
     defaultValues: { nombre: "", email: "", mensaje: "" },
   });
 
-  function onSubmit() {
-    toast.success("¡Mensaje enviado! Te vamos a responder a la brevedad.");
+  function onSubmit(values: ContactFormValues) {
+    if (!whatsapp) {
+      toast.error(
+        "No hay un WhatsApp configurado todavía. Escribinos por email mientras tanto.",
+      );
+      return;
+    }
+
+    const message = `Hola! Soy ${values.nombre} (${values.email}). ${values.mensaje}`;
+    const href = `https://wa.me/${whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
+
+    toast.success("Te llevamos a WhatsApp para enviar tu mensaje...");
+    window.open(href, "_blank", "noopener,noreferrer");
     form.reset();
   }
 
@@ -42,7 +55,6 @@ export function ContactForm() {
         <FormField
           control={form.control}
           name="nombre"
-          rules={{ required: "Ingresá tu nombre" }}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Nombre</FormLabel>
@@ -57,10 +69,6 @@ export function ContactForm() {
         <FormField
           control={form.control}
           name="email"
-          rules={{
-            required: "Ingresá tu email",
-            pattern: { value: EMAIL_PATTERN, message: "Email inválido" },
-          }}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>
@@ -75,10 +83,6 @@ export function ContactForm() {
         <FormField
           control={form.control}
           name="mensaje"
-          rules={{
-            required: "Contanos en qué te podemos ayudar",
-            minLength: { value: 10, message: "Escribí un poco más" },
-          }}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Mensaje</FormLabel>

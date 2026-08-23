@@ -8,7 +8,6 @@ import { ImagePlaceholder } from "@/components/image-placeholder";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { WishlistButton } from "@/components/site/wishlist-button";
 import { useCart } from "@/hooks/use-cart";
 import {
   formatCurrency,
@@ -111,10 +110,11 @@ export function ProductCard({ product }: { product: ProductCardData }) {
         </div>
       </Card>
 
-      <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
-        <WishlistButton product={product} />
-        {lowStock && <Badge variant="secondary">¡Últimas unidades!</Badge>}
-      </div>
+      {lowStock && (
+        <Badge variant="secondary" className="absolute top-2 right-2">
+          ¡Últimas unidades!
+        </Badge>
+      )}
     </div>
   );
 }

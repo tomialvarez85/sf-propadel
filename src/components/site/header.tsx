@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { ChevronDown, Heart, Lock, Menu, Search } from "lucide-react";
+import { ChevronDown, Lock, Menu, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,31 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CartSheet } from "@/components/site/cart-sheet";
-import { useWishlist } from "@/hooks/use-wishlist";
 import type { CategoryNavItem, SiteSettingsData } from "@/lib/site-data";
-
-function WishlistHeaderLink() {
-  const { items, hydrated } = useWishlist();
-
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      aria-label="Favoritos"
-      className="size-11 md:size-8"
-      asChild
-    >
-      <Link href="/favoritos" className="relative">
-        <Heart className="size-5" />
-        {hydrated && items.length > 0 && (
-          <span className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full text-[10px] font-semibold">
-            {items.length}
-          </span>
-        )}
-      </Link>
-    </Button>
-  );
-}
 
 function AdminAccessLink() {
   return (
@@ -192,7 +168,6 @@ export function SiteHeader({
         <SearchForm className="ml-auto hidden max-w-xs flex-1 md:block" />
 
         <div className="ml-auto flex items-center gap-1 md:ml-0">
-          <WishlistHeaderLink />
           <CartSheet />
 
           <div aria-hidden className="bg-border mx-1 h-5 w-px" />

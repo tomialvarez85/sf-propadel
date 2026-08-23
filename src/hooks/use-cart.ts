@@ -53,10 +53,9 @@ function writeItems(items: CartItem[]) {
 }
 
 /**
- * Cart persisted entirely in localStorage (no backend), same architecture as
- * useWishlist: full product-line snapshots (not just ids), a custom
- * window event plus "storage" to keep every mounted instance (header badge,
- * cart sheet, product pages) in sync.
+ * Cart persisted entirely in localStorage (no backend): full product-line
+ * snapshots (not just ids), a custom window event plus "storage" to keep
+ * every mounted instance (header badge, cart sheet, product pages) in sync.
  *
  * A cart line is identified by `lineId` = productId + a sorted signature of
  * its selected variants, so the same product added with different
