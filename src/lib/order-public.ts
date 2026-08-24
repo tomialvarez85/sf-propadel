@@ -12,7 +12,6 @@ export type PublicOrder = {
   nombreCliente: string;
   total: number;
   createdAt: Date;
-  comprobanteUrl: string | null;
   comprobanteSubidoEn: Date | null;
   items: PublicOrderItem[];
 };
@@ -20,7 +19,11 @@ export type PublicOrder = {
 /** Customer-facing order lookup for /pedido/[orderId] — no auth, the
  * unguessable cuid id is the only access control (same trust model as the
  * checkout confirmation screen itself). Only exposes fields safe to show
- * to whoever holds the link: no email/telefono, no internal `estado`. */
+ * to whoever holds the link: no email/telefono, no internal `estado`, and
+ * no `comprobanteUrl` (the Storage object path) — the page only ever needs
+ * to know *whether* one was uploaded (`comprobanteSubidoEn`), not the path
+ * itself, which has no reason to leave the server even though the private
+ * bucket's RLS would still block reading it either way. */
 export async function getPublicOrder(orderId: string): Promise<PublicOrder | null> {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
@@ -29,7 +32,6 @@ export async function getPublicOrder(orderId: string): Promise<PublicOrder | nul
       nombreCliente: true,
       total: true,
       createdAt: true,
-      comprobanteUrl: true,
       comprobanteSubidoEn: true,
       items: {
         select: {
@@ -49,7 +51,6 @@ export async function getPublicOrder(orderId: string): Promise<PublicOrder | nul
     nombreCliente: order.nombreCliente,
     total: order.total.toNumber(),
     createdAt: order.createdAt,
-    comprobanteUrl: order.comprobanteUrl,
     comprobanteSubidoEn: order.comprobanteSubidoEn,
     items: order.items.map((item) => ({
       nombreProducto: item.nombreProducto,

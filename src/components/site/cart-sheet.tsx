@@ -60,6 +60,7 @@ function CartItemsList({
                   src={item.imagen}
                   alt={item.nombre}
                   fill
+                  sizes="64px"
                   className="object-cover"
                 />
               ) : (

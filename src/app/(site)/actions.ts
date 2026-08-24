@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { sendOrderConfirmationEmail, sendOrderNotificationEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
+import { checkoutFormSchema } from "@/lib/validations/checkout";
 
 const checkoutItemSchema = z.object({
   productId: z.string(),
@@ -14,22 +15,10 @@ const checkoutItemSchema = z.object({
   variantes: z.array(z.object({ tipo: z.string(), valor: z.string() })),
 });
 
-const checkoutSchema = z.object({
-  nombre: z.string().trim().min(2, "Ingresá tu nombre"),
-  email: z
-    .string()
-    .trim()
-    .min(1, "Ingresá tu email")
-    .email("Ingresá un email válido"),
-  telefono: z
-    .string()
-    .trim()
-    .min(1, "Ingresá tu teléfono")
-    .regex(/^\+?[\d\s()-]+$/, "Ingresá un teléfono válido")
-    .refine(
-      (value) => value.replace(/\D/g, "").length >= 8,
-      "Ingresá un teléfono válido",
-    ),
+// Reuses the exact nombre/email/telefono rules the client-side form already
+// validates against (lib/validations/checkout.ts) instead of a hand-copied
+// duplicate — the two can no longer drift out of sync.
+const checkoutSchema = checkoutFormSchema.extend({
   items: z.array(checkoutItemSchema).min(1, "El carrito está vacío."),
 });
 

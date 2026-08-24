@@ -438,7 +438,7 @@ export function ImageUploader({
     <div className="flex items-center gap-4">
       <div className="border-border bg-muted relative flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-dashed">
         {value ? (
-          <Image src={value} alt="" fill className="object-cover" />
+          <Image src={value} alt="" fill sizes="96px" className="object-cover" />
         ) : (
           <Upload className="text-muted-foreground size-5" />
         )}

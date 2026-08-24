@@ -71,7 +71,13 @@ export function ProductImageCell({
       >
         <div className="bg-muted relative size-10 overflow-hidden rounded-md">
           {savedImage ? (
-            <Image src={savedImage} alt="" fill className="object-cover" />
+            <Image
+              src={savedImage}
+              alt=""
+              fill
+              sizes="40px"
+              className="object-cover"
+            />
           ) : (
             <ImagePlaceholder iconClassName="size-4" />
           )}

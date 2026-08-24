@@ -91,6 +91,7 @@ export function InlineImageCell({
               src={savedImage}
               alt=""
               fill
+              sizes="64px"
               className={fit === "contain" ? "object-contain" : "object-cover"}
             />
           ) : (
