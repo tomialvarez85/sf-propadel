@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Mail, MapPin, MessageCircle } from "lucide-react";
 
-import { FacebookIcon, InstagramIcon } from "@/components/icons/social";
+import { InstagramIcon } from "@/components/icons/social";
 import type { SiteSettingsData } from "@/lib/site-data";
 
 const INFO_LINKS = [
@@ -30,17 +30,6 @@ export function SiteFooter({ settings }: { settings: SiteSettingsData }) {
                 className="text-primary-foreground/70 hover:text-primary-foreground transition-colors"
               >
                 <InstagramIcon className="size-5" />
-              </Link>
-            )}
-            {settings?.facebook && (
-              <Link
-                href={settings.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Facebook"
-                className="text-primary-foreground/70 hover:text-primary-foreground transition-colors"
-              >
-                <FacebookIcon className="size-5" />
               </Link>
             )}
             {settings?.whatsapp && (

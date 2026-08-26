@@ -237,8 +237,8 @@ export function ImageUploader({
    * When set, every upload goes through a mandatory crop step locked to this
    * aspect ratio (e.g. 1 for square product photos) before it's saved —
    * catalog images stay visually consistent regardless of the source
-   * file's original framing. Omitted entirely for non-product uploaders
-   * (banners, categories, brands) that need their own aspect ratios.
+   * file's original framing. Omitted for uploaders (categories, brands)
+   * that need their own aspect ratio or none at all.
    */
   cropAspect?: number;
   /**
@@ -330,8 +330,8 @@ export function ImageUploader({
     if (!file) return;
 
     if (!cropAspect) {
-      // No forced framing for this uploader (banners/categories/etc.) —
-      // keep the original direct-upload behavior.
+      // No forced framing for this uploader (categories/etc.) — keep the
+      // original direct-upload behavior.
       if (recommendedMinSize) {
         try {
           const detected = await getImageDimensions(file);

@@ -1,19 +1,16 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
-import Autoplay from "embla-carousel-autoplay";
 
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import type { HomeBanner } from "@/lib/home-data";
+export type HeroBannerData = {
+  imagen: string;
+  link: string | null;
+  titulo: string | null;
+};
 
-function BannerSlide({ banner }: { banner: HomeBanner }) {
+/** Single fixed hero image, sourced from the SiteSettings singleton
+ * (heroImagen/heroLink/heroTitulo, edited at /admin/banners) — no
+ * carousel/embla logic to maintain here at all. */
+export function HeroBanner({ banner }: { banner: HeroBannerData }) {
   const content = (
     <div className="bg-muted relative w-full overflow-hidden h-[calc(100dvh_-_var(--header-height))]">
       <Image
@@ -26,8 +23,7 @@ function BannerSlide({ banner }: { banner: HomeBanner }) {
         className="object-cover"
       />
       {/* Angled Corner motif (see DESIGN.md > Shapes) — a solid-lime quarter-disc
-          pie slice centered on the true corner, curving concave into the image
-          instead of the old straight diagonal clip-path + traced accent line. */}
+          pie slice centered on the true corner, curving concave into the image. */}
       <svg
         aria-hidden
         viewBox="0 0 1 1"
@@ -76,27 +72,5 @@ function BannerSlide({ banner }: { banner: HomeBanner }) {
     </Link>
   ) : (
     content
-  );
-}
-
-export function HeroCarousel({ banners }: { banners: HomeBanner[] }) {
-  return (
-    <Carousel
-      opts={{ loop: true }}
-      plugins={[Autoplay({ delay: 5000, stopOnInteraction: false })]}
-      className="w-full"
-    >
-      <CarouselContent>
-        {banners.map((banner) => (
-          <CarouselItem key={banner.id}>
-            <BannerSlide banner={banner} />
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-      {/* z-20 to sit above the corner motif and title overlay, which
-          share that layer inside each slide. */}
-      <CarouselPrevious className="z-20" />
-      <CarouselNext className="z-20" />
-    </Carousel>
   );
 }

@@ -1,5 +1,5 @@
 import { CategoryTiles, type CategoryTile } from "@/components/site/category-tiles";
-import { HeroCarousel } from "@/components/site/hero-carousel";
+import { HeroBanner } from "@/components/site/hero-banner";
 import { TestimonialsSection } from "@/components/site/testimonials-section";
 import {
   ProductCard,
@@ -13,7 +13,6 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import {
-  getActiveBanners,
   getActiveTestimonials,
   getCategoryBySlug,
   getDestacadoProducts,
@@ -66,9 +65,8 @@ function ProductSection({
 }
 
 export default async function HomePage() {
-  const [banners, settings, accesorios, ofertas, destacados, testimonials] =
+  const [settings, accesorios, ofertas, destacados, testimonials] =
     await Promise.all([
-      getActiveBanners(),
       getSiteSettings(),
       getCategoryBySlug("accesorios"),
       getOfertaProducts(),
@@ -97,9 +95,17 @@ export default async function HomePage() {
     },
   ];
 
+  const heroBanner = settings?.heroImagen
+    ? {
+        imagen: settings.heroImagen,
+        link: settings.heroLink,
+        titulo: settings.heroTitulo,
+      }
+    : null;
+
   return (
     <>
-      {banners.length > 0 && <HeroCarousel banners={banners} />}
+      {heroBanner && <HeroBanner banner={heroBanner} />}
 
       <CategoryTiles tiles={categoryTiles} />
 

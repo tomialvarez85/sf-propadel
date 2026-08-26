@@ -2,8 +2,10 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { Info } from "lucide-react";
 import { toast } from "sonner";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
@@ -31,6 +33,8 @@ export function ProductPurchasePanel({
   precio,
   precioAnterior,
   stock,
+  condicion,
+  estadoConservacion,
   variants,
   whatsapp,
 }: {
@@ -42,6 +46,8 @@ export function ProductPurchasePanel({
   precio: number;
   precioAnterior: number | null;
   stock: number;
+  condicion: "NUEVO" | "USADO";
+  estadoConservacion: string | null;
   variants: Variant[];
   whatsapp: string | null;
 }) {
@@ -130,11 +136,27 @@ export function ProductPurchasePanel({
           {discountPercent !== null && (
             <Badge variant="lime">-{discountPercent}%</Badge>
           )}
+          {condicion === "USADO" && <Badge variant="secondary">Usado</Badge>}
         </div>
         <span className="text-muted-foreground text-sm">
           {INSTALLMENTS} cuotas de {formatCurrency(precio / INSTALLMENTS)}
         </span>
+        {condicion === "USADO" && estadoConservacion && (
+          <p className="text-muted-foreground text-sm">
+            {estadoConservacion}
+          </p>
+        )}
       </div>
+
+      {condicion === "USADO" && (
+        <Alert>
+          <Info />
+          <AlertDescription>
+            Los productos usados no admiten cambios ni devoluciones, salvo
+            fallas no informadas.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {variantGroups.map(([tipo, options]) => (
         <div key={tipo} className="flex flex-col gap-2">

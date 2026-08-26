@@ -61,6 +61,8 @@ export default async function ProductoPage(
           precio={product.precio}
           precioAnterior={product.precioAnterior}
           stock={product.stock}
+          condicion={product.condicion}
+          estadoConservacion={product.estadoConservacion}
           variants={product.variants}
           whatsapp={settings?.whatsapp ?? null}
         />

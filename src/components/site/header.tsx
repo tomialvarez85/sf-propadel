@@ -163,6 +163,7 @@ export function SiteHeader({
           <ProductsNav categories={categories} />
           <NavLink href="/nosotros">Nosotros</NavLink>
           <NavLink href="/contacto">Contacto</NavLink>
+          <NavLink href="/usados">Usados</NavLink>
         </nav>
 
         <SearchForm className="ml-auto hidden max-w-xs flex-1 md:block" />
@@ -219,6 +220,12 @@ export function SiteHeader({
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/contacto">Contacto</Link>
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem asChild>
+                <Link href="/usados">Usados</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

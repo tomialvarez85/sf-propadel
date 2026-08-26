@@ -17,8 +17,8 @@ import { cn } from "@/lib/utils";
 
 /**
  * Click-a-thumbnail-to-replace-it dialog, for entities with a single scalar
- * image field (category imagen, brand logo, banner imagen) — no gallery, no
- * "primary among several" concept, unlike products' `ProductImageCell`.
+ * image field (category imagen, brand logo, testimonial avatarUrl) — no
+ * gallery, no "primary among several" concept, unlike products' `ProductImageCell`.
  */
 export function InlineImageCell({
   label,
@@ -31,7 +31,7 @@ export function InlineImageCell({
   thumbnailClassName = "size-10",
   successMessage = "Imagen actualizada",
 }: {
-  /** Dialog title context and toast description (e.g. category/brand/banner name). */
+  /** Dialog title context and toast description (e.g. category/brand/testimonial name). */
   label: string;
   imageUrl: string | null;
   onSave: (url: string) => Promise<{ success: boolean; error?: string }>;

@@ -93,24 +93,6 @@ export function SiteSettingsForm({
 
             <FormField
               control={form.control}
-              name="facebook"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Facebook</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="https://facebook.com/sfpropadel"
-                      {...field}
-                      value={field.value ?? ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>

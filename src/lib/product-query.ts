@@ -46,6 +46,10 @@ async function queryProductListing(
 ): Promise<ProductListingResult> {
   const where: Prisma.ProductWhereInput = {
     activo: true,
+    // Baseline scope, same status as `activo: true` above — not a removable
+    // filter. /productos never shows usados; that has its own independent
+    // page/query (used-product-query.ts) with condicion: "USADO" instead.
+    condicion: "NUEVO",
     ...(params.categoryIds?.length
       ? { categoryId: { in: params.categoryIds } }
       : {}),
@@ -78,6 +82,7 @@ async function queryProductListing(
         precio: true,
         precioAnterior: true,
         stock: true,
+        condicion: true,
         images: {
           orderBy: { orden: "asc" },
           take: 1,
@@ -96,6 +101,7 @@ async function queryProductListing(
       precioAnterior: product.precioAnterior?.toNumber() ?? null,
       stock: product.stock,
       imagen: product.images[0]?.url ?? null,
+      condicion: product.condicion,
     })),
     total,
     totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
@@ -123,15 +129,19 @@ export async function getFilterFacetCounts(
   categoryIds?: string[],
 ): Promise<FilterFacetCounts> {
   try {
-    const scopedWhere: Prisma.ProductWhereInput = {
+    const baseWhere: Prisma.ProductWhereInput = {
       activo: true,
+      condicion: "NUEVO",
+    };
+    const scopedWhere: Prisma.ProductWhereInput = {
+      ...baseWhere,
       ...(categoryIds?.length ? { categoryId: { in: categoryIds } } : {}),
     };
 
     const [categoryGroups, brandGroups, generoGroups] = await Promise.all([
       prisma.product.groupBy({
         by: ["categoryId"],
-        where: { activo: true },
+        where: baseWhere,
         _count: true,
       }),
       prisma.product.groupBy({

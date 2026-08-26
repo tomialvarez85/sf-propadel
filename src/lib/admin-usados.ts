@@ -1,8 +1,11 @@
+// Independent from admin-products.ts on purpose — /admin/usados must never
+// share its query layer with /admin/productos (see used-product-query.ts
+// for the same reasoning on the public-site side).
 import type { Genero, Prisma } from "@/generated/prisma";
 import { LOW_STOCK_THRESHOLD } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 
-export type ProductListItem = {
+export type UsedProductListItem = {
   id: string;
   nombre: string;
   slug: string;
@@ -19,11 +22,10 @@ export type ProductListItem = {
 
 export type StockStatus = "con-stock" | "bajo" | "sin-stock";
 
-export type ProductListFilters = {
+export type UsedProductListFilters = {
   search?: string;
   categoryId?: string;
   brandId?: string;
-  /** `null` means "sin especificar" (genero is unset), not "no filter". */
   genero?: Genero | null;
   stockStatus?: StockStatus;
   activo?: boolean;
@@ -33,8 +35,8 @@ export type ProductListFilters = {
   precioMax?: number;
 };
 
-export type ProductListResult = {
-  products: ProductListItem[];
+export type UsedProductListResult = {
+  products: UsedProductListItem[];
   total: number;
   totalUnfiltered: number;
 };
@@ -46,15 +48,12 @@ function stockWhere(status?: StockStatus): Prisma.ProductWhereInput {
   return {};
 }
 
-export async function getProductList(
-  filters: ProductListFilters = {},
-): Promise<ProductListResult> {
+export async function getUsedProductList(
+  filters: UsedProductListFilters = {},
+): Promise<UsedProductListResult> {
   try {
     const where: Prisma.ProductWhereInput = {
-      // Baseline scope, like the other unconditional filters below —
-      // /admin/productos is exclusively for condicion=NUEVO. Used products
-      // have their own independent section (/admin/usados, admin-usados.ts).
-      condicion: "NUEVO",
+      condicion: "USADO",
       ...(filters.search
         ? { nombre: { contains: filters.search, mode: "insensitive" } }
         : {}),
@@ -103,7 +102,7 @@ export async function getProductList(
         },
       }),
       prisma.product.count({ where }),
-      prisma.product.count({ where: { condicion: "NUEVO" } }),
+      prisma.product.count({ where: { condicion: "USADO" } }),
     ]);
 
     return {
@@ -125,16 +124,17 @@ export async function getProductList(
       totalUnfiltered,
     };
   } catch (error) {
-    console.error("No se pudieron cargar los productos:", error);
+    console.error("No se pudieron cargar los productos usados:", error);
     return { products: [], total: 0, totalUnfiltered: 0 };
   }
 }
 
-export type ProductEditData = {
+export type UsedProductEditData = {
   id: string;
   nombre: string;
   slug: string;
   descripcion: string;
+  estadoConservacion: string | null;
   precio: number;
   precioAnterior: number | null;
   stock: number;
@@ -148,17 +148,18 @@ export type ProductEditData = {
   variants: { tipo: string; valor: string; stock: number }[];
 };
 
-export async function getProductForEdit(
+export async function getUsedProductForEdit(
   id: string,
-): Promise<ProductEditData | null> {
+): Promise<UsedProductEditData | null> {
   try {
     const product = await prisma.product.findUnique({
-      where: { id },
+      where: { id, condicion: "USADO" },
       select: {
         id: true,
         nombre: true,
         slug: true,
         descripcion: true,
+        estadoConservacion: true,
         precio: true,
         precioAnterior: true,
         stock: true,
@@ -181,7 +182,7 @@ export async function getProductForEdit(
       precioAnterior: product.precioAnterior?.toNumber() ?? null,
     };
   } catch (error) {
-    console.error("No se pudo cargar el producto:", error);
+    console.error("No se pudo cargar el producto usado:", error);
     return null;
   }
 }

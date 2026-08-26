@@ -2,26 +2,6 @@ import type { Prisma } from "@/generated/prisma";
 import type { ProductCardData } from "@/components/site/product-card";
 import { prisma } from "@/lib/prisma";
 
-export type HomeBanner = {
-  id: string;
-  imagen: string;
-  link: string | null;
-  titulo: string | null;
-};
-
-export async function getActiveBanners(): Promise<HomeBanner[]> {
-  try {
-    return await prisma.banner.findMany({
-      where: { activo: true },
-      orderBy: { orden: "asc" },
-      select: { id: true, imagen: true, link: true, titulo: true },
-    });
-  } catch (error) {
-    console.error("No se pudieron cargar los banners:", error);
-    return [];
-  }
-}
-
 export type HomeTestimonial = {
   id: string;
   nombreCliente: string;
@@ -90,6 +70,7 @@ async function getProducts(
       precio: true,
       precioAnterior: true,
       stock: true,
+      condicion: true,
       images: {
         orderBy: { orden: "asc" },
         take: 1,
@@ -106,6 +87,7 @@ async function getProducts(
     precioAnterior: product.precioAnterior?.toNumber() ?? null,
     stock: product.stock,
     imagen: product.images[0]?.url ?? null,
+    condicion: product.condicion,
   }));
 }
 

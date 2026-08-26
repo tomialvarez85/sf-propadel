@@ -4,7 +4,6 @@ import type { SiteSettingsFormValues } from "@/lib/validations/site-settings";
 const EMPTY_SETTINGS: SiteSettingsFormValues = {
   whatsapp: "",
   instagram: "",
-  facebook: "",
   email: "",
   emailPedidos: "",
   direccion: "",
@@ -31,7 +30,6 @@ export async function getSiteSettingsForEdit(): Promise<SiteSettingsFormValues> 
     return {
       whatsapp: settings.whatsapp ?? "",
       instagram: settings.instagram ?? "",
-      facebook: settings.facebook ?? "",
       email: settings.email ?? "",
       emailPedidos: settings.emailPedidos ?? "",
       direccion: settings.direccion ?? "",

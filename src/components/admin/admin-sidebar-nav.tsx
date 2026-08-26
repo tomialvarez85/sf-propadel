@@ -11,6 +11,7 @@ import {
   Settings,
   Tag,
   Tags,
+  Undo2,
 } from "lucide-react";
 
 import { LogoutButton } from "@/components/admin/logout-button";
@@ -19,10 +20,11 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/productos", label: "Productos", icon: Package },
+  { href: "/admin/usados", label: "Usados", icon: Undo2 },
   { href: "/admin/pedidos", label: "Pedidos", icon: Receipt },
   { href: "/admin/categorias", label: "Categorías", icon: Tags },
   { href: "/admin/marcas", label: "Marcas", icon: Tag },
-  { href: "/admin/banners", label: "Banners", icon: ImageIcon },
+  { href: "/admin/banners", label: "Banner del home", icon: ImageIcon },
   {
     href: "/admin/testimonios",
     label: "Testimonios",

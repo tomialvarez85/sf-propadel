@@ -24,7 +24,6 @@ function normalizeSettingsData(
   return {
     whatsapp: data.whatsapp || null,
     instagram: data.instagram || null,
-    facebook: data.facebook || null,
     email: data.email || null,
     emailPedidos: data.emailPedidos || null,
     direccion: data.direccion || null,

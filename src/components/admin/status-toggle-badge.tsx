@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 /** Click-to-toggle Activo/Inactivo badge. Entity-agnostic — backs Estado on
- * both products and banners via a caller-supplied `onToggle`. */
+ * products and testimonials via a caller-supplied `onToggle`. */
 export function StatusToggleBadge({
   label,
   initialActive,
@@ -15,7 +15,7 @@ export function StatusToggleBadge({
   activeMessage,
   inactiveMessage,
 }: {
-  /** Used only in the aria-label and toast description (e.g. product/banner name). */
+  /** Used only in the aria-label and toast description (e.g. product/testimonial name). */
   label: string;
   initialActive: boolean;
   onToggle: (next: boolean) => Promise<{ success: boolean; error?: string }>;

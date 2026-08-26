@@ -31,7 +31,6 @@ export async function getCategoryNav(): Promise<CategoryNavItem[]> {
 export type SiteSettingsData = {
   whatsapp: string | null;
   instagram: string | null;
-  facebook: string | null;
   email: string | null;
   direccion: string | null;
   horarioAtencion: string | null;
@@ -40,6 +39,9 @@ export type SiteSettingsData = {
   textoNosotros: string | null;
   imagenGeneroHombre: string | null;
   imagenGeneroMujer: string | null;
+  heroImagen: string | null;
+  heroLink: string | null;
+  heroTitulo: string | null;
   alias: string | null;
   cbu: string | null;
   titular: string | null;

@@ -33,8 +33,7 @@ function EditIcon({ isPending }: { isPending: boolean }) {
 /**
  * Inline text field — click to edit, Enter/blur saves, Escape cancels.
  * Entity-agnostic: the caller supplies `onSave`, so this same component
- * backs Nombre across products, categories, and brands, and Título/Link on
- * banners.
+ * backs Nombre across products, categories, and brands.
  */
 export function InlineTextCell({
   value,
@@ -47,7 +46,7 @@ export function InlineTextCell({
   value: string;
   onSave: (value: string) => Promise<SaveResult>;
   successMessage?: string;
-  /** Set false for optional fields (e.g. banner título/link) — empty saves as "". */
+  /** Set false for optional fields — empty saves as "". */
   required?: boolean;
   requiredError?: string;
   className?: string;

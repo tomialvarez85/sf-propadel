@@ -42,20 +42,29 @@ enum Genero {
   UNISEX
 }
 
+enum Condicion {
+  NUEVO
+  USADO
+}
+
 model Product {
-  id             String   @id @default(cuid())
-  nombre         String
-  slug           String   @unique
-  descripcion    String
-  precio         Decimal  @db.Decimal(10, 2)
-  precioAnterior Decimal? @db.Decimal(10, 2)
-  stock          Int
-  genero         Genero?
-  destacado      Boolean  @default(false)
-  enOferta       Boolean  @default(false)
-  activo         Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                 String    @id @default(cuid())
+  nombre             String
+  slug               String    @unique
+  descripcion        String
+  precio             Decimal   @db.Decimal(10, 2)
+  precioAnterior     Decimal?  @db.Decimal(10, 2)
+  stock              Int
+  genero             Genero?
+  condicion          Condicion @default(NUEVO)
+  // Solo relevante cuando condicion=USADO — texto corto libre para describir
+  // el estado del producto (ej. "Excelente estado, poco uso").
+  estadoConservacion String?
+  destacado          Boolean   @default(false)
+  enOferta           Boolean   @default(false)
+  activo             Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id])
@@ -87,17 +96,8 @@ model ProductVariant {
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
-model Banner {
-  id     String  @id @default(cuid())
-  imagen String
-  link   String?
-  titulo String?
-  orden  Int     @default(0)
-  activo Boolean @default(true)
-}
-
 // Curated by the owner in /admin/testimonios — no public submission form,
-// same trust model as Banner (admin-only content, not user-generated).
+// admin-only content, not user-generated.
 model Testimonial {
   id            String   @id @default(cuid())
   nombreCliente String
@@ -113,7 +113,6 @@ model SiteSettings {
   id               Int     @id @default(1)
   whatsapp         String?
   instagram        String?
-  facebook         String?
   email            String?
   // Separate from `email` above on purpose: `email` is the public contact
   // address shown on /contacto and the footer, emailPedidos is the internal
@@ -132,6 +131,14 @@ model SiteSettings {
   // ya existente de la categoría real.
   imagenGeneroHombre String?
   imagenGeneroMujer  String?
+
+  // Imagen fija del hero del home — antes un carrusel de `Banner` (modelo
+  // ahora eliminado). El home ya no rota entre varias, así que no hace
+  // falta una tabla aparte con orden/activo: un solo registro, editado en
+  // /admin/banners, igual que el resto de este singleton.
+  heroImagen String?
+  heroLink   String?
+  heroTitulo String?
 
   // Transferencia bancaria (pago manual, ver checkout / src/lib/email.ts).
   // Todos opcionales — no todos los negocios usan los mismos medios — y
@@ -164,8 +171,8 @@ model Order {
   // guarda el PATH dentro del bucket, no una URL pública: el bucket exige
   // sesión autenticada para leer, así que la vista siempre pide una signed
   // URL nueva en el momento (admin) en vez de confiar en un link fijo.
-  comprobanteUrl       String?
-  comprobanteSubidoEn  DateTime?
+  comprobanteUrl      String?
+  comprobanteSubidoEn DateTime?
 
   items OrderItem[]
 }

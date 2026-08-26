@@ -260,42 +260,6 @@ async function main() {
     }
   }
 
-  const banners = [
-    {
-      id: "banner-seed-1",
-      imagen: PLACEHOLDER_BANNER,
-      titulo: "Nueva colección de paletas 2026",
-      link: "/productos?categoria=paletas",
-      orden: 1,
-      activo: true,
-    },
-    {
-      id: "banner-seed-2",
-      imagen: PLACEHOLDER_BANNER,
-      titulo: "Hasta 20% off en indumentaria",
-      link: "/productos?categoria=indumentaria",
-      orden: 2,
-      activo: true,
-    },
-    {
-      id: "banner-seed-3",
-      imagen: PLACEHOLDER_BANNER,
-      titulo: "Envío gratis en compras mayores a $100.000",
-      link: null,
-      orden: 3,
-      activo: true,
-    },
-  ];
-
-  for (const banner of banners) {
-    const { id, ...data } = banner;
-    await prisma.banner.upsert({
-      where: { id },
-      update: {},
-      create: { id, ...data },
-    });
-  }
-
   await prisma.siteSettings.upsert({
     where: { id: 1 },
     update: {},
@@ -303,16 +267,18 @@ async function main() {
       id: 1,
       whatsapp: "5491122334455",
       instagram: "https://instagram.com/sfpropadel",
-      facebook: "https://facebook.com/sfpropadel",
       email: "hola@sfpropadel.com.ar",
       direccion: "Av. Siempre Viva 1234, San Fernando, Buenos Aires",
       textoEnvioGratis: "Envío gratis en compras mayores a $100.000",
       textoCuotas: "6 cuotas sin interés",
+      heroImagen: PLACEHOLDER_BANNER,
+      heroTitulo: "Nueva colección de paletas 2026",
+      heroLink: "/productos?categoria=paletas",
     },
   });
 
   console.log(
-    `Seed OK: ${categories.length} categorías, ${brands.length} marcas, ${products.length} productos, ${banners.length} banners, 1 SiteSettings.`,
+    `Seed OK: ${categories.length} categorías, ${brands.length} marcas, ${products.length} productos, 1 SiteSettings (con hero).`,
   );
 }
 
