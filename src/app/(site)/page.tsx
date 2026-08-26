@@ -90,10 +90,9 @@ export default async function HomePage() {
       key: "accesorios",
       nombre: accesorios?.nombre ?? "Accesorios",
       href: accesorios ? `/${accesorios.slug}` : "/productos?categoria=accesorios",
-      // Category.imagen fue eliminado del schema (ver DESIGN.md > Category
-      // Tiles) — este tile ya no tiene foto propia, cae al placeholder
-      // genérico de CategoryTiles como cualquier tile sin imagen.
-      imagen: null,
+      // Fija en /public, igual que Hombre/Mujer — Category.imagen fue
+      // eliminado del schema (ver DESIGN.md > Category Tiles).
+      imagen: "/tiles/accesorios.jpg",
     },
   ];
 
