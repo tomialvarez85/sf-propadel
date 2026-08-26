@@ -5,6 +5,11 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@/generated/prisma";
 import { getCurrentAdminUser } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
+import {
+  resolveUniqueSlug,
+  validateImportRow,
+  type ImportColumnKey,
+} from "@/lib/product-import";
 import { productSchema } from "@/lib/validations/product";
 
 export type ActionResult =
@@ -281,4 +286,86 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
 
   revalidateProductPaths();
   return { success: true };
+}
+
+export type ImportProductsRow = {
+  rowNumber: number;
+  raw: Record<ImportColumnKey, string>;
+};
+
+export type ImportProductsResult =
+  | {
+      success: true;
+      created: number;
+      errors: { rowNumber: number; reason: string }[];
+    }
+  | { success: false; error: string };
+
+/**
+ * Re-validates every row server-side against live categories/marcas —
+ * never trusts the client's preview-time resolution (data could be stale,
+ * or the request could be forged). Rows are created one at a time rather
+ * than via createMany so a single bad row (e.g. a last-second unique
+ * constraint hit) doesn't sink the rest of the batch — same "no todo o
+ * nada" principle the preview already applies to validation.
+ */
+export async function importProducts(
+  rows: ImportProductsRow[],
+): Promise<ImportProductsResult> {
+  const admin = await getCurrentAdminUser();
+  if (!admin) return { success: false, error: "No autorizado." };
+
+  if (!Array.isArray(rows) || rows.length === 0) {
+    return { success: false, error: "No hay filas para importar." };
+  }
+
+  const [categories, brands, existingProducts] = await Promise.all([
+    prisma.category.findMany({ select: { id: true, nombre: true } }),
+    prisma.brand.findMany({ select: { id: true, nombre: true } }),
+    prisma.product.findMany({ select: { slug: true } }),
+  ]);
+
+  const usedSlugs = new Set(existingProducts.map((product) => product.slug));
+  const rowErrors: { rowNumber: number; reason: string }[] = [];
+  let created = 0;
+
+  for (const { rowNumber, raw } of rows) {
+    const result = validateImportRow(raw, rowNumber, categories, brands);
+    if (!result.data) {
+      rowErrors.push({ rowNumber, reason: result.errors.join(" ") });
+      continue;
+    }
+
+    const slug = resolveUniqueSlug(result.data.nombre, usedSlugs);
+
+    try {
+      await prisma.product.create({
+        data: {
+          nombre: result.data.nombre,
+          slug,
+          descripcion: result.data.descripcion,
+          precio: result.data.precio,
+          precioAnterior: result.data.precioAnterior,
+          stock: result.data.stock,
+          genero: result.data.genero,
+          categoryId: result.data.categoryId,
+          brandId: result.data.brandId,
+          destacado: result.data.destacado,
+          enOferta: result.data.enOferta,
+          activo: result.data.activo,
+          condicion: "NUEVO",
+        },
+      });
+      created++;
+    } catch (error) {
+      console.error(`No se pudo crear el producto de la fila ${rowNumber}:`, error);
+      rowErrors.push({
+        rowNumber,
+        reason: "No se pudo guardar en la base de datos.",
+      });
+    }
+  }
+
+  revalidateProductPaths();
+  return { success: true, created, errors: rowErrors };
 }

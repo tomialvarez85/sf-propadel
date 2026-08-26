@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Download, Plus } from "lucide-react";
 
 import type { Genero } from "@/generated/prisma";
+import { ImportProductsDialog } from "@/components/admin/import-products-dialog";
 import { ProductFilters } from "@/components/admin/product-filters";
 import { ProductList } from "@/components/admin/product-list";
 import { Button } from "@/components/ui/button";
@@ -77,14 +78,23 @@ export default async function AdminProductosPage(
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">Productos</h1>
-        <Button asChild>
-          <Link href="/admin/productos/nuevo">
-            <Plus className="size-4" />
-            Nuevo producto
-          </Link>
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button asChild variant="outline">
+            <a href="/admin/productos/plantilla" download>
+              <Download className="size-4" />
+              Descargar plantilla
+            </a>
+          </Button>
+          <ImportProductsDialog categories={categories} brands={brands} />
+          <Button asChild>
+            <Link href="/admin/productos/nuevo">
+              <Plus className="size-4" />
+              Nuevo producto
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <ProductFilters
