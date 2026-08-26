@@ -4,7 +4,6 @@ export type BrandListItem = {
   id: string;
   nombre: string;
   slug: string;
-  logo: string | null;
   productCount: number;
 };
 
@@ -16,7 +15,6 @@ export async function getBrandList(): Promise<BrandListItem[]> {
         id: true,
         nombre: true,
         slug: true,
-        logo: true,
         _count: { select: { products: true } },
       },
     });
@@ -25,7 +23,6 @@ export async function getBrandList(): Promise<BrandListItem[]> {
       id: brand.id,
       nombre: brand.nombre,
       slug: brand.slug,
-      logo: brand.logo,
       productCount: brand._count.products,
     }));
   } catch (error) {
@@ -38,7 +35,6 @@ export type BrandEditData = {
   id: string;
   nombre: string;
   slug: string;
-  logo: string | null;
 };
 
 export async function getBrandForEdit(
@@ -47,7 +43,7 @@ export async function getBrandForEdit(
   try {
     return await prisma.brand.findUnique({
       where: { id },
-      select: { id: true, nombre: true, slug: true, logo: true },
+      select: { id: true, nombre: true, slug: true },
     });
   } catch (error) {
     console.error("No se pudo cargar la marca:", error);

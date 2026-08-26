@@ -10,7 +10,6 @@ import {
   createCategory,
   updateCategory,
 } from "@/app/(admin)/admin/(dashboard)/categorias/actions";
-import { ImageUploader } from "@/components/admin/image-uploader";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -56,7 +55,6 @@ export function CategoryForm({
       nombre: "",
       slug: "",
       descripcion: "",
-      imagen: null,
       parentId: null,
       orden: 0,
     },
@@ -170,24 +168,6 @@ export function CategoryForm({
                   ))}
                 </SelectContent>
               </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="imagen"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Imagen</FormLabel>
-              <FormControl>
-                <ImageUploader
-                  value={field.value ?? null}
-                  onChange={field.onChange}
-                  folder="categories"
-                />
-              </FormControl>
               <FormMessage />
             </FormItem>
           )}

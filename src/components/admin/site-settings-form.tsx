@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { updateSiteSettings } from "@/app/(admin)/admin/(dashboard)/configuracion/actions";
-import { ImageUploader } from "@/components/admin/image-uploader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -288,49 +287,6 @@ export function SiteSettingsForm({
                       placeholder="6 cuotas sin interés"
                       {...field}
                       value={field.value ?? ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Tiles de género (home)</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <FormField
-              control={form.control}
-              name="imagenGeneroHombre"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Imagen tile &quot;Hombre&quot;</FormLabel>
-                  <FormControl>
-                    <ImageUploader
-                      value={field.value ?? null}
-                      onChange={field.onChange}
-                      folder="site"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="imagenGeneroMujer"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Imagen tile &quot;Mujer&quot;</FormLabel>
-                  <FormControl>
-                    <ImageUploader
-                      value={field.value ?? null}
-                      onChange={field.onChange}
-                      folder="site"
                     />
                   </FormControl>
                   <FormMessage />

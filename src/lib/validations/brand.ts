@@ -10,7 +10,6 @@ export const brandSchema = z.object({
       /^[a-z0-9]+(-[a-z0-9]+)*$/,
       "El slug solo puede tener minúsculas, números y guiones",
     ),
-  logo: z.string().url().nullable().optional(),
 });
 
 export type BrandFormValues = z.infer<typeof brandSchema>;

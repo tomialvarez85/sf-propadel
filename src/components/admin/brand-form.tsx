@@ -10,7 +10,6 @@ import {
   createBrand,
   updateBrand,
 } from "@/app/(admin)/admin/(dashboard)/marcas/actions";
-import { ImageUploader } from "@/components/admin/image-uploader";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -36,7 +35,7 @@ export function BrandForm({
 
   const form = useForm<BrandFormValues>({
     resolver: zodResolver(brandSchema),
-    defaultValues: initialData ?? { nombre: "", slug: "", logo: null },
+    defaultValues: initialData ?? { nombre: "", slug: "" },
   });
 
   async function onSubmit(values: BrandFormValues) {
@@ -98,24 +97,6 @@ export function BrandForm({
                     setSlugTouched(true);
                     field.onChange(event);
                   }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="logo"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Logo</FormLabel>
-              <FormControl>
-                <ImageUploader
-                  value={field.value ?? null}
-                  onChange={field.onChange}
-                  folder="brands"
                 />
               </FormControl>
               <FormMessage />

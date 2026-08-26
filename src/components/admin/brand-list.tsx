@@ -8,11 +8,9 @@ import { toast } from "sonner";
 
 import {
   deleteBrand,
-  updateBrandImage,
   updateBrandNombre,
 } from "@/app/(admin)/admin/(dashboard)/marcas/actions";
 import { InlineTextCell } from "@/components/admin/inline-edit-cell";
-import { InlineImageCell } from "@/components/admin/inline-image-cell";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,16 +54,6 @@ function BrandRow({ brand }: { brand: BrandListItem }) {
   return (
     <>
       <TableRow>
-        <TableCell>
-          <InlineImageCell
-            label={brand.nombre}
-            imageUrl={brand.logo}
-            folder="brands"
-            fit="contain"
-            onSave={(url) => updateBrandImage(brand.id, url)}
-            successMessage="Logo actualizado"
-          />
-        </TableCell>
         <TableCell className="font-medium">
           <InlineTextCell
             value={brand.nombre}
@@ -141,7 +129,6 @@ export function BrandList({ brands }: { brands: BrandListItem[] }) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Logo</TableHead>
           <TableHead>Nombre</TableHead>
           <TableHead>Slug</TableHead>
           <TableHead>Productos</TableHead>

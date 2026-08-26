@@ -18,7 +18,6 @@ import {
   getDestacadoProducts,
   getOfertaProducts,
 } from "@/lib/home-data";
-import { getSiteSettings } from "@/lib/site-data";
 
 function ProductSection({
   title,
@@ -65,47 +64,42 @@ function ProductSection({
 }
 
 export default async function HomePage() {
-  const [settings, accesorios, ofertas, destacados, testimonials] =
-    await Promise.all([
-      getSiteSettings(),
-      getCategoryBySlug("accesorios"),
-      getOfertaProducts(),
-      getDestacadoProducts(),
-      getActiveTestimonials(),
-    ]);
+  const [accesorios, ofertas, destacados, testimonials] = await Promise.all([
+    getCategoryBySlug("accesorios"),
+    getOfertaProducts(),
+    getDestacadoProducts(),
+    getActiveTestimonials(),
+  ]);
 
   const categoryTiles: CategoryTile[] = [
     {
       key: "hombre",
       nombre: "Hombre",
       href: "/productos?genero=hombre",
-      imagen: settings?.imagenGeneroHombre ?? null,
+      // Fija en /public — el dueño no puede cambiarla desde el admin, ver
+      // DESIGN.md > Category Tiles.
+      imagen: "/tiles/hombre.jpg",
     },
     {
       key: "mujer",
       nombre: "Mujer",
       href: "/productos?genero=mujer",
-      imagen: settings?.imagenGeneroMujer ?? null,
+      imagen: "/tiles/mujer.jpg",
     },
     {
       key: "accesorios",
       nombre: accesorios?.nombre ?? "Accesorios",
       href: accesorios ? `/${accesorios.slug}` : "/productos?categoria=accesorios",
-      imagen: accesorios?.imagen ?? null,
+      // Category.imagen fue eliminado del schema (ver DESIGN.md > Category
+      // Tiles) — este tile ya no tiene foto propia, cae al placeholder
+      // genérico de CategoryTiles como cualquier tile sin imagen.
+      imagen: null,
     },
   ];
 
-  const heroBanner = settings?.heroImagen
-    ? {
-        imagen: settings.heroImagen,
-        link: settings.heroLink,
-        titulo: settings.heroTitulo,
-      }
-    : null;
-
   return (
     <>
-      {heroBanner && <HeroBanner banner={heroBanner} />}
+      <HeroBanner />
 
       <CategoryTiles tiles={categoryTiles} />
 

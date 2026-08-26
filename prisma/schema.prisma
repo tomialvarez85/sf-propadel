@@ -17,7 +17,6 @@ model Category {
   nombre      String
   slug        String  @unique
   descripcion String?
-  imagen      String?
   orden       Int     @default(0)
 
   parentId String?
@@ -31,7 +30,6 @@ model Brand {
   id     String  @id @default(cuid())
   nombre String
   slug   String  @unique
-  logo   String?
 
   products Product[]
 }
@@ -125,20 +123,6 @@ model SiteSettings {
   textoEnvioGratis String?
   textoCuotas      String?
   textoNosotros    String?
-
-  // Imágenes de los tiles "Hombre" / "Mujer" en el home (ver CategoryTiles).
-  // El tile de "Accesorios" no necesita un campo propio: reutiliza la imagen
-  // ya existente de la categoría real.
-  imagenGeneroHombre String?
-  imagenGeneroMujer  String?
-
-  // Imagen fija del hero del home — antes un carrusel de `Banner` (modelo
-  // ahora eliminado). El home ya no rota entre varias, así que no hace
-  // falta una tabla aparte con orden/activo: un solo registro, editado en
-  // /admin/banners, igual que el resto de este singleton.
-  heroImagen String?
-  heroLink   String?
-  heroTitulo String?
 
   // Transferencia bancaria (pago manual, ver checkout / src/lib/email.ts).
   // Todos opcionales — no todos los negocios usan los mismos medios — y

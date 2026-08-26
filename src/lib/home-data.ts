@@ -26,21 +26,7 @@ export type HomeCategory = {
   id: string;
   nombre: string;
   slug: string;
-  imagen: string | null;
 };
-
-export async function getMainCategories(): Promise<HomeCategory[]> {
-  try {
-    return await prisma.category.findMany({
-      where: { parentId: null },
-      orderBy: { orden: "asc" },
-      select: { id: true, nombre: true, slug: true, imagen: true },
-    });
-  } catch (error) {
-    console.error("No se pudieron cargar las categorías:", error);
-    return [];
-  }
-}
 
 export async function getCategoryBySlug(
   slug: string,
@@ -48,7 +34,7 @@ export async function getCategoryBySlug(
   try {
     return await prisma.category.findUnique({
       where: { slug },
-      select: { id: true, nombre: true, slug: true, imagen: true },
+      select: { id: true, nombre: true, slug: true },
     });
   } catch (error) {
     console.error("No se pudo cargar la categoría:", error);

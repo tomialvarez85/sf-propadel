@@ -11,7 +11,6 @@ export type ActionResult =
 
 function revalidateSettingsPaths() {
   // Header/footer live in the (site) layout, shared by every public route.
-  // Home also reads imagenGeneroHombre/Mujer directly for the category tiles.
   revalidatePath("/", "layout");
   revalidatePath("/nosotros");
   revalidatePath("/contacto");
@@ -31,8 +30,6 @@ function normalizeSettingsData(
     textoEnvioGratis: data.textoEnvioGratis || null,
     textoCuotas: data.textoCuotas || null,
     textoNosotros: data.textoNosotros || null,
-    imagenGeneroHombre: data.imagenGeneroHombre || null,
-    imagenGeneroMujer: data.imagenGeneroMujer || null,
     alias: data.alias || null,
     cbu: data.cbu || null,
     titular: data.titular || null,

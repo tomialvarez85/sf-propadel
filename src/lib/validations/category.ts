@@ -11,7 +11,6 @@ export const categorySchema = z.object({
       "El slug solo puede tener minúsculas, números y guiones",
     ),
   descripcion: z.string().trim().nullable().optional(),
-  imagen: z.string().url().nullable().optional(),
   parentId: z.string().nullable().optional(),
   orden: z.number().int().min(0),
 });

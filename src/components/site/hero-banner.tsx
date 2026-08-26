@@ -1,21 +1,20 @@
 import Link from "next/link";
 import Image from "next/image";
 
-export type HeroBannerData = {
-  imagen: string;
-  link: string | null;
-  titulo: string | null;
-};
+// Fijo en el código, no editable desde el admin (antes SiteSettings.hero* /
+// /admin/banners, ambos eliminados) — ver DESIGN.md > Hero Banner. Cambiar
+// esto significa reemplazar /public/hero/banner-principal.jpg y estos
+// valores, y redeployar.
+const HERO_IMAGEN = "/hero/banner-principal.jpg";
+const HERO_TITULO = "Nueva colección de paletas 2026";
+const HERO_LINK = "/productos?categoria=paletas";
 
-/** Single fixed hero image, sourced from the SiteSettings singleton
- * (heroImagen/heroLink/heroTitulo, edited at /admin/banners) — no
- * carousel/embla logic to maintain here at all. */
-export function HeroBanner({ banner }: { banner: HeroBannerData }) {
+export function HeroBanner() {
   const content = (
     <div className="bg-muted relative w-full overflow-hidden h-[calc(100dvh_-_var(--header-height))]">
       <Image
-        src={banner.imagen}
-        alt={banner.titulo ?? ""}
+        src={HERO_IMAGEN}
+        alt={HERO_TITULO}
         fill
         priority
         quality={85}
@@ -53,24 +52,20 @@ export function HeroBanner({ banner }: { banner: HeroBannerData }) {
           opacity="0.5"
         />
       </svg>
-      {banner.titulo && (
-        <div className="absolute inset-0 z-20 flex items-end bg-gradient-to-t from-black/60 to-transparent p-6">
-          <h2 className="font-heading text-xl font-extrabold tracking-[-0.02em] text-white sm:text-3xl">
-            {banner.titulo}
-          </h2>
-        </div>
-      )}
+      <div className="absolute inset-0 z-20 flex items-end bg-gradient-to-t from-black/60 to-transparent p-6">
+        <h2 className="font-heading text-xl font-extrabold tracking-[-0.02em] text-white sm:text-3xl">
+          {HERO_TITULO}
+        </h2>
+      </div>
     </div>
   );
 
-  return banner.link ? (
+  return (
     <Link
-      href={banner.link}
+      href={HERO_LINK}
       className="focus-visible:ring-ring/50 block outline-none focus-visible:ring-3"
     >
       {content}
     </Link>
-  ) : (
-    content
   );
 }

@@ -5,8 +5,6 @@ const prisma = new PrismaClient();
 // Next.js Image Optimization blocks SVG by default, and placehold.co serves
 // SVG unless a raster format is requested explicitly via the extension.
 const PLACEHOLDER_IMAGE = "https://placehold.co/800x800/e4e4e7/71717a.png";
-const PLACEHOLDER_LOGO = "https://placehold.co/200x100/e4e4e7/71717a.png";
-const PLACEHOLDER_BANNER = "https://placehold.co/1600x500/e4e4e7/71717a.png";
 
 async function main() {
   const categories = await Promise.all(
@@ -36,7 +34,7 @@ async function main() {
       prisma.brand.upsert({
         where: { slug: brand.slug },
         update: {},
-        create: { ...brand, logo: PLACEHOLDER_LOGO },
+        create: brand,
       }),
     ),
   );
@@ -271,14 +269,11 @@ async function main() {
       direccion: "Av. Siempre Viva 1234, San Fernando, Buenos Aires",
       textoEnvioGratis: "Envío gratis en compras mayores a $100.000",
       textoCuotas: "6 cuotas sin interés",
-      heroImagen: PLACEHOLDER_BANNER,
-      heroTitulo: "Nueva colección de paletas 2026",
-      heroLink: "/productos?categoria=paletas",
     },
   });
 
   console.log(
-    `Seed OK: ${categories.length} categorías, ${brands.length} marcas, ${products.length} productos, 1 SiteSettings (con hero).`,
+    `Seed OK: ${categories.length} categorías, ${brands.length} marcas, ${products.length} productos, 1 SiteSettings.`,
   );
 }
 

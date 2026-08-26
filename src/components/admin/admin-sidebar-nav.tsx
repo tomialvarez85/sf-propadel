@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Image as ImageIcon,
   LayoutDashboard,
   MessageSquareQuote,
   Package,
@@ -24,7 +23,6 @@ const NAV_ITEMS = [
   { href: "/admin/pedidos", label: "Pedidos", icon: Receipt },
   { href: "/admin/categorias", label: "Categorías", icon: Tags },
   { href: "/admin/marcas", label: "Marcas", icon: Tag },
-  { href: "/admin/banners", label: "Banner del home", icon: ImageIcon },
   {
     href: "/admin/testimonios",
     label: "Testimonios",

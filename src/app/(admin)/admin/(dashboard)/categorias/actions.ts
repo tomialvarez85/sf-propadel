@@ -22,7 +22,6 @@ function normalizeCategoryData(data: ReturnType<typeof categorySchema.parse>) {
     nombre: data.nombre,
     slug: data.slug,
     descripcion: data.descripcion || null,
-    imagen: data.imagen || null,
     parentId: data.parentId || null,
     orden: data.orden,
   };
@@ -128,28 +127,6 @@ export async function updateCategoryNombre(
   } catch (error) {
     console.error("No se pudo actualizar el nombre de la categoría:", error);
     return { success: false, error: "No se pudo guardar el cambio." };
-  }
-
-  revalidateCategoryPaths();
-  return { success: true };
-}
-
-export async function updateCategoryImage(
-  id: string,
-  imagen: string,
-): Promise<ActionResult> {
-  const admin = await getCurrentAdminUser();
-  if (!admin) return { success: false, error: "No autorizado." };
-
-  if (!imagen.trim()) {
-    return { success: false, error: "Falta la URL de la imagen." };
-  }
-
-  try {
-    await prisma.category.update({ where: { id }, data: { imagen } });
-  } catch (error) {
-    console.error("No se pudo actualizar la imagen de la categoría:", error);
-    return { success: false, error: "No se pudo guardar la imagen." };
   }
 
   revalidateCategoryPaths();

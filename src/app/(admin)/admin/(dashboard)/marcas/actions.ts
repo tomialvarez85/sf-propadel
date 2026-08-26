@@ -20,7 +20,6 @@ function normalizeBrandData(data: ReturnType<typeof brandSchema.parse>) {
   return {
     nombre: data.nombre,
     slug: data.slug,
-    logo: data.logo || null,
   };
 }
 
@@ -105,28 +104,6 @@ export async function updateBrandNombre(
   } catch (error) {
     console.error("No se pudo actualizar el nombre de la marca:", error);
     return { success: false, error: "No se pudo guardar el cambio." };
-  }
-
-  revalidateBrandPaths();
-  return { success: true };
-}
-
-export async function updateBrandImage(
-  id: string,
-  logo: string,
-): Promise<ActionResult> {
-  const admin = await getCurrentAdminUser();
-  if (!admin) return { success: false, error: "No autorizado." };
-
-  if (!logo.trim()) {
-    return { success: false, error: "Falta la URL del logo." };
-  }
-
-  try {
-    await prisma.brand.update({ where: { id }, data: { logo } });
-  } catch (error) {
-    console.error("No se pudo actualizar el logo de la marca:", error);
-    return { success: false, error: "No se pudo guardar el logo." };
   }
 
   revalidateBrandPaths();

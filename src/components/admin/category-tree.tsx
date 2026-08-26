@@ -8,11 +8,9 @@ import { toast } from "sonner";
 
 import {
   deleteCategory,
-  updateCategoryImage,
   updateCategoryNombre,
 } from "@/app/(admin)/admin/(dashboard)/categorias/actions";
 import { InlineTextCell } from "@/components/admin/inline-edit-cell";
-import { InlineImageCell } from "@/components/admin/inline-image-cell";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -57,14 +55,6 @@ function CategoryRow({
         className="border-border flex items-center gap-3 border-b py-2.5 last:border-0"
         style={{ paddingLeft: depth * 28 }}
       >
-        <InlineImageCell
-          label={node.nombre}
-          imageUrl={node.imagen}
-          folder="categories"
-          onSave={(url) => updateCategoryImage(node.id, url)}
-          successMessage="Imagen de categoría actualizada"
-        />
-
         <div className="min-w-0 flex-1">
           <InlineTextCell
             value={node.nombre}

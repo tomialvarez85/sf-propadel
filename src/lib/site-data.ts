@@ -37,11 +37,6 @@ export type SiteSettingsData = {
   textoEnvioGratis: string | null;
   textoCuotas: string | null;
   textoNosotros: string | null;
-  imagenGeneroHombre: string | null;
-  imagenGeneroMujer: string | null;
-  heroImagen: string | null;
-  heroLink: string | null;
-  heroTitulo: string | null;
   alias: string | null;
   cbu: string | null;
   titular: string | null;

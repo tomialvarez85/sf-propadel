@@ -4,7 +4,6 @@ export type CategoryTreeNode = {
   id: string;
   nombre: string;
   slug: string;
-  imagen: string | null;
   orden: number;
   productCount: number;
   children: CategoryTreeNode[];
@@ -18,7 +17,6 @@ export async function getCategoryTree(): Promise<CategoryTreeNode[]> {
         id: true,
         nombre: true,
         slug: true,
-        imagen: true,
         parentId: true,
         orden: true,
         _count: { select: { products: true } },
@@ -31,7 +29,6 @@ export async function getCategoryTree(): Promise<CategoryTreeNode[]> {
         id: category.id,
         nombre: category.nombre,
         slug: category.slug,
-        imagen: category.imagen,
         orden: category.orden,
         productCount: category._count.products,
         children: [],
@@ -98,7 +95,6 @@ export type CategoryEditData = {
   nombre: string;
   slug: string;
   descripcion: string | null;
-  imagen: string | null;
   parentId: string | null;
   orden: number;
 };
@@ -114,7 +110,6 @@ export async function getCategoryForEdit(
         nombre: true,
         slug: true,
         descripcion: true,
-        imagen: true,
         parentId: true,
         orden: true,
       },
