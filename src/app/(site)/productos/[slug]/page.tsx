@@ -50,7 +50,7 @@ export default async function ProductoPage(
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
-      <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:items-center">
         <ProductGallery images={product.images} productName={product.nombre} />
         <ProductPurchasePanel
           id={product.id}
