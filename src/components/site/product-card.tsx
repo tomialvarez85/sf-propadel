@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCart } from "@/hooks/use-cart";
-import { formatCurrency, getDiscountPercent, INSTALLMENTS } from "@/lib/format";
+import { formatCurrency, getDiscountPercent } from "@/lib/format";
 
 export type ProductCardData = {
   id: string;
@@ -22,7 +22,15 @@ export type ProductCardData = {
   condicion: "NUEVO" | "USADO";
 };
 
-export function ProductCard({ product }: { product: ProductCardData }) {
+export function ProductCard({
+  product,
+  cantidadCuotas,
+  cuotasSinInteres,
+}: {
+  product: ProductCardData;
+  cantidadCuotas: number;
+  cuotasSinInteres: boolean;
+}) {
   const { addItem } = useCart();
   const discountPercent = getDiscountPercent(
     product.precio,
@@ -37,6 +45,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
       slug: product.slug,
       precio: product.precio,
       imagen: product.imagen,
+      condicion: product.condicion,
     });
     toast.success("Agregado al carrito", { description: product.nombre });
   }
@@ -86,10 +95,13 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             </span>
           </div>
 
-          <span className="text-muted-foreground text-xs">
-            {INSTALLMENTS} cuotas de{" "}
-            {formatCurrency(product.precio / INSTALLMENTS)}
-          </span>
+          {product.condicion !== "USADO" && (
+            <span className="text-muted-foreground text-xs">
+              {cantidadCuotas} cuotas de{" "}
+              {formatCurrency(product.precio / cantidadCuotas)}
+              {cuotasSinInteres ? " sin interés" : ""}
+            </span>
+          )}
         </CardContent>
       </Link>
 

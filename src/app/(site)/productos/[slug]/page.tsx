@@ -65,6 +65,10 @@ export default async function ProductoPage(
           estadoConservacion={product.estadoConservacion}
           variants={product.variants}
           whatsapp={settings?.whatsapp ?? null}
+          cantidadCuotas={settings?.cantidadCuotas ?? 12}
+          cuotasSinInteres={settings?.cuotasSinInteres ?? true}
+          descuentoTransferencia={settings?.descuentoTransferencia ?? null}
+          mostrarPrecioSinImpuestos={settings?.mostrarPrecioSinImpuestos ?? false}
         />
       </div>
 
@@ -86,7 +90,12 @@ export default async function ProductoPage(
           </h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {relatedProducts.map((related) => (
-              <ProductCard key={related.id} product={related} />
+              <ProductCard
+                key={related.id}
+                product={related}
+                cantidadCuotas={settings?.cantidadCuotas ?? 12}
+                cuotasSinInteres={settings?.cuotasSinInteres ?? true}
+              />
             ))}
           </div>
         </section>

@@ -15,6 +15,10 @@ const EMPTY_SETTINGS: SiteSettingsFormValues = {
   cbu: "",
   titular: "",
   banco: "",
+  cantidadCuotas: 12,
+  cuotasSinInteres: true,
+  descuentoTransferencia: null,
+  mostrarPrecioSinImpuestos: false,
 };
 
 export async function getSiteSettingsForEdit(): Promise<SiteSettingsFormValues> {
@@ -39,6 +43,10 @@ export async function getSiteSettingsForEdit(): Promise<SiteSettingsFormValues> 
       cbu: settings.cbu ?? "",
       titular: settings.titular ?? "",
       banco: settings.banco ?? "",
+      cantidadCuotas: settings.cantidadCuotas,
+      cuotasSinInteres: settings.cuotasSinInteres,
+      descuentoTransferencia: settings.descuentoTransferencia,
+      mostrarPrecioSinImpuestos: settings.mostrarPrecioSinImpuestos,
     };
   } catch (error) {
     console.error("No se pudo cargar la configuración del sitio:", error);

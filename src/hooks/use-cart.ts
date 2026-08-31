@@ -13,6 +13,7 @@ export type CartItem = {
   imagen: string | null;
   variants: CartVariant[];
   quantity: number;
+  condicion: "NUEVO" | "USADO";
 };
 
 export type CartLineInput = {
@@ -23,6 +24,7 @@ export type CartLineInput = {
   imagen: string | null;
   variants?: CartVariant[];
   quantity?: number;
+  condicion: "NUEVO" | "USADO";
 };
 
 const STORAGE_KEY = "sf-propadel-cart";
@@ -103,6 +105,7 @@ export function useCart() {
             imagen: input.imagen,
             variants,
             quantity,
+            condicion: input.condicion,
           },
         ];
 

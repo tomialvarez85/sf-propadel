@@ -27,9 +27,9 @@ model Category {
 }
 
 model Brand {
-  id     String  @id @default(cuid())
+  id     String @id @default(cuid())
   nombre String
-  slug   String  @unique
+  slug   String @unique
 
   products Product[]
 }
@@ -132,6 +132,16 @@ model SiteSettings {
   cbu     String?
   titular String?
   banco   String?
+
+  // Precios y cuotas (ver ProductPurchasePanel y /pedido/[orderId]).
+  // Controlan cómo se calcula/etiqueta la cuota mostrada en el detalle de
+  // producto — independiente de `textoCuotas` arriba, que es el texto
+  // libre de la barra superior del header, no un cálculo.
+  cantidadCuotas            Int     @default(12)
+  cuotasSinInteres          Boolean @default(true)
+  // Porcentaje (ej. 15). 0 o null = sin descuento por transferencia.
+  descuentoTransferencia    Int?
+  mostrarPrecioSinImpuestos Boolean @default(false)
 }
 
 enum OrderStatus {
@@ -168,11 +178,15 @@ model Order {
 // reason in the other direction: deleting a product must not be blocked by,
 // or cascade into deleting, past orders that reference it.
 model OrderItem {
-  id             String  @id @default(cuid())
+  id             String    @id @default(cuid())
   nombreProducto String
   variante       String?
   cantidad       Int
-  precioUnitario Decimal @db.Decimal(10, 2)
+  precioUnitario Decimal   @db.Decimal(10, 2)
+  // Snapshot at sale time, same reasoning as the fields above — used to
+  // exclude usados from the transfer discount on /pedido/[orderId] without
+  // a live join back to `product` (which may since have been deleted).
+  condicion      Condicion @default(NUEVO)
 
   orderId String
   order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)

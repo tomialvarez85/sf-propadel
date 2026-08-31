@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { updateSiteSettings } from "@/app/(admin)/admin/(dashboard)/configuracion/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -247,6 +248,107 @@ export function SiteSettingsForm({
                     />
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Precios y cuotas</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <p className="text-muted-foreground -mt-2 text-sm">
+              Controlan cómo se calcula la cuota mostrada en el detalle de
+              cada producto y el descuento por transferencia en el checkout.
+            </p>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="cantidadCuotas"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cantidad de cuotas</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={1}
+                        {...field}
+                        onChange={(event) =>
+                          field.onChange(event.target.valueAsNumber || 1)
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="descuentoTransferencia"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Descuento por transferencia (%)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={100}
+                        placeholder="Ej: 15"
+                        value={field.value ?? ""}
+                        onChange={(event) =>
+                          field.onChange(
+                            event.target.value === ""
+                              ? null
+                              : event.target.valueAsNumber,
+                          )
+                        }
+                      />
+                    </FormControl>
+                    <p className="text-muted-foreground text-xs">
+                      Vacío o 0 = sin descuento.
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="cuotasSinInteres"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center gap-2">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormLabel className="font-normal">
+                    Las cuotas son sin interés
+                  </FormLabel>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="mostrarPrecioSinImpuestos"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center gap-2">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormLabel className="font-normal">
+                    Mostrar precio sin impuestos en el detalle de producto
+                  </FormLabel>
                 </FormItem>
               )}
             />

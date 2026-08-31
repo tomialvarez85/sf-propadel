@@ -5,6 +5,7 @@ import { PedidoCheckoutPanel } from "@/components/site/pedido-checkout-panel";
 import { formatCurrency } from "@/lib/format";
 import { getPublicOrder } from "@/lib/order-public";
 import { getSiteSettings } from "@/lib/site-data";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Tu pedido | SF ProPadel",
@@ -28,6 +29,19 @@ export default async function PedidoPage(
   if (!order) {
     notFound();
   }
+
+  // Usados no tienen descuento por transferencia — solo se descuenta la
+  // porción del pedido que corresponde a ítems NUEVO (snapshot por ítem,
+  // no un join en vivo a Product — ver comentario en schema.prisma).
+  const descuentoTransferencia = settings?.descuentoTransferencia ?? null;
+  const montoDescontable = order.items
+    .filter((item) => item.condicion !== "USADO")
+    .reduce((sum, item) => sum + item.precioUnitario * item.cantidad, 0);
+  const tieneDescuento =
+    !!descuentoTransferencia && descuentoTransferencia > 0 && montoDescontable > 0;
+  const totalConDescuento = tieneDescuento
+    ? order.total - montoDescontable * (descuentoTransferencia! / 100)
+    : order.total;
 
   const paymentFields = [
     { label: "Alias", value: settings?.alias, copyable: true },
@@ -71,10 +85,25 @@ export default async function PedidoPage(
         </ul>
         <div className="mt-1 flex items-center justify-between border-t pt-2 text-sm font-semibold">
           <span>Total</span>
-          <span className="font-heading text-lg font-extrabold">
+          <span
+            className={cn(
+              "font-heading text-lg font-extrabold",
+              tieneDescuento && "text-muted-foreground line-through",
+            )}
+          >
             {formatCurrency(order.total)}
           </span>
         </div>
+        {tieneDescuento && (
+          <div className="flex items-center justify-between text-sm font-semibold">
+            <span className="text-primary">
+              Total con descuento por transferencia ({descuentoTransferencia}%)
+            </span>
+            <span className="font-heading text-primary text-lg font-extrabold">
+              {formatCurrency(totalConDescuento)}
+            </span>
+          </div>
+        )}
       </div>
 
       <PedidoCheckoutPanel

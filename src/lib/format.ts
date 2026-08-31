@@ -1,5 +1,8 @@
 export const INSTALLMENTS = 12;
 export const LOW_STOCK_THRESHOLD = 3;
+// Ajustar acá si cambia la alícuota de IVA — usado por el cálculo de
+// "precio sin impuestos" en ProductPurchasePanel.
+export const IVA_RATE = 0.21;
 
 export function formatCurrency(value: number) {
   return new Intl.NumberFormat("es-AR", {

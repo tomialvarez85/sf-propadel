@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCart } from "@/hooks/use-cart";
 import type { UsedProductCardData } from "@/lib/used-product-query";
-import { formatCurrency, getDiscountPercent, INSTALLMENTS } from "@/lib/format";
+import { formatCurrency, getDiscountPercent } from "@/lib/format";
 
 /** Visually similar to `ProductCard`, but fully independent — no shared
  * type, no shared query. Adds a truncated description line that the
@@ -35,6 +35,7 @@ export function UsedProductCard({
       slug: product.slug,
       precio: product.precio,
       imagen: product.imagen,
+      condicion: "USADO",
     });
     toast.success("Agregado al carrito", { description: product.nombre });
   }
@@ -87,11 +88,6 @@ export function UsedProductCard({
               {formatCurrency(product.precio)}
             </span>
           </div>
-
-          <span className="text-muted-foreground text-xs">
-            {INSTALLMENTS} cuotas de{" "}
-            {formatCurrency(product.precio / INSTALLMENTS)}
-          </span>
         </CardContent>
       </Link>
 

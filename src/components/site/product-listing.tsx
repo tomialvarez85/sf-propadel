@@ -10,7 +10,7 @@ import {
 } from "@/components/site/product-filters";
 import { ProductPagination } from "@/components/site/product-pagination";
 import { ProductSort } from "@/components/site/product-sort";
-import { getCategoryNav } from "@/lib/site-data";
+import { getCategoryNav, getSiteSettings } from "@/lib/site-data";
 import {
   GENERO_OPTIONS,
   parseGeneroOption,
@@ -63,7 +63,7 @@ export async function ProductListing({
     ? (generoOption.toUpperCase() as Genero)
     : undefined;
 
-  const [categoryIds, brandIds, categoryNav, brands, facetCounts] =
+  const [categoryIds, brandIds, categoryNav, brands, facetCounts, settings] =
     await Promise.all([
       categoryScope
         ? Promise.resolve(categoryScope.ids)
@@ -72,6 +72,7 @@ export async function ProductListing({
       categoryScope ? Promise.resolve([]) : getCategoryNav(),
       getBrandOptions(),
       getFilterFacetCounts(categoryScope?.ids),
+      getSiteSettings(),
     ]);
 
   const { products, total, totalPages } = await getProductListing({
@@ -157,7 +158,12 @@ export async function ProductListing({
           ) : (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
               {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  cantidadCuotas={settings?.cantidadCuotas ?? 12}
+                  cuotasSinInteres={settings?.cuotasSinInteres ?? true}
+                />
               ))}
             </div>
           )}

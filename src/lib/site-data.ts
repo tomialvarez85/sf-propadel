@@ -41,6 +41,10 @@ export type SiteSettingsData = {
   cbu: string | null;
   titular: string | null;
   banco: string | null;
+  cantidadCuotas: number;
+  cuotasSinInteres: boolean;
+  descuentoTransferencia: number | null;
+  mostrarPrecioSinImpuestos: boolean;
 } | null;
 
 export async function getSiteSettings(): Promise<SiteSettingsData> {

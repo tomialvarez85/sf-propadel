@@ -18,15 +18,20 @@ import {
   getDestacadoProducts,
   getOfertaProducts,
 } from "@/lib/home-data";
+import { getSiteSettings } from "@/lib/site-data";
 
 function ProductSection({
   title,
   products,
   layout = "grid",
+  cantidadCuotas,
+  cuotasSinInteres,
 }: {
   title: string;
   products: ProductCardData[];
   layout?: "grid" | "carousel";
+  cantidadCuotas: number;
+  cuotasSinInteres: boolean;
 }) {
   if (products.length === 0) return null;
 
@@ -44,7 +49,11 @@ function ProductSection({
                   key={product.id}
                   className="basis-1/2 sm:basis-1/3 lg:basis-1/4"
                 >
-                  <ProductCard product={product} />
+                  <ProductCard
+                    product={product}
+                    cantidadCuotas={cantidadCuotas}
+                    cuotasSinInteres={cuotasSinInteres}
+                  />
                 </CarouselItem>
               ))}
             </CarouselContent>
@@ -54,7 +63,12 @@ function ProductSection({
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                cantidadCuotas={cantidadCuotas}
+                cuotasSinInteres={cuotasSinInteres}
+              />
             ))}
           </div>
         )}
@@ -64,12 +78,17 @@ function ProductSection({
 }
 
 export default async function HomePage() {
-  const [accesorios, ofertas, destacados, testimonials] = await Promise.all([
-    getCategoryBySlug("accesorios"),
-    getOfertaProducts(),
-    getDestacadoProducts(),
-    getActiveTestimonials(),
-  ]);
+  const [accesorios, ofertas, destacados, testimonials, settings] =
+    await Promise.all([
+      getCategoryBySlug("accesorios"),
+      getOfertaProducts(),
+      getDestacadoProducts(),
+      getActiveTestimonials(),
+      getSiteSettings(),
+    ]);
+
+  const cantidadCuotas = settings?.cantidadCuotas ?? 12;
+  const cuotasSinInteres = settings?.cuotasSinInteres ?? true;
 
   const categoryTiles: CategoryTile[] = [
     {
@@ -102,11 +121,19 @@ export default async function HomePage() {
 
       <CategoryTiles tiles={categoryTiles} />
 
-      <ProductSection title="Ofertas" products={ofertas} layout="carousel" />
+      <ProductSection
+        title="Ofertas"
+        products={ofertas}
+        layout="carousel"
+        cantidadCuotas={cantidadCuotas}
+        cuotasSinInteres={cuotasSinInteres}
+      />
       <ProductSection
         title="Destacados"
         products={destacados}
         layout="carousel"
+        cantidadCuotas={cantidadCuotas}
+        cuotasSinInteres={cuotasSinInteres}
       />
 
       <TestimonialsSection testimonials={testimonials} />

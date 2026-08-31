@@ -5,6 +5,7 @@ export type PublicOrderItem = {
   variante: string | null;
   cantidad: number;
   precioUnitario: number;
+  condicion: "NUEVO" | "USADO";
 };
 
 export type PublicOrder = {
@@ -39,6 +40,7 @@ export async function getPublicOrder(orderId: string): Promise<PublicOrder | nul
           variante: true,
           cantidad: true,
           precioUnitario: true,
+          condicion: true,
         },
       },
     },
@@ -57,6 +59,7 @@ export async function getPublicOrder(orderId: string): Promise<PublicOrder | nul
       variante: item.variante,
       cantidad: item.cantidad,
       precioUnitario: item.precioUnitario.toNumber(),
+      condicion: item.condicion,
     })),
   };
 }

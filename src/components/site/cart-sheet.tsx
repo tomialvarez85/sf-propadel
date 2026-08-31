@@ -175,6 +175,9 @@ function CheckoutForm({
           precio: item.precio,
           cantidad: item.quantity,
           variantes: item.variants,
+          // Falls back to NUEVO for carts saved in localStorage before this
+          // field existed — the safe default, since most of the catalog is.
+          condicion: item.condicion ?? "NUEVO",
         })),
       });
 

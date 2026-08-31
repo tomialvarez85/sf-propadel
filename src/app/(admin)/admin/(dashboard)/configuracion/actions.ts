@@ -12,9 +12,18 @@ export type ActionResult =
 function revalidateSettingsPaths() {
   // Header/footer live in the (site) layout, shared by every public route.
   revalidatePath("/", "layout");
+  // "/" is also its own statically-rendered page (Ofertas/Destacados show
+  // cuotas via ProductCard) — the layout revalidation above doesn't reliably
+  // bust an already-prerendered static page's own cache, so it needs its
+  // own explicit entry too, same as every other page below.
+  revalidatePath("/", "page");
   revalidatePath("/nosotros");
   revalidatePath("/contacto");
+  revalidatePath("/productos", "page");
   revalidatePath("/productos/[slug]", "page");
+  revalidatePath("/[categoria]", "page");
+  // Precios y cuotas also drive the transfer-discount total shown here.
+  revalidatePath("/pedido/[orderId]", "page");
 }
 
 function normalizeSettingsData(
@@ -34,6 +43,10 @@ function normalizeSettingsData(
     cbu: data.cbu || null,
     titular: data.titular || null,
     banco: data.banco || null,
+    cantidadCuotas: data.cantidadCuotas,
+    cuotasSinInteres: data.cuotasSinInteres,
+    descuentoTransferencia: data.descuentoTransferencia || null,
+    mostrarPrecioSinImpuestos: data.mostrarPrecioSinImpuestos,
   };
 }
 

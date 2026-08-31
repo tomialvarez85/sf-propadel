@@ -14,6 +14,16 @@ export const siteSettingsSchema = z.object({
   cbu: z.string().trim().nullable().optional(),
   titular: z.string().trim().nullable().optional(),
   banco: z.string().trim().nullable().optional(),
+  cantidadCuotas: z.number().int().min(1, "Tiene que ser al menos 1 cuota"),
+  cuotasSinInteres: z.boolean(),
+  descuentoTransferencia: z
+    .number()
+    .int()
+    .min(0, "No puede ser negativo")
+    .max(100, "No puede ser mayor a 100")
+    .nullable()
+    .optional(),
+  mostrarPrecioSinImpuestos: z.boolean(),
 });
 
 export type SiteSettingsFormValues = z.infer<typeof siteSettingsSchema>;

@@ -13,6 +13,7 @@ const checkoutItemSchema = z.object({
   precio: z.number().positive(),
   cantidad: z.number().int().positive(),
   variantes: z.array(z.object({ tipo: z.string(), valor: z.string() })),
+  condicion: z.enum(["NUEVO", "USADO"]),
 });
 
 // Reuses the exact nombre/email/telefono rules the client-side form already
@@ -65,6 +66,7 @@ export async function createOrder(input: unknown): Promise<CheckoutResult> {
                 : null,
             cantidad: item.cantidad,
             precioUnitario: item.precio,
+            condicion: item.condicion,
           })),
         },
       },

@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Info } from "lucide-react";
+import { Info, Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -10,7 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
 import { cn } from "@/lib/utils";
-import { formatCurrency, getDiscountPercent, INSTALLMENTS } from "@/lib/format";
+import {
+  formatCurrency,
+  getDiscountPercent,
+  IVA_RATE,
+} from "@/lib/format";
 
 type Variant = { id: string; tipo: string; valor: string; stock: number };
 
@@ -37,6 +41,10 @@ export function ProductPurchasePanel({
   estadoConservacion,
   variants,
   whatsapp,
+  cantidadCuotas,
+  cuotasSinInteres,
+  descuentoTransferencia,
+  mostrarPrecioSinImpuestos,
 }: {
   id: string;
   slug: string;
@@ -50,6 +58,10 @@ export function ProductPurchasePanel({
   estadoConservacion: string | null;
   variants: Variant[];
   whatsapp: string | null;
+  cantidadCuotas: number;
+  cuotasSinInteres: boolean;
+  descuentoTransferencia: number | null;
+  mostrarPrecioSinImpuestos: boolean;
 }) {
   const variantGroups = useMemo(() => groupVariants(variants), [variants]);
 
@@ -76,9 +88,25 @@ export function ProductPurchasePanel({
   const stockLabel =
     effectiveStock <= 0
       ? "Sin stock"
-      : effectiveStock <= 3
+      : effectiveStock <= 3 && condicion !== "USADO"
         ? "¡Últimas unidades!"
         : `${effectiveStock} disponibles`;
+
+  const [quantity, setQuantity] = useState(1);
+
+  // Selecting a variant (or the variant's own stock changing) can shrink
+  // the available stock below whatever quantity was picked before —
+  // clamp instead of letting a stale quantity slip through to the cart.
+  useEffect(() => {
+    setQuantity((current) => Math.min(Math.max(current, 1), Math.max(effectiveStock, 1)));
+  }, [effectiveStock]);
+
+  const precioSinImpuestos = precio / (1 + IVA_RATE);
+  const tieneDescuentoTransferencia =
+    !!descuentoTransferencia && descuentoTransferencia > 0 && condicion !== "USADO";
+  const precioTransferencia = tieneDescuentoTransferencia
+    ? precio * (1 - descuentoTransferencia! / 100)
+    : precio;
 
   const whatsappHref = useMemo(() => {
     if (!whatsapp) return null;
@@ -101,6 +129,8 @@ export function ProductPurchasePanel({
       slug,
       precio,
       imagen,
+      quantity,
+      condicion,
       variants: selectedVariants.map((variant) => ({
         tipo: variant.tipo,
         valor: variant.valor,
@@ -138,9 +168,27 @@ export function ProductPurchasePanel({
           )}
           {condicion === "USADO" && <Badge variant="secondary">Usado</Badge>}
         </div>
-        <span className="text-muted-foreground text-sm">
-          {INSTALLMENTS} cuotas de {formatCurrency(precio / INSTALLMENTS)}
-        </span>
+
+        {mostrarPrecioSinImpuestos && condicion !== "USADO" && (
+          <span className="text-muted-foreground text-xs">
+            Precio sin impuestos: {formatCurrency(precioSinImpuestos)}
+          </span>
+        )}
+
+        {condicion !== "USADO" && (
+          <span className="text-muted-foreground text-sm">
+            {cantidadCuotas} cuotas de {formatCurrency(precio / cantidadCuotas)}
+            {cuotasSinInteres ? " sin interés" : ""}
+          </span>
+        )}
+
+        {tieneDescuentoTransferencia && (
+          <p className="text-primary text-sm font-semibold">
+            {descuentoTransferencia}% OFF pagando por transferencia —{" "}
+            {formatCurrency(precioTransferencia)}
+          </p>
+        )}
+
         {condicion === "USADO" && estadoConservacion && (
           <p className="text-muted-foreground text-sm">
             {estadoConservacion}
@@ -188,11 +236,44 @@ export function ProductPurchasePanel({
       <p
         className={cn(
           "text-sm font-medium transition-colors duration-200",
-          effectiveStock <= 3 ? "text-destructive" : "text-muted-foreground",
+          effectiveStock <= 3 && condicion !== "USADO"
+            ? "text-destructive"
+            : "text-muted-foreground",
         )}
       >
         {stockLabel}
       </p>
+
+      {effectiveStock > 0 && (
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-semibold">Cantidad</span>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-sm"
+              aria-label="Restar cantidad"
+              disabled={quantity <= 1}
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+            >
+              <Minus className="size-3.5" />
+            </Button>
+            <span className="w-8 text-center text-sm font-medium tabular-nums">
+              {quantity}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-sm"
+              aria-label="Sumar cantidad"
+              disabled={quantity >= effectiveStock}
+              onClick={() => setQuantity((q) => Math.min(effectiveStock, q + 1))}
+            >
+              <Plus className="size-3.5" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
         <Button
