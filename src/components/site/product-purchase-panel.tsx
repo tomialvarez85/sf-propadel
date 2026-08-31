@@ -77,7 +77,7 @@ export function ProductPurchasePanel({
     effectiveStock <= 0
       ? "Sin stock"
       : effectiveStock <= 3
-        ? `¡Últimas unidades! (${effectiveStock} disponibles)`
+        ? "¡Últimas unidades!"
         : `${effectiveStock} disponibles`;
 
   const whatsappHref = useMemo(() => {
