@@ -46,6 +46,7 @@ export default async function ProductoPage(
   const relatedProducts = await getRelatedProducts(
     product.categoryId,
     product.id,
+    product.condicion,
   );
 
   return (

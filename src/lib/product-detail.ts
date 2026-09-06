@@ -61,12 +61,14 @@ export const getProductBySlug = cache(
 export async function getRelatedProducts(
   categoryId: string,
   excludeProductId: string,
+  condicion: "NUEVO" | "USADO",
 ): Promise<ProductCardData[]> {
   try {
     const products = await prisma.product.findMany({
       where: {
         categoryId,
         activo: true,
+        condicion,
         id: { not: excludeProductId },
       },
       orderBy: { createdAt: "desc" },

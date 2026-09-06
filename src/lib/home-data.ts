@@ -79,7 +79,7 @@ async function getProducts(
 
 export async function getOfertaProducts(): Promise<ProductCardData[]> {
   try {
-    return await getProducts({ activo: true, enOferta: true });
+    return await getProducts({ activo: true, condicion: "NUEVO", enOferta: true });
   } catch (error) {
     console.error("No se pudieron cargar las ofertas:", error);
     return [];
@@ -88,7 +88,7 @@ export async function getOfertaProducts(): Promise<ProductCardData[]> {
 
 export async function getDestacadoProducts(): Promise<ProductCardData[]> {
   try {
-    return await getProducts({ activo: true, destacado: true });
+    return await getProducts({ activo: true, condicion: "NUEVO", destacado: true });
   } catch (error) {
     console.error("No se pudieron cargar los destacados:", error);
     return [];
