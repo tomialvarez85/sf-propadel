@@ -44,7 +44,7 @@ export function ProductGallery({
         <CarouselContent>
           {images.map((image) => (
             <CarouselItem key={image.id}>
-              <div className="bg-muted relative aspect-square overflow-hidden rounded-xl">
+              <div className="border-border bg-white relative aspect-square overflow-hidden rounded-xl border">
                 <Image
                   src={image.url}
                   alt={productName}
@@ -52,7 +52,7 @@ export function ProductGallery({
                   priority
                   quality={85}
                   sizes="(min-width: 768px) 50vw, 100vw"
-                  className="object-cover"
+                  className="object-contain"
                 />
               </div>
             </CarouselItem>
@@ -74,7 +74,7 @@ export function ProductGallery({
               type="button"
               onClick={() => api?.scrollTo(index)}
               className={cn(
-                "bg-muted relative size-16 shrink-0 overflow-hidden rounded-lg ring-2 ring-transparent transition-colors duration-150",
+                "border-border bg-white relative size-16 shrink-0 overflow-hidden rounded-lg border ring-2 ring-transparent transition-colors duration-150",
                 current === index && "ring-primary",
               )}
             >
@@ -83,7 +83,7 @@ export function ProductGallery({
                 alt=""
                 fill
                 sizes="64px"
-                className="object-cover"
+                className="object-contain"
               />
             </button>
           ))}

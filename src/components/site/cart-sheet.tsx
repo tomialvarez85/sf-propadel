@@ -54,14 +54,14 @@ function CartItemsList({
       <ul className="flex flex-col gap-4">
         {items.map((item) => (
           <li key={item.lineId} className="flex gap-3">
-            <div className="bg-muted relative size-16 shrink-0 overflow-hidden rounded-lg">
+            <div className="border-border bg-white relative size-16 shrink-0 overflow-hidden rounded-lg border">
               {item.imagen ? (
                 <Image
                   src={item.imagen}
                   alt={item.nombre}
                   fill
                   sizes="64px"
-                  className="object-cover"
+                  className="object-contain"
                 />
               ) : (
                 <ImagePlaceholder />

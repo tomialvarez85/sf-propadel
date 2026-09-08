@@ -83,7 +83,6 @@ export function TestimonialForm({
                   value={field.value || null}
                   onChange={(url) => field.onChange(url ?? "")}
                   folder="testimonios"
-                  cropAspect={1}
                 />
               </FormControl>
               <FormMessage />

@@ -25,7 +25,6 @@ export function InlineImageCell({
   imageUrl,
   onSave,
   folder,
-  cropAspect,
   recommendedMinSize,
   fit = "cover",
   thumbnailClassName = "size-10",
@@ -36,7 +35,6 @@ export function InlineImageCell({
   imageUrl: string | null;
   onSave: (url: string) => Promise<{ success: boolean; error?: string }>;
   folder: string;
-  cropAspect?: number;
   recommendedMinSize?: { width: number; height: number };
   fit?: "cover" | "contain";
   thumbnailClassName?: string;
@@ -124,7 +122,6 @@ export function InlineImageCell({
               onChange={handleUploaderChange}
               folder={folder}
               recommendedMinSize={recommendedMinSize}
-              cropAspect={cropAspect}
             />
             {isSaving && (
               <div className="bg-background/70 absolute inset-0 flex items-center justify-center rounded-lg">

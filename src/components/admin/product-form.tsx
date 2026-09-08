@@ -406,7 +406,6 @@ export function ProductForm({
                           onChange={(url) => field.onChange(url ?? "")}
                           folder="products"
                           recommendedMinSize={{ width: 1200, height: 1200 }}
-                          cropAspect={1}
                           allowBackgroundRemoval
                         />
                       </FormControl>

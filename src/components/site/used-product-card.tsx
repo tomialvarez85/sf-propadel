@@ -46,15 +46,15 @@ export function UsedProductCard({
         href={`/productos/${product.slug}`}
         className="focus-visible:ring-ring/50 flex h-full flex-col rounded-t-xl outline-none focus-visible:ring-3"
       >
-        <div className="bg-muted relative aspect-square">
+        <div className="bg-white relative aspect-square shrink-0">
           {product.imagen ? (
             <Image
               src={product.imagen}
               alt={product.nombre}
               fill
               quality={85}
-              sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-              className="object-cover"
+              sizes="(min-width: 640px) 224px, 192px"
+              className="object-contain"
             />
           ) : (
             <ImagePlaceholder />

@@ -2,12 +2,6 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-import ReactCrop, {
-  centerCrop,
-  makeAspectCrop,
-  type Crop,
-  type PixelCrop,
-} from "react-image-crop";
 import {
   ImageIcon,
   Info,
@@ -44,59 +38,7 @@ import {
 } from "@/components/ui/popover";
 import { uploadImage } from "@/lib/supabase/storage";
 
-import "react-image-crop/dist/ReactCrop.css";
-
 type Dimensions = { width: number; height: number };
-
-function getImageDimensions(file: File): Promise<Dimensions> {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new window.Image();
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      resolve({ width: img.naturalWidth, height: img.naturalHeight });
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error("No se pudo leer las dimensiones de la imagen"));
-    };
-    img.src = url;
-  });
-}
-
-function getCroppedBlob(
-  image: HTMLImageElement,
-  crop: PixelCrop,
-): Promise<Blob> {
-  const scaleX = image.naturalWidth / image.width;
-  const scaleY = image.naturalHeight / image.height;
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.round(crop.width * scaleX);
-  canvas.height = Math.round(crop.height * scaleY);
-
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("No se pudo procesar la imagen");
-
-  ctx.drawImage(
-    image,
-    crop.x * scaleX,
-    crop.y * scaleY,
-    crop.width * scaleX,
-    crop.height * scaleY,
-    0,
-    0,
-    canvas.width,
-    canvas.height,
-  );
-
-  return new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (blob) =>
-        blob ? resolve(blob) : reject(new Error("No se pudo recortar la imagen")),
-      "image/png",
-    );
-  });
-}
 
 /** Composites a (presumably transparent-background) image over solid white
  * — the background-removal model outputs a transparent PNG, but the
@@ -225,7 +167,6 @@ export function ImageUploader({
   onChange,
   folder,
   recommendedMinSize,
-  cropAspect,
   allowBackgroundRemoval = false,
 }: {
   value: string | null;
@@ -234,20 +175,11 @@ export function ImageUploader({
   /** Soft, non-blocking resolution check — warns but never prevents the upload. */
   recommendedMinSize?: Dimensions;
   /**
-   * When set, every upload goes through a mandatory crop step locked to this
-   * aspect ratio (e.g. 1 for square product photos) before it's saved —
-   * catalog images stay visually consistent regardless of the source
-   * file's original framing. Omitted for uploaders (categories, brands)
-   * that need their own aspect ratio or none at all.
-   */
-  cropAspect?: number;
-  /**
    * Turns on automatic background removal for this uploader, composited
    * onto solid white — the default for product photos (mostly standalone
-   * objects: paletas, bolsos, accesorios). The crop dialog shows a
-   * "Mantener fondo original" checkbox to opt out per-photo, for
-   * indumentaria puesta en modelos where background removal doesn't make
-   * sense.
+   * objects: paletas, bolsos, accesorios). Shows a "Mantener fondo
+   * original" checkbox to opt out per-photo, for indumentaria puesta en
+   * modelos where background removal doesn't make sense.
    */
   allowBackgroundRemoval?: boolean;
 }) {
@@ -257,11 +189,11 @@ export function ImageUploader({
     detected: Dimensions;
   } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
 
-  const [cropSrc, setCropSrc] = useState<string | null>(null);
-  const [crop, setCrop] = useState<Crop>();
-  const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [pendingPreviewUrl, setPendingPreviewUrl] = useState<string | null>(
+    null,
+  );
   const [keepOriginalBackground, setKeepOriginalBackground] = useState(false);
   const [removingBackground, setRemovingBackground] = useState(false);
   const [bgProgress, setBgProgress] = useState<{
@@ -270,11 +202,10 @@ export function ImageUploader({
   } | null>(null);
   const [review, setReview] = useState<ReviewState | null>(null);
 
-  function resetCropState() {
-    if (cropSrc) URL.revokeObjectURL(cropSrc);
-    setCropSrc(null);
-    setCrop(undefined);
-    setCompletedCrop(undefined);
+  function resetPending() {
+    if (pendingPreviewUrl) URL.revokeObjectURL(pendingPreviewUrl);
+    setPendingFile(null);
+    setPendingPreviewUrl(null);
     setKeepOriginalBackground(false);
   }
 
@@ -329,61 +260,30 @@ export function ImageUploader({
     event.target.value = "";
     if (!file) return;
 
-    if (!cropAspect) {
-      // No forced framing for this uploader (categories/etc.) — keep the
-      // original direct-upload behavior.
-      if (recommendedMinSize) {
-        try {
-          const detected = await getImageDimensions(file);
-          if (
-            detected.width < recommendedMinSize.width ||
-            detected.height < recommendedMinSize.height
-          ) {
-            setLowResWarning({ blob: file, detected });
-            return;
-          }
-        } catch {
-          // ignore, fall through to upload
-        }
-      }
-      await finishUpload(file);
+    if (!allowBackgroundRemoval) {
+      // No background-removal choice to make for this uploader (categories,
+      // brands, testimonios) — upload the file as-is.
+      await uploadWithOptionalSizeCheck(file);
       return;
     }
 
-    setCropSrc(URL.createObjectURL(file));
+    setPendingFile(file);
+    setPendingPreviewUrl(URL.createObjectURL(file));
   }
 
-  function handleImageLoad(event: React.SyntheticEvent<HTMLImageElement>) {
-    if (!cropAspect) return;
-    const { width, height } = event.currentTarget;
-    const initialCrop = centerCrop(
-      makeAspectCrop({ unit: "%", width: 90 }, cropAspect, width, height),
-      width,
-      height,
-    );
-    setCrop(initialCrop);
-    setCompletedCrop({
-      unit: "px",
-      x: (initialCrop.x / 100) * width,
-      y: (initialCrop.y / 100) * height,
-      width: (initialCrop.width / 100) * width,
-      height: (initialCrop.height / 100) * height,
-    });
-  }
-
-  async function runBackgroundRemoval(croppedBlob: Blob) {
+  async function runBackgroundRemoval(sourceBlob: Blob) {
     setRemovingBackground(true);
     setBgProgress(null);
     try {
       const { removeBackground } = await import("@imgly/background-removal");
-      const cutout = await removeBackground(croppedBlob, {
+      const cutout = await removeBackground(sourceBlob, {
         progress: (_key, current, total) => setBgProgress({ current, total }),
       });
       const processedBlob = await compositeOnWhite(cutout);
-      resetCropState();
+      resetPending();
       setReview({
-        originalBlob: croppedBlob,
-        originalUrl: URL.createObjectURL(croppedBlob),
+        originalBlob: sourceBlob,
+        originalUrl: URL.createObjectURL(sourceBlob),
         processedBlob,
         processedUrl: URL.createObjectURL(processedBlob),
       });
@@ -391,29 +291,23 @@ export function ImageUploader({
       toast.error(
         "No se pudo quitar el fondo automáticamente. Se sube la foto tal cual.",
       );
-      resetCropState();
-      await uploadWithOptionalSizeCheck(croppedBlob);
+      resetPending();
+      await uploadWithOptionalSizeCheck(sourceBlob);
     } finally {
       setRemovingBackground(false);
       setBgProgress(null);
     }
   }
 
-  async function handleConfirmCrop() {
-    if (!imageRef.current || !completedCrop) return;
-    try {
-      const blob = await getCroppedBlob(imageRef.current, completedCrop);
-      if (allowBackgroundRemoval && !keepOriginalBackground) {
-        await runBackgroundRemoval(blob);
-        return;
-      }
-      resetCropState();
-      await uploadWithOptionalSizeCheck(blob);
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "No se pudo recortar la imagen",
-      );
+  async function handleConfirmPending() {
+    if (!pendingFile) return;
+    const file = pendingFile;
+    if (keepOriginalBackground) {
+      resetPending();
+      await uploadWithOptionalSizeCheck(file);
+      return;
     }
+    await runBackgroundRemoval(file);
   }
 
   async function confirmReview(useProcessed: boolean) {
@@ -467,7 +361,7 @@ export function ImageUploader({
           >
             {value ? "Cambiar imagen" : "Subir imagen"}
           </Button>
-          {cropAspect && <PhotoGuidePopover />}
+          {allowBackgroundRemoval && <PhotoGuidePopover />}
         </div>
         {value && (
           <Button
@@ -483,70 +377,54 @@ export function ImageUploader({
       </div>
 
       <Dialog
-        open={cropSrc !== null}
-        onOpenChange={(open) => !open && resetCropState()}
+        open={pendingFile !== null}
+        onOpenChange={(open) => !open && resetPending()}
       >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Recortar imagen</DialogTitle>
+            <DialogTitle>Confirmar imagen</DialogTitle>
           </DialogHeader>
 
-          {cropSrc && (
+          {pendingPreviewUrl && (
             <div className="flex flex-col gap-4">
-              <p className="text-muted-foreground text-sm">
-                Ajustá el recuadro cuadrado sobre la parte del producto que
-                querés mostrar en el catálogo.
-              </p>
               <div className="bg-muted flex max-h-[60vh] items-center justify-center overflow-hidden rounded-lg">
-                <ReactCrop
-                  crop={crop}
-                  onChange={(_, percentCrop) => setCrop(percentCrop)}
-                  onComplete={(pixelCrop) => setCompletedCrop(pixelCrop)}
-                  aspect={cropAspect}
-                  keepSelection
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element -- ReactCrop needs a raw <img> ref, next/image doesn't expose one compatibly */}
-                  <img
-                    ref={imageRef}
-                    src={cropSrc}
-                    alt=""
-                    onLoad={handleImageLoad}
-                    className="max-h-[60vh]"
-                  />
-                </ReactCrop>
+                {/* eslint-disable-next-line @next/next/no-img-element -- blob: URL preview, not an optimizable static asset */}
+                <img
+                  src={pendingPreviewUrl}
+                  alt=""
+                  className="max-h-[60vh] max-w-full object-contain"
+                />
               </div>
 
-              {allowBackgroundRemoval && (
-                <div className="border-border bg-muted/50 flex flex-col gap-2 rounded-lg border p-3">
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="keep-original-bg"
-                      checked={keepOriginalBackground}
-                      onCheckedChange={(checked) =>
-                        setKeepOriginalBackground(checked === true)
-                      }
-                    />
-                    <label htmlFor="keep-original-bg" className="text-sm">
-                      Mantener fondo original
-                    </label>
-                  </div>
-                  <p className="text-muted-foreground text-xs">
-                    Por defecto quitamos el fondo automáticamente y lo
-                    reemplazamos por blanco sólido — funciona mejor con
-                    productos solos (paletas, accesorios, calzado). Activá
-                    esto para indumentaria puesta en modelos, donde no se
-                    recomienda quitar el fondo.
-                  </p>
-                  {removingBackground && (
-                    <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                      <Loader2 className="size-3.5 animate-spin" />
-                      {bgProgressPercent !== null
-                        ? `Quitando fondo... ${bgProgressPercent}%`
-                        : "Quitando fondo..."}
-                    </div>
-                  )}
+              <div className="border-border bg-muted/50 flex flex-col gap-2 rounded-lg border p-3">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="keep-original-bg"
+                    checked={keepOriginalBackground}
+                    onCheckedChange={(checked) =>
+                      setKeepOriginalBackground(checked === true)
+                    }
+                  />
+                  <label htmlFor="keep-original-bg" className="text-sm">
+                    Mantener fondo original
+                  </label>
                 </div>
-              )}
+                <p className="text-muted-foreground text-xs">
+                  Por defecto quitamos el fondo automáticamente y lo
+                  reemplazamos por blanco sólido — funciona mejor con
+                  productos solos (paletas, accesorios, calzado). Activá
+                  esto para indumentaria puesta en modelos, donde no se
+                  recomienda quitar el fondo.
+                </p>
+                {removingBackground && (
+                  <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                    <Loader2 className="size-3.5 animate-spin" />
+                    {bgProgressPercent !== null
+                      ? `Quitando fondo... ${bgProgressPercent}%`
+                      : "Quitando fondo..."}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -554,21 +432,21 @@ export function ImageUploader({
             <Button
               type="button"
               variant="outline"
-              onClick={resetCropState}
+              onClick={resetPending}
               disabled={removingBackground}
             >
               Cancelar
             </Button>
             <Button
               type="button"
-              disabled={!completedCrop || uploading || removingBackground}
-              onClick={handleConfirmCrop}
+              disabled={uploading || removingBackground}
+              onClick={handleConfirmPending}
             >
               {removingBackground
                 ? "Procesando..."
                 : uploading
                   ? "Subiendo..."
-                  : "Confirmar recorte"}
+                  : "Confirmar"}
             </Button>
           </DialogFooter>
         </DialogContent>

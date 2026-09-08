@@ -117,7 +117,6 @@ export function ProductImageCell({
               onChange={handleUploaderChange}
               folder="products"
               recommendedMinSize={{ width: 1200, height: 1200 }}
-              cropAspect={1}
               allowBackgroundRemoval
             />
             {isSaving && (

@@ -57,7 +57,7 @@ export function ProductCard({
         href={`/productos/${product.slug}`}
         className="focus-visible:ring-ring/50 block rounded-t-xl outline-none focus-visible:ring-3"
       >
-        <div className="bg-muted relative aspect-square">
+        <div className="bg-white relative aspect-square">
           {product.imagen ? (
             <Image
               src={product.imagen}
@@ -65,7 +65,7 @@ export function ProductCard({
               fill
               quality={85}
               sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-              className="object-cover"
+              className="object-contain"
             />
           ) : (
             <ImagePlaceholder />
