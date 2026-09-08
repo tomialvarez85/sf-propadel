@@ -96,13 +96,18 @@ export function ProductCard({
             </span>
           </div>
 
-          {product.condicion !== "USADO" && product.permiteCuotas && (
-            <span className="text-muted-foreground text-xs">
-              {cantidadCuotas} cuotas de{" "}
-              {formatCurrency(product.precio / cantidadCuotas)}
-              {cuotasSinInteres ? " sin interés" : ""}
-            </span>
-          )}
+          {product.condicion !== "USADO" &&
+            (product.permiteCuotas ? (
+              <span className="text-muted-foreground text-xs">
+                {cantidadCuotas} cuotas de{" "}
+                {formatCurrency(product.precio / cantidadCuotas)}
+                {cuotasSinInteres ? " sin interés" : ""}
+              </span>
+            ) : (
+              <span className="text-muted-foreground text-xs">
+                Pago único de {formatCurrency(product.precio)}
+              </span>
+            ))}
         </CardContent>
       </Link>
 

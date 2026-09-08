@@ -177,12 +177,17 @@ export function ProductPurchasePanel({
           </span>
         )}
 
-        {condicion !== "USADO" && permiteCuotas && (
-          <span className="text-muted-foreground text-sm">
-            {cantidadCuotas} cuotas de {formatCurrency(precio / cantidadCuotas)}
-            {cuotasSinInteres ? " sin interés" : ""}
-          </span>
-        )}
+        {condicion !== "USADO" &&
+          (permiteCuotas ? (
+            <span className="text-muted-foreground text-sm">
+              {cantidadCuotas} cuotas de {formatCurrency(precio / cantidadCuotas)}
+              {cuotasSinInteres ? " sin interés" : ""}
+            </span>
+          ) : (
+            <span className="text-muted-foreground text-sm">
+              Pago único de {formatCurrency(precio)}
+            </span>
+          ))}
 
         {tieneDescuentoTransferencia && (
           <p className="text-primary text-sm font-semibold">
