@@ -61,6 +61,9 @@ model Product {
   destacado          Boolean   @default(false)
   enOferta           Boolean   @default(false)
   activo             Boolean   @default(true)
+  // Productos de bajo valor no tienen sentido financiar en cuotas — el
+  // dueño puede destildarlo por producto.
+  permiteCuotas      Boolean   @default(true)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 

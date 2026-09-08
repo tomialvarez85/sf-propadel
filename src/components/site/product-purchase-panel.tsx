@@ -38,6 +38,7 @@ export function ProductPurchasePanel({
   precioAnterior,
   stock,
   condicion,
+  permiteCuotas,
   estadoConservacion,
   variants,
   whatsapp,
@@ -55,6 +56,7 @@ export function ProductPurchasePanel({
   precioAnterior: number | null;
   stock: number;
   condicion: "NUEVO" | "USADO";
+  permiteCuotas: boolean;
   estadoConservacion: string | null;
   variants: Variant[];
   whatsapp: string | null;
@@ -175,7 +177,7 @@ export function ProductPurchasePanel({
           </span>
         )}
 
-        {condicion !== "USADO" && (
+        {condicion !== "USADO" && permiteCuotas && (
           <span className="text-muted-foreground text-sm">
             {cantidadCuotas} cuotas de {formatCurrency(precio / cantidadCuotas)}
             {cuotasSinInteres ? " sin interés" : ""}

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Pencil, Trash2 } from "lucide-react";
+import { Ban, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -111,12 +111,22 @@ function ProductTableRow({
           />
         </TableCell>
         <TableCell className="font-medium">
-          <InlineTextCell
-            value={product.nombre}
-            onSave={(value) => updateProductField(product.id, "nombre", value)}
-            requiredError="El nombre no puede estar vacío."
-            successMessage="Nombre actualizado"
-          />
+          <div className="flex items-center gap-1.5">
+            <InlineTextCell
+              value={product.nombre}
+              onSave={(value) => updateProductField(product.id, "nombre", value)}
+              requiredError="El nombre no puede estar vacío."
+              successMessage="Nombre actualizado"
+            />
+            {!product.permiteCuotas && (
+              <span title="No permite pago en cuotas">
+                <Ban
+                  className="text-muted-foreground size-3.5 shrink-0"
+                  aria-label="No permite pago en cuotas"
+                />
+              </span>
+            )}
+          </div>
         </TableCell>
         <TableCell className="text-muted-foreground">
           <InlineSelectCell
@@ -222,13 +232,23 @@ function ProductCard({
           imageCount={product.imageCount}
         />
         <div className="min-w-0 flex-1">
-          <InlineTextCell
-            value={product.nombre}
-            onSave={(value) => updateProductField(product.id, "nombre", value)}
-            requiredError="El nombre no puede estar vacío."
-            successMessage="Nombre actualizado"
-            className="font-medium"
-          />
+          <div className="flex items-center gap-1.5">
+            <InlineTextCell
+              value={product.nombre}
+              onSave={(value) => updateProductField(product.id, "nombre", value)}
+              requiredError="El nombre no puede estar vacío."
+              successMessage="Nombre actualizado"
+              className="font-medium"
+            />
+            {!product.permiteCuotas && (
+              <span title="No permite pago en cuotas">
+                <Ban
+                  className="text-muted-foreground size-3.5 shrink-0"
+                  aria-label="No permite pago en cuotas"
+                />
+              </span>
+            )}
+          </div>
           <div className="text-muted-foreground flex items-center gap-1 text-xs">
             <InlineSelectCell
               valueId={product.categoryId}

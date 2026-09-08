@@ -83,6 +83,7 @@ async function queryProductListing(
         precioAnterior: true,
         stock: true,
         condicion: true,
+        permiteCuotas: true,
         images: {
           orderBy: { orden: "asc" },
           take: 1,
@@ -102,6 +103,7 @@ async function queryProductListing(
       stock: product.stock,
       imagen: product.images[0]?.url ?? null,
       condicion: product.condicion,
+      permiteCuotas: product.permiteCuotas,
     })),
     total,
     totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)),

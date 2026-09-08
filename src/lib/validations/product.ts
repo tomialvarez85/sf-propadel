@@ -33,6 +33,7 @@ export const productSchema = z
     destacado: z.boolean(),
     enOferta: z.boolean(),
     activo: z.boolean(),
+    permiteCuotas: z.boolean(),
     images: z.array(productImageSchema).min(1, "Agregá al menos una imagen"),
     variants: z.array(productVariantSchema),
   })

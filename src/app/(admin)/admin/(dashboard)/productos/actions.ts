@@ -36,6 +36,7 @@ function normalizeProductData(data: ReturnType<typeof productSchema.parse>) {
     destacado: data.destacado,
     enOferta: data.enOferta,
     activo: data.activo,
+    permiteCuotas: data.permiteCuotas,
   };
 }
 

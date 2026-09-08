@@ -20,6 +20,7 @@ export type ProductCardData = {
   stock: number;
   imagen: string | null;
   condicion: "NUEVO" | "USADO";
+  permiteCuotas: boolean;
 };
 
 export function ProductCard({
@@ -95,7 +96,7 @@ export function ProductCard({
             </span>
           </div>
 
-          {product.condicion !== "USADO" && (
+          {product.condicion !== "USADO" && product.permiteCuotas && (
             <span className="text-muted-foreground text-xs">
               {cantidadCuotas} cuotas de{" "}
               {formatCurrency(product.precio / cantidadCuotas)}

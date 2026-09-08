@@ -11,6 +11,7 @@ export type ProductDetail = {
   precioAnterior: number | null;
   stock: number;
   condicion: "NUEVO" | "USADO";
+  permiteCuotas: boolean;
   estadoConservacion: string | null;
   categoryId: string;
   brand: { nombre: string; slug: string };
@@ -31,6 +32,7 @@ export const getProductBySlug = cache(
           precioAnterior: true,
           stock: true,
           condicion: true,
+          permiteCuotas: true,
           estadoConservacion: true,
           categoryId: true,
           brand: { select: { nombre: true, slug: true } },
@@ -81,6 +83,7 @@ export async function getRelatedProducts(
         precioAnterior: true,
         stock: true,
         condicion: true,
+        permiteCuotas: true,
         images: {
           orderBy: { orden: "asc" },
           take: 1,
@@ -98,6 +101,7 @@ export async function getRelatedProducts(
       stock: product.stock,
       imagen: product.images[0]?.url ?? null,
       condicion: product.condicion,
+      permiteCuotas: product.permiteCuotas,
     }));
   } catch (error) {
     console.error("No se pudieron cargar los productos relacionados:", error);

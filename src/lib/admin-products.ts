@@ -9,6 +9,7 @@ export type ProductListItem = {
   precio: number;
   stock: number;
   activo: boolean;
+  permiteCuotas: boolean;
   imagen: string | null;
   imageCount: number;
   categoryId: string;
@@ -90,6 +91,7 @@ export async function getProductList(
           precio: true,
           stock: true,
           activo: true,
+          permiteCuotas: true,
           categoryId: true,
           category: { select: { nombre: true } },
           brandId: true,
@@ -114,6 +116,7 @@ export async function getProductList(
         precio: product.precio.toNumber(),
         stock: product.stock,
         activo: product.activo,
+        permiteCuotas: product.permiteCuotas,
         imagen: product.images[0]?.url ?? null,
         imageCount: product._count.images,
         categoryId: product.categoryId,
@@ -144,6 +147,7 @@ export type ProductEditData = {
   destacado: boolean;
   enOferta: boolean;
   activo: boolean;
+  permiteCuotas: boolean;
   images: { url: string }[];
   variants: { tipo: string; valor: string; stock: number }[];
 };
@@ -168,6 +172,7 @@ export async function getProductForEdit(
         destacado: true,
         enOferta: true,
         activo: true,
+        permiteCuotas: true,
         images: { orderBy: { orden: "asc" }, select: { url: true } },
         variants: { select: { tipo: true, valor: true, stock: true } },
       },

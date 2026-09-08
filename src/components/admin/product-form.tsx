@@ -77,6 +77,7 @@ export function ProductForm({
       destacado: false,
       enOferta: false,
       activo: true,
+      permiteCuotas: true,
       images: [],
       variants: [],
     },
@@ -367,6 +368,23 @@ export function ProductForm({
                   />
                 </FormControl>
                 <FormLabel className="font-normal">Activo</FormLabel>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="permiteCuotas"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center gap-2">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormLabel className="font-normal">
+                  Permite pago en cuotas
+                </FormLabel>
               </FormItem>
             )}
           />

@@ -63,6 +63,7 @@ export default async function ProductoPage(
           precioAnterior={product.precioAnterior}
           stock={product.stock}
           condicion={product.condicion}
+          permiteCuotas={product.permiteCuotas}
           estadoConservacion={product.estadoConservacion}
           variants={product.variants}
           whatsapp={settings?.whatsapp ?? null}
