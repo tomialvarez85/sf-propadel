@@ -11,7 +11,7 @@ const HERO_LINK = "/productos?categoria=paletas";
 
 export function HeroBanner() {
   const content = (
-    <div className="bg-muted relative w-full overflow-hidden h-[calc(100dvh_-_var(--header-height))]">
+    <div className="bg-muted relative w-full overflow-hidden h-[65vh] sm:h-[calc(100dvh_-_var(--header-height))]">
       <Image
         src={HERO_IMAGEN}
         alt={HERO_TITULO}
@@ -19,7 +19,7 @@ export function HeroBanner() {
         priority
         quality={85}
         sizes="(min-width: 1152px) 1152px, 100vw"
-        className="object-cover"
+        className="object-cover object-center"
       />
       {/* Angled Corner motif (see DESIGN.md > Shapes) — a solid-lime quarter-disc
           pie slice centered on the true corner, curving concave into the image. */}
