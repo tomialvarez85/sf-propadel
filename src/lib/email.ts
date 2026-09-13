@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 
 import { formatCurrency } from "@/lib/format";
+import { SITE_URL } from "@/lib/site-url";
 import { COMPROBANTES_BUCKET } from "@/lib/storage-constants";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -12,8 +13,6 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // with. Override via RESEND_FROM_EMAIL once a verified domain exists.
 const FROM_EMAIL =
   process.env.RESEND_FROM_EMAIL || "SF ProPadel <onboarding@resend.dev>";
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 const TEAL = "#0e5865";
 const LIME = "#bccd0f";
