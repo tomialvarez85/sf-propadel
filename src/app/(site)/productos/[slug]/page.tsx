@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { JsonLd } from "@/components/site/json-ld";
 import { ProductCard } from "@/components/site/product-card";
 import { ProductGallery } from "@/components/site/product-gallery";
 import { ProductPurchasePanel } from "@/components/site/product-purchase-panel";
 import { getProductBySlug, getRelatedProducts } from "@/lib/product-detail";
+import { absoluteUrl, buildSocialMetadata, truncateDescription } from "@/lib/seo";
 import { getSiteSettings } from "@/lib/site-data";
 
 export async function generateMetadata(
@@ -17,16 +19,19 @@ export async function generateMetadata(
     return { title: "Producto no encontrado | SF ProPadel" };
   }
 
+  const title = `${product.nombre} | ${product.brand.nombre} | SF ProPadel`;
+  const description = truncateDescription(product.descripcion);
   const image = product.images[0]?.url;
 
   return {
-    title: `${product.nombre} | SF ProPadel`,
-    description: product.descripcion,
-    openGraph: {
+    title,
+    description,
+    ...buildSocialMetadata({
       title: product.nombre,
-      description: product.descripcion,
-      images: image ? [{ url: image }] : undefined,
-    },
+      description,
+      path: `/productos/${slug}`,
+      image,
+    }),
   };
 }
 
@@ -51,6 +56,26 @@ export default async function ProductoPage(
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: product.nombre,
+          description: product.descripcion,
+          image: product.images.map((image) => image.url),
+          brand: { "@type": "Brand", name: product.brand.nombre },
+          offers: {
+            "@type": "Offer",
+            url: absoluteUrl(`/productos/${slug}`),
+            priceCurrency: "ARS",
+            price: product.precio,
+            availability:
+              product.stock > 0
+                ? "https://schema.org/InStock"
+                : "https://schema.org/OutOfStock",
+          },
+        }}
+      />
       <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:items-center">
         <ProductGallery images={product.images} productName={product.nombre} />
         <ProductPurchasePanel

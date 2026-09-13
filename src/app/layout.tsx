@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { SITE_URL } from "@/lib/site-url";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,10 +14,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Fallback for any route that doesn't set its own metadata (loading/error
+// states, etc). Every real page under (site) overrides this with its own
+// title/description/openGraph — see src/lib/seo.ts.
 export const metadata: Metadata = {
-  title: "SF ProPadel",
+  metadataBase: new URL(SITE_URL),
+  title: "SF ProPadel | Tienda de pádel online",
   description:
-    "Tienda de artículos de pádel: paletas, indumentaria, calzado, accesorios y bolsos.",
+    "Tienda de artículos de pádel: paletas, indumentaria, calzado, accesorios y bolsos, con envíos a todo el país.",
 };
 
 // viewportFit "cover" is what makes env(safe-area-inset-*) resolve to real

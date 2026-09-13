@@ -2,11 +2,17 @@ import type { Metadata } from "next";
 
 import { ContactForm } from "@/components/site/contact-form";
 import { Card, CardContent } from "@/components/ui/card";
+import { buildSocialMetadata } from "@/lib/seo";
 import { getSiteSettings } from "@/lib/site-data";
 
+const TITLE = "Contacto | SF ProPadel";
+const DESCRIPTION =
+  "¿Dudas sobre un producto o un pedido? Escribinos y te respondemos por WhatsApp a la brevedad.";
+
 export const metadata: Metadata = {
-  title: "Contacto | SF ProPadel",
-  description: "Escribinos y te respondemos por WhatsApp.",
+  title: TITLE,
+  description: DESCRIPTION,
+  ...buildSocialMetadata({ title: TITLE, description: DESCRIPTION, path: "/contacto" }),
 };
 
 export default async function ContactoPage() {

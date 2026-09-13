@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
+
 import { CategoryTiles, type CategoryTile } from "@/components/site/category-tiles";
 import { HeroBanner } from "@/components/site/hero-banner";
+import { JsonLd } from "@/components/site/json-ld";
 import { TestimonialsSection } from "@/components/site/testimonials-section";
 import {
   ProductCard,
@@ -18,7 +21,19 @@ import {
   getDestacadoProducts,
   getOfertaProducts,
 } from "@/lib/home-data";
+import { buildSocialMetadata, DEFAULT_OG_IMAGE, SITE_NAME } from "@/lib/seo";
 import { getSiteSettings } from "@/lib/site-data";
+import { SITE_URL } from "@/lib/site-url";
+
+const TITLE = `${SITE_NAME} | Tienda de pádel online`;
+const DESCRIPTION =
+  "Paletas, indumentaria, calzado, accesorios y bolsos de pádel de las mejores marcas, con envíos a todo el país y atención personalizada por WhatsApp.";
+
+export const metadata: Metadata = {
+  title: TITLE,
+  description: DESCRIPTION,
+  ...buildSocialMetadata({ title: TITLE, description: DESCRIPTION, path: "/" }),
+};
 
 function ProductSection({
   title,
@@ -115,8 +130,30 @@ export default async function HomePage() {
     },
   ];
 
+  // wa.me needs digits only — settings.whatsapp is stored in a human-typed
+  // format (spaces, dashes, a leading +), see also product-purchase-panel.tsx.
+  const whatsappDigits = settings?.whatsapp?.replace(/\D/g, "");
+  const sameAs = [
+    settings?.instagram,
+    whatsappDigits && `https://wa.me/${whatsappDigits}`,
+  ].filter((value): value is string => Boolean(value));
+
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "SportingGoodsStore",
+          name: SITE_NAME,
+          url: SITE_URL,
+          image: DEFAULT_OG_IMAGE,
+          ...(settings?.direccion ? { address: settings.direccion } : {}),
+          ...(settings?.email ? { email: settings.email } : {}),
+          ...(settings?.whatsapp ? { telephone: settings.whatsapp } : {}),
+          ...(sameAs.length > 0 ? { sameAs } : {}),
+        }}
+      />
+
       <HeroBanner />
 
       <CategoryTiles tiles={categoryTiles} />

@@ -7,7 +7,9 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: "/admin",
+      // /pedido/[orderId] is a per-customer order page (name + order
+      // contents) — see the noindex on that page's own metadata too.
+      disallow: ["/admin", "/pedido"],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
   };

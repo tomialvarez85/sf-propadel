@@ -80,7 +80,7 @@ export function ProductGallery({
             >
               <Image
                 src={image.url}
-                alt=""
+                alt={`${productName} - foto ${index + 1}`}
                 fill
                 sizes="64px"
                 className="object-contain"

@@ -53,9 +53,10 @@ export function HeroBanner() {
         />
       </svg>
       <div className="absolute inset-0 z-20 flex items-end bg-gradient-to-t from-black/60 to-transparent p-6">
-        <h2 className="font-heading text-xl font-extrabold tracking-[-0.02em] text-white sm:text-3xl">
+        {/* Only ever rendered on the home page — this is its one <h1>. */}
+        <h1 className="font-heading text-xl font-extrabold tracking-[-0.02em] text-white sm:text-3xl">
           {HERO_TITULO}
-        </h2>
+        </h1>
       </div>
     </div>
   );

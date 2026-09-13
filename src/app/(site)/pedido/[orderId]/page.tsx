@@ -7,8 +7,13 @@ import { getPublicOrder } from "@/lib/order-public";
 import { getSiteSettings } from "@/lib/site-data";
 import { cn } from "@/lib/utils";
 
+// Per-customer order page — has the buyer's name and order contents, so it
+// must never show up in search results even though robots.ts also disallows
+// /pedido; this is the belt to that suspenders (a disallowed URL can still
+// get indexed with no snippet if Google finds a link to it some other way).
 export const metadata: Metadata = {
   title: "Tu pedido | SF ProPadel",
+  robots: { index: false, follow: false },
 };
 
 // Step 2 of checkout — the ONLY place a comprobante gets attached to an

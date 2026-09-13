@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { ProductListing } from "@/components/site/product-listing";
 import { resolveCategoryScope } from "@/lib/product-query";
+import { buildSocialMetadata } from "@/lib/seo";
 
 export async function generateMetadata(
   props: PageProps<"/[categoria]">,
@@ -14,9 +15,15 @@ export async function generateMetadata(
     return { title: "Categoría no encontrada | SF ProPadel" };
   }
 
+  const title = `${categoryScope.nombre} | SF ProPadel`;
+  const description = `Comprá ${categoryScope.nombre.toLowerCase()} de pádel en SF ProPadel — envíos a todo el país.`;
+
+  // Same reasoning as /productos: canonical is the bare category path, so
+  // ?marca=/precioMin=/etc. combinations don't get indexed as separate pages.
   return {
-    title: `${categoryScope.nombre} | SF ProPadel`,
-    description: `Comprá ${categoryScope.nombre.toLowerCase()} de pádel en SF ProPadel — envíos a todo el país.`,
+    title,
+    description,
+    ...buildSocialMetadata({ title, description, path: `/${categoryScope.slug}` }),
   };
 }
 

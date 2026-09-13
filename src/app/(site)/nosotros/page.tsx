@@ -4,12 +4,17 @@ import { MessageCircle, ShieldCheck, Truck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { getBrandOptions } from "@/lib/product-query";
+import { buildSocialMetadata } from "@/lib/seo";
 import { getSiteSettings } from "@/lib/site-data";
 
+const TITLE = "Nosotros | SF ProPadel";
+const DESCRIPTION =
+  "Conocé la historia de SF ProPadel, tienda especializada en pádel con marcas oficiales, asesoramiento por WhatsApp y envíos a todo el país.";
+
 export const metadata: Metadata = {
-  title: "Nosotros | SF ProPadel",
-  description:
-    "Conocé la historia de SF ProPadel, tienda especializada en pádel.",
+  title: TITLE,
+  description: DESCRIPTION,
+  ...buildSocialMetadata({ title: TITLE, description: DESCRIPTION, path: "/nosotros" }),
 };
 
 const DEFAULT_MISSION =
