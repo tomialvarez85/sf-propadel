@@ -46,6 +46,7 @@ function normalizeSettingsData(
     cantidadCuotas: data.cantidadCuotas,
     cuotasSinInteres: data.cuotasSinInteres,
     descuentoTransferencia: data.descuentoTransferencia || null,
+    descuentoEfectivo: data.descuentoEfectivo || null,
     mostrarPrecioSinImpuestos: data.mostrarPrecioSinImpuestos,
   };
 }

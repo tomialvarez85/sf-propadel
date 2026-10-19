@@ -46,26 +46,31 @@ enum Condicion {
 }
 
 model Product {
-  id                 String    @id @default(cuid())
-  nombre             String
-  slug               String    @unique
-  descripcion        String
-  precio             Decimal   @db.Decimal(10, 2)
-  precioAnterior     Decimal?  @db.Decimal(10, 2)
-  stock              Int
-  genero             Genero?
-  condicion          Condicion @default(NUEVO)
+  id                             String    @id @default(cuid())
+  nombre                         String
+  slug                           String    @unique
+  descripcion                    String
+  precio                         Decimal   @db.Decimal(10, 2)
+  precioAnterior                 Decimal?  @db.Decimal(10, 2)
+  stock                          Int
+  genero                         Genero?
+  condicion                      Condicion @default(NUEVO)
   // Solo relevante cuando condicion=USADO — texto corto libre para describir
   // el estado del producto (ej. "Excelente estado, poco uso").
-  estadoConservacion String?
-  destacado          Boolean   @default(false)
-  enOferta           Boolean   @default(false)
-  activo             Boolean   @default(true)
+  estadoConservacion             String?
+  destacado                      Boolean   @default(false)
+  enOferta                       Boolean   @default(false)
+  activo                         Boolean   @default(true)
   // Productos de bajo valor no tienen sentido financiar en cuotas — el
   // dueño puede destildarlo por producto.
-  permiteCuotas      Boolean   @default(true)
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  permiteCuotas                  Boolean   @default(true)
+  // Porcentajes propios del producto. null = hereda el global de
+  // SiteSettings (descuentoTransferencia / descuentoEfectivo); 0 = este
+  // producto explícitamente sin descuento. Ver src/lib/discounts.ts.
+  descuentoTransferenciaOverride Int?
+  descuentoEfectivoOverride      Int?
+  createdAt                      DateTime  @default(now())
+  updatedAt                      DateTime  @updatedAt
 
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id])
@@ -144,6 +149,9 @@ model SiteSettings {
   cuotasSinInteres          Boolean @default(true)
   // Porcentaje (ej. 15). 0 o null = sin descuento por transferencia.
   descuentoTransferencia    Int?
+  // Pago en efectivo en el local físico (solo se muestra si hay
+  // `direccion` cargada). Mismo criterio: 0 o null = sin descuento.
+  descuentoEfectivo         Int?
   mostrarPrecioSinImpuestos Boolean @default(false)
 }
 
@@ -181,15 +189,19 @@ model Order {
 // reason in the other direction: deleting a product must not be blocked by,
 // or cascade into deleting, past orders that reference it.
 model OrderItem {
-  id             String    @id @default(cuid())
-  nombreProducto String
-  variante       String?
-  cantidad       Int
-  precioUnitario Decimal   @db.Decimal(10, 2)
+  id                     String    @id @default(cuid())
+  nombreProducto         String
+  variante               String?
+  cantidad               Int
+  precioUnitario         Decimal   @db.Decimal(10, 2)
   // Snapshot at sale time, same reasoning as the fields above — used to
   // exclude usados from the transfer discount on /pedido/[orderId] without
   // a live join back to `product` (which may since have been deleted).
-  condicion      Condicion @default(NUEVO)
+  condicion              Condicion @default(NUEVO)
+  // Porcentaje de descuento por transferencia ya resuelto (override del
+  // producto o global) al momento de la venta. null = pedido anterior a
+  // los descuentos por producto: /pedido/[orderId] cae al cálculo viejo.
+  descuentoTransferencia Int?
 
   orderId String
   order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)

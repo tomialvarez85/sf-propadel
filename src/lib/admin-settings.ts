@@ -18,6 +18,7 @@ const EMPTY_SETTINGS: SiteSettingsFormValues = {
   cantidadCuotas: 12,
   cuotasSinInteres: true,
   descuentoTransferencia: null,
+  descuentoEfectivo: null,
   mostrarPrecioSinImpuestos: false,
 };
 
@@ -46,6 +47,7 @@ export async function getSiteSettingsForEdit(): Promise<SiteSettingsFormValues> 
       cantidadCuotas: settings.cantidadCuotas,
       cuotasSinInteres: settings.cuotasSinInteres,
       descuentoTransferencia: settings.descuentoTransferencia,
+      descuentoEfectivo: settings.descuentoEfectivo,
       mostrarPrecioSinImpuestos: settings.mostrarPrecioSinImpuestos,
     };
   } catch (error) {

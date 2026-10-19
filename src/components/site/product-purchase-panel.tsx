@@ -15,6 +15,7 @@ import {
   getDiscountPercent,
   IVA_RATE,
 } from "@/lib/format";
+import { applyDescuento } from "@/lib/discounts";
 
 type Variant = { id: string; tipo: string; valor: string; stock: number };
 
@@ -45,6 +46,7 @@ export function ProductPurchasePanel({
   cantidadCuotas,
   cuotasSinInteres,
   descuentoTransferencia,
+  descuentoEfectivo,
   mostrarPrecioSinImpuestos,
 }: {
   id: string;
@@ -62,7 +64,10 @@ export function ProductPurchasePanel({
   whatsapp: string | null;
   cantidadCuotas: number;
   cuotasSinInteres: boolean;
+  // Already resolved server-side (override del producto o global, ver
+  // src/lib/discounts.ts) — null means "don't show this line".
   descuentoTransferencia: number | null;
+  descuentoEfectivo: number | null;
   mostrarPrecioSinImpuestos: boolean;
 }) {
   const variantGroups = useMemo(() => groupVariants(variants), [variants]);
@@ -104,11 +109,6 @@ export function ProductPurchasePanel({
   }, [effectiveStock]);
 
   const precioSinImpuestos = precio / (1 + IVA_RATE);
-  const tieneDescuentoTransferencia =
-    !!descuentoTransferencia && descuentoTransferencia > 0 && condicion !== "USADO";
-  const precioTransferencia = tieneDescuentoTransferencia
-    ? precio * (1 - descuentoTransferencia! / 100)
-    : precio;
 
   const whatsappHref = useMemo(() => {
     if (!whatsapp) return null;
@@ -156,19 +156,24 @@ export function ProductPurchasePanel({
       </div>
 
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          {discountPercent !== null && (
-            <span className="text-muted-foreground text-base line-through">
-              {formatCurrency(precioAnterior!)}
-            </span>
-          )}
+        {(discountPercent !== null || condicion === "USADO") && (
+          <div className="flex items-center gap-2">
+            {discountPercent !== null && (
+              <Badge variant="lime">{discountPercent}% OFF</Badge>
+            )}
+            {condicion === "USADO" && <Badge variant="secondary">Usado</Badge>}
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <span className="font-heading bg-primary text-primary-foreground inline-flex items-center rounded-md px-3 py-1 text-3xl font-extrabold tracking-[-0.02em] sm:text-4xl">
             {formatCurrency(precio)}
           </span>
           {discountPercent !== null && (
-            <Badge variant="lime">-{discountPercent}%</Badge>
+            <span className="text-muted-foreground text-lg line-through">
+              {formatCurrency(precioAnterior!)}
+            </span>
           )}
-          {condicion === "USADO" && <Badge variant="secondary">Usado</Badge>}
         </div>
 
         {mostrarPrecioSinImpuestos && condicion !== "USADO" && (
@@ -179,8 +184,10 @@ export function ProductPurchasePanel({
 
         {condicion !== "USADO" &&
           (permiteCuotas ? (
-            <span className="text-muted-foreground text-sm">
-              {cantidadCuotas} cuotas de {formatCurrency(precio / cantidadCuotas)}
+            <span className="text-sm">
+              <span className="font-semibold">
+                {cantidadCuotas} x {formatCurrency(precio / cantidadCuotas)}
+              </span>
               {cuotasSinInteres ? " sin interés" : ""}
             </span>
           ) : (
@@ -189,10 +196,27 @@ export function ProductPurchasePanel({
             </span>
           ))}
 
-        {tieneDescuentoTransferencia && (
-          <p className="text-primary text-sm font-semibold">
-            {descuentoTransferencia}% OFF pagando por transferencia —{" "}
-            {formatCurrency(precioTransferencia)}
+        {descuentoTransferencia !== null && (
+          <p className="text-sm">
+            <span className="text-primary font-semibold">
+              {formatCurrency(applyDescuento(precio, descuentoTransferencia))}
+            </span>{" "}
+            pagando con transferencia{" "}
+            <span className="text-muted-foreground">
+              ({descuentoTransferencia}% OFF)
+            </span>
+          </p>
+        )}
+
+        {descuentoEfectivo !== null && (
+          <p className="text-sm">
+            <span className="text-primary font-semibold">
+              {formatCurrency(applyDescuento(precio, descuentoEfectivo))}
+            </span>{" "}
+            pagando en efectivo en nuestro local{" "}
+            <span className="text-muted-foreground">
+              ({descuentoEfectivo}% OFF)
+            </span>
           </p>
         )}
 

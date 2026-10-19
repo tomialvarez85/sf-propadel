@@ -4,6 +4,8 @@
 // (usados/actions.ts) sets it server-side, not from user input.
 import { z } from "zod";
 
+import { descuentoOverrideSchema } from "@/lib/validations/discount-override";
+
 const usedProductImageSchema = z.object({
   url: z.string().url("La imagen no es válida"),
 });
@@ -42,6 +44,8 @@ export const usedProductSchema = z
       .array(usedProductImageSchema)
       .min(1, "Agregá al menos una imagen"),
     variants: z.array(usedProductVariantSchema),
+    descuentoTransferenciaOverride: descuentoOverrideSchema,
+    descuentoEfectivoOverride: descuentoOverrideSchema,
   })
   .refine((data) => !data.precioAnterior || data.precioAnterior > data.precio, {
     message: "El precio anterior debe ser mayor al precio actual",

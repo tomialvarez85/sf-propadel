@@ -315,7 +315,43 @@ export function SiteSettingsForm({
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="descuentoEfectivo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Descuento en efectivo en el local (%)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={100}
+                        placeholder="Ej: 20"
+                        value={field.value ?? ""}
+                        onChange={(event) =>
+                          field.onChange(
+                            event.target.value === ""
+                              ? null
+                              : event.target.valueAsNumber,
+                          )
+                        }
+                      />
+                    </FormControl>
+                    <p className="text-muted-foreground text-xs">
+                      Vacío o 0 = sin descuento. Solo se muestra si hay una
+                      dirección del local cargada.
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
+
+            <p className="text-muted-foreground text-xs">
+              Estos son los descuentos generales. Cada producto puede tener
+              su propio porcentaje desde su formulario de edición.
+            </p>
 
             <FormField
               control={form.control}

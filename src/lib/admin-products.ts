@@ -148,6 +148,8 @@ export type ProductEditData = {
   enOferta: boolean;
   activo: boolean;
   permiteCuotas: boolean;
+  descuentoTransferenciaOverride: number | null;
+  descuentoEfectivoOverride: number | null;
   images: { url: string }[];
   variants: { tipo: string; valor: string; stock: number }[];
 };
@@ -173,6 +175,8 @@ export async function getProductForEdit(
         enOferta: true,
         activo: true,
         permiteCuotas: true,
+        descuentoTransferenciaOverride: true,
+        descuentoEfectivoOverride: true,
         images: { orderBy: { orden: "asc" }, select: { url: true } },
         variants: { select: { tipo: true, valor: true, stock: true } },
       },

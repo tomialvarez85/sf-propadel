@@ -44,6 +44,7 @@ export type SiteSettingsData = {
   cantidadCuotas: number;
   cuotasSinInteres: boolean;
   descuentoTransferencia: number | null;
+  descuentoEfectivo: number | null;
   mostrarPrecioSinImpuestos: boolean;
 } | null;
 

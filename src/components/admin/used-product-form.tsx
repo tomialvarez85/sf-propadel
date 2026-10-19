@@ -11,6 +11,7 @@ import {
   createUsedProduct,
   updateUsedProduct,
 } from "@/app/(admin)/admin/(dashboard)/usados/actions";
+import { DiscountOverrideFields } from "@/components/admin/discount-override-fields";
 import { ImageUploader } from "@/components/admin/image-uploader";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -78,6 +79,8 @@ export function UsedProductForm({
       destacado: false,
       enOferta: false,
       activo: true,
+      descuentoTransferenciaOverride: null,
+      descuentoEfectivoOverride: null,
       images: [],
       variants: [],
     },
@@ -237,6 +240,8 @@ export function UsedProductForm({
             )}
           />
         </div>
+
+        <DiscountOverrideFields control={form.control} usado />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FormField

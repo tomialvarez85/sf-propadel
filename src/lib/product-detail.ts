@@ -12,6 +12,8 @@ export type ProductDetail = {
   stock: number;
   condicion: "NUEVO" | "USADO";
   permiteCuotas: boolean;
+  descuentoTransferenciaOverride: number | null;
+  descuentoEfectivoOverride: number | null;
   estadoConservacion: string | null;
   categoryId: string;
   brand: { nombre: string; slug: string };
@@ -33,6 +35,8 @@ export const getProductBySlug = cache(
           stock: true,
           condicion: true,
           permiteCuotas: true,
+          descuentoTransferenciaOverride: true,
+          descuentoEfectivoOverride: true,
           estadoConservacion: true,
           categoryId: true,
           brand: { select: { nombre: true, slug: true } },

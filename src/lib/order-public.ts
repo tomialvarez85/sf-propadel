@@ -6,6 +6,8 @@ export type PublicOrderItem = {
   cantidad: number;
   precioUnitario: number;
   condicion: "NUEVO" | "USADO";
+  // null = pedido anterior al snapshot por ítem (ver schema.prisma).
+  descuentoTransferencia: number | null;
 };
 
 export type PublicOrder = {
@@ -41,6 +43,7 @@ export async function getPublicOrder(orderId: string): Promise<PublicOrder | nul
           cantidad: true,
           precioUnitario: true,
           condicion: true,
+          descuentoTransferencia: true,
         },
       },
     },
@@ -60,6 +63,7 @@ export async function getPublicOrder(orderId: string): Promise<PublicOrder | nul
       cantidad: item.cantidad,
       precioUnitario: item.precioUnitario.toNumber(),
       condicion: item.condicion,
+      descuentoTransferencia: item.descuentoTransferencia,
     })),
   };
 }

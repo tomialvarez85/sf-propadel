@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { descuentoOverrideSchema } from "@/lib/validations/discount-override";
+
 export const GENERO_VALUES = ["HOMBRE", "MUJER", "UNISEX"] as const;
 
 const productImageSchema = z.object({
@@ -36,6 +38,8 @@ export const productSchema = z
     permiteCuotas: z.boolean(),
     images: z.array(productImageSchema).min(1, "Agregá al menos una imagen"),
     variants: z.array(productVariantSchema),
+    descuentoTransferenciaOverride: descuentoOverrideSchema,
+    descuentoEfectivoOverride: descuentoOverrideSchema,
   })
   .refine((data) => !data.precioAnterior || data.precioAnterior > data.precio, {
     message: "El precio anterior debe ser mayor al precio actual",

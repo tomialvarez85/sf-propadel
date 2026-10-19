@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { PedidoCheckoutPanel } from "@/components/site/pedido-checkout-panel";
+import { resolveDescuento } from "@/lib/discounts";
 import { formatCurrency } from "@/lib/format";
 import { getPublicOrder } from "@/lib/order-public";
 import { getSiteSettings } from "@/lib/site-data";
@@ -35,18 +36,28 @@ export default async function PedidoPage(
     notFound();
   }
 
-  // Usados no tienen descuento por transferencia — solo se descuenta la
-  // porción del pedido que corresponde a ítems NUEVO (snapshot por ítem,
-  // no un join en vivo a Product — ver comentario en schema.prisma).
-  const descuentoTransferencia = settings?.descuentoTransferencia ?? null;
-  const montoDescontable = order.items
-    .filter((item) => item.condicion !== "USADO")
-    .reduce((sum, item) => sum + item.precioUnitario * item.cantidad, 0);
-  const tieneDescuento =
-    !!descuentoTransferencia && descuentoTransferencia > 0 && montoDescontable > 0;
-  const totalConDescuento = tieneDescuento
-    ? order.total - montoDescontable * (descuentoTransferencia! / 100)
-    : order.total;
+  // Cada ítem trae su porcentaje ya resuelto al momento de la compra
+  // (override del producto o global — snapshot, no un join en vivo a
+  // Product, ver schema.prisma). Ítems de pedidos viejos sin snapshot
+  // (null) usan la regla anterior: global actual, usados excluidos.
+  const descuentoGlobal = settings?.descuentoTransferencia ?? null;
+  const descuentoPorItem = order.items.map((item) =>
+    item.descuentoTransferencia !== null
+      ? item.descuentoTransferencia
+      : resolveDescuento(null, descuentoGlobal, item.condicion) ?? 0,
+  );
+  const ahorro = order.items.reduce(
+    (sum, item, index) =>
+      sum + item.precioUnitario * item.cantidad * (descuentoPorItem[index] / 100),
+    0,
+  );
+  const tieneDescuento = ahorro > 0;
+  const totalConDescuento = order.total - ahorro;
+  // Si todos los ítems con descuento comparten porcentaje se muestra en la
+  // etiqueta; con porcentajes mezclados (overrides distintos) se omite.
+  const porcentajesAplicados = new Set(descuentoPorItem.filter((p) => p > 0));
+  const descuentoTransferencia =
+    porcentajesAplicados.size === 1 ? [...porcentajesAplicados][0] : null;
 
   const paymentFields = [
     { label: "Alias", value: settings?.alias, copyable: true },
@@ -102,7 +113,8 @@ export default async function PedidoPage(
         {tieneDescuento && (
           <div className="flex items-center justify-between text-sm font-semibold">
             <span className="text-primary">
-              Total con descuento por transferencia ({descuentoTransferencia}%)
+              Total con descuento por transferencia
+              {descuentoTransferencia !== null && ` (${descuentoTransferencia}%)`}
             </span>
             <span className="font-heading text-primary text-lg font-extrabold">
               {formatCurrency(totalConDescuento)}

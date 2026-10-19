@@ -5,6 +5,7 @@ import { JsonLd } from "@/components/site/json-ld";
 import { ProductCard } from "@/components/site/product-card";
 import { ProductGallery } from "@/components/site/product-gallery";
 import { ProductPurchasePanel } from "@/components/site/product-purchase-panel";
+import { resolveDescuento } from "@/lib/discounts";
 import { getProductBySlug, getRelatedProducts } from "@/lib/product-detail";
 import { absoluteUrl, buildSocialMetadata, truncateDescription } from "@/lib/seo";
 import { getSiteSettings } from "@/lib/site-data";
@@ -94,7 +95,22 @@ export default async function ProductoPage(
           whatsapp={settings?.whatsapp ?? null}
           cantidadCuotas={settings?.cantidadCuotas ?? 12}
           cuotasSinInteres={settings?.cuotasSinInteres ?? true}
-          descuentoTransferencia={settings?.descuentoTransferencia ?? null}
+          descuentoTransferencia={resolveDescuento(
+            product.descuentoTransferenciaOverride,
+            settings?.descuentoTransferencia,
+            product.condicion,
+          )}
+          // Efectivo es "en nuestro local" — sin dirección cargada no hay
+          // local físico que mostrar, así que el escalón no aplica.
+          descuentoEfectivo={
+            settings?.direccion
+              ? resolveDescuento(
+                  product.descuentoEfectivoOverride,
+                  settings.descuentoEfectivo,
+                  product.condicion,
+                )
+              : null
+          }
           mostrarPrecioSinImpuestos={settings?.mostrarPrecioSinImpuestos ?? false}
         />
       </div>

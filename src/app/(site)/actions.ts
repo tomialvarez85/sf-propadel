@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { resolveDescuento } from "@/lib/discounts";
 import { sendOrderConfirmationEmail, sendOrderNotificationEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import { checkoutFormSchema } from "@/lib/validations/checkout";
@@ -50,6 +51,32 @@ export async function createOrder(input: unknown): Promise<CheckoutResult> {
 
   let order;
   try {
+    // Snapshot the transfer discount each item gets right now — resolved
+    // from the live product + global setting, never from the client — so
+    // /pedido/[orderId] shows the same percent the product page showed.
+    const [products, settings] = await Promise.all([
+      prisma.product.findMany({
+        where: { id: { in: items.map((item) => item.productId) } },
+        select: { id: true, condicion: true, descuentoTransferenciaOverride: true },
+      }),
+      prisma.siteSettings.findUnique({
+        where: { id: 1 },
+        select: { descuentoTransferencia: true },
+      }),
+    ]);
+    const productsById = new Map(products.map((product) => [product.id, product]));
+    const descuentoFor = (productId: string, condicion: "NUEVO" | "USADO") => {
+      const product = productsById.get(productId);
+      // 0, not null: null on OrderItem means "legacy order, pre-snapshot".
+      return (
+        resolveDescuento(
+          product?.descuentoTransferenciaOverride,
+          settings?.descuentoTransferencia,
+          product?.condicion ?? condicion,
+        ) ?? 0
+      );
+    };
+
     order = await prisma.order.create({
       data: {
         nombreCliente: nombre,
@@ -67,6 +94,7 @@ export async function createOrder(input: unknown): Promise<CheckoutResult> {
             cantidad: item.cantidad,
             precioUnitario: item.precio,
             condicion: item.condicion,
+            descuentoTransferencia: descuentoFor(item.productId, item.condicion),
           })),
         },
       },

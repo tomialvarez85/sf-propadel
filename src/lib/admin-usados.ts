@@ -144,6 +144,8 @@ export type UsedProductEditData = {
   destacado: boolean;
   enOferta: boolean;
   activo: boolean;
+  descuentoTransferenciaOverride: number | null;
+  descuentoEfectivoOverride: number | null;
   images: { url: string }[];
   variants: { tipo: string; valor: string; stock: number }[];
 };
@@ -169,6 +171,8 @@ export async function getUsedProductForEdit(
         destacado: true,
         enOferta: true,
         activo: true,
+        descuentoTransferenciaOverride: true,
+        descuentoEfectivoOverride: true,
         images: { orderBy: { orden: "asc" }, select: { url: true } },
         variants: { select: { tipo: true, valor: true, stock: true } },
       },

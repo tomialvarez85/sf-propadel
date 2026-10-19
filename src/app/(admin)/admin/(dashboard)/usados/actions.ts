@@ -27,6 +27,10 @@ function normalizeUsedProductData(
     estadoConservacion: data.estadoConservacion || null,
     precio: data.precio,
     precioAnterior: data.precioAnterior || null,
+    // `?? null`, not `|| null`: an explicit 0 means "no discount for this
+    // product" and must not collapse into "inherit the global".
+    descuentoTransferenciaOverride: data.descuentoTransferenciaOverride ?? null,
+    descuentoEfectivoOverride: data.descuentoEfectivoOverride ?? null,
     stock: data.stock,
     genero: data.genero || null,
     // Never taken from client input — this section only ever creates/edits

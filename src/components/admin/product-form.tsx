@@ -11,6 +11,10 @@ import {
   createProduct,
   updateProduct,
 } from "@/app/(admin)/admin/(dashboard)/productos/actions";
+import {
+  DiscountOverrideFields,
+  type DescuentosGenerales,
+} from "@/components/admin/discount-override-fields";
 import { ImageUploader } from "@/components/admin/image-uploader";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -53,11 +57,13 @@ export function ProductForm({
   initialData,
   categories,
   brands,
+  descuentosGenerales,
 }: {
   mode: "create" | "edit";
   initialData?: ProductFormValues & { id: string };
   categories: CategoryOption[];
   brands: FilterOption[];
+  descuentosGenerales: DescuentosGenerales;
 }) {
   const router = useRouter();
   const [slugTouched, setSlugTouched] = useState(mode === "edit");
@@ -78,6 +84,8 @@ export function ProductForm({
       enOferta: false,
       activo: true,
       permiteCuotas: true,
+      descuentoTransferenciaOverride: null,
+      descuentoEfectivoOverride: null,
       images: [],
       variants: [],
     },
@@ -218,6 +226,11 @@ export function ProductForm({
             )}
           />
         </div>
+
+        <DiscountOverrideFields
+          control={form.control}
+          generales={descuentosGenerales}
+        />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FormField

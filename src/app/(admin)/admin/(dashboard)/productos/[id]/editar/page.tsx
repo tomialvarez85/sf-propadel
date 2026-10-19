@@ -5,6 +5,7 @@ import { ProductForm } from "@/components/admin/product-form";
 import { getAllCategoriesFlat } from "@/lib/admin-categories";
 import { getProductForEdit } from "@/lib/admin-products";
 import { getBrandOptions } from "@/lib/product-query";
+import { getSiteSettings } from "@/lib/site-data";
 
 export const metadata: Metadata = {
   title: "Editar producto | SF ProPadel Admin",
@@ -15,15 +16,21 @@ export default async function EditarProductoPage(
 ) {
   const { id } = await props.params;
 
-  const [product, categories, brands] = await Promise.all([
+  const [product, categories, brands, settings] = await Promise.all([
     getProductForEdit(id),
     getAllCategoriesFlat(),
     getBrandOptions(),
+    getSiteSettings(),
   ]);
 
   if (!product) {
     notFound();
   }
+
+  const descuentosGenerales = {
+    transferencia: settings?.descuentoTransferencia ?? null,
+    efectivo: settings?.descuentoEfectivo ?? null,
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -35,6 +42,7 @@ export default async function EditarProductoPage(
         initialData={product}
         categories={categories}
         brands={brands}
+        descuentosGenerales={descuentosGenerales}
       />
     </div>
   );

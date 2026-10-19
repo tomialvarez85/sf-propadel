@@ -23,6 +23,13 @@ export const siteSettingsSchema = z.object({
     .max(100, "No puede ser mayor a 100")
     .nullable()
     .optional(),
+  descuentoEfectivo: z
+    .number()
+    .int()
+    .min(0, "No puede ser negativo")
+    .max(100, "No puede ser mayor a 100")
+    .nullable()
+    .optional(),
   mostrarPrecioSinImpuestos: z.boolean(),
 });
 
