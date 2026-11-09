@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+// SafeImage: workaround temporal por el límite de transformaciones de Vercel
+// (ver src/components/safe-image.tsx).
+import { SafeImage as Image } from "@/components/safe-image";
 import { Quote, User } from "lucide-react";
 
 import {
@@ -27,6 +29,7 @@ function TestimonialCard({ testimonial }: { testimonial: HomeTestimonial }) {
               src={testimonial.avatarUrl}
               alt={testimonial.nombreCliente}
               fill
+              quality={75}
               sizes="40px"
               className="object-cover"
             />

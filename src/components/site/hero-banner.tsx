@@ -1,5 +1,7 @@
 import Link from "next/link";
-import Image from "next/image";
+// SafeImage: workaround temporal por el límite de transformaciones de Vercel
+// (ver src/components/safe-image.tsx).
+import { SafeImage as Image } from "@/components/safe-image";
 
 // Fijo en el código, no editable desde el admin (antes SiteSettings.hero* /
 // /admin/banners, ambos eliminados) — ver DESIGN.md > Hero Banner. Cambiar

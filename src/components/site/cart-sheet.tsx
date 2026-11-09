@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Image from "next/image";
+// SafeImage: workaround temporal por el límite de transformaciones de Vercel
+// (ver src/components/safe-image.tsx).
+import { SafeImage as Image } from "@/components/safe-image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -60,6 +62,7 @@ function CartItemsList({
                   src={item.imagen}
                   alt={item.nombre}
                   fill
+                  quality={75}
                   sizes="64px"
                   className="object-contain"
                 />
