@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Mail, MapPin, MessageCircle } from "lucide-react";
 
@@ -14,9 +15,17 @@ export function SiteFooter({ settings }: { settings: SiteSettingsData }) {
     <footer className="border-border bg-primary text-primary-foreground border-t">
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-6 py-12 sm:grid-cols-3">
         <div className="flex flex-col gap-3">
-          <span className="font-heading text-xl font-extrabold tracking-[-0.02em]">
-            SFProPadel
-          </span>
+          <Link href="/" className="w-fit">
+            {/* PNG chico y fijo: sin optimizar, no gasta transformaciones. */}
+            <Image
+              src="/logo-white.png"
+              alt="SF ProPadel"
+              width={566}
+              height={240}
+              unoptimized
+              className="h-12 w-auto"
+            />
+          </Link>
           <p className="text-primary-foreground/70 text-sm">
             Todo lo que necesitás para jugar al pádel.
           </p>

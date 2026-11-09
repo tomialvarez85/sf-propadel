@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ChevronDown, Lock, Menu, Search } from "lucide-react";
 
@@ -30,7 +31,7 @@ function AdminAccessLink() {
       asChild
     >
       <Link href="/admin">
-        <Lock className="text-muted-foreground size-5" />
+        <Lock className="text-foreground size-5" />
       </Link>
     </Button>
   );
@@ -40,7 +41,7 @@ function SearchForm({ className }: { className?: string }) {
   return (
     <form action="/productos" method="GET" className={className}>
       <div className="relative w-full">
-        <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+        <Search className="text-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
         <Input
           type="search"
           name="q"
@@ -62,7 +63,7 @@ function NavLink({
   return (
     <Link
       href={href}
-      className="hover:text-primary text-sm font-medium transition-colors"
+      className="text-primary hover:text-primary/70 text-sm font-medium transition-colors"
     >
       {children}
     </Link>
@@ -77,7 +78,7 @@ function ProductsNav({ categories }: { categories: CategoryNavItem[] }) {
         <DropdownMenu>
           <DropdownMenuTrigger
             aria-label="Ver categorías"
-            className="hover:text-primary focus-visible:ring-ring/50 flex items-center rounded-md p-1 outline-none transition-colors focus-visible:ring-3"
+            className="text-primary hover:text-primary/70 focus-visible:ring-ring/50 flex items-center rounded-md p-1 outline-none transition-colors focus-visible:ring-3"
           >
             <ChevronDown className="size-3.5" />
           </DropdownMenuTrigger>
@@ -142,10 +143,10 @@ export function SiteHeader({
   return (
     <header
       ref={headerRef}
-      className="border-border bg-lime sticky top-0 z-50 border-b"
+      className="border-border sticky top-0 z-50 border-b bg-white"
     >
       {topBarText && (
-        <div className="bg-primary text-primary-foreground px-6 py-2 text-center text-xs font-medium">
+        <div className="bg-lime text-lime-foreground px-6 py-2 text-center text-xs font-medium">
           {topBarText}
         </div>
       )}
@@ -153,9 +154,18 @@ export function SiteHeader({
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-6 py-4">
         <Link
           href="/"
-          className="font-heading shrink-0 text-xl font-extrabold tracking-[-0.02em] whitespace-nowrap"
+          className="focus-visible:ring-ring/50 shrink-0 rounded-md outline-none focus-visible:ring-3"
         >
-          SF<span className="text-primary">ProPadel</span>
+          {/* PNG chico y fijo: sin optimizar, no gasta transformaciones. */}
+          <Image
+            src="/logo.png"
+            alt="SF ProPadel"
+            width={566}
+            height={240}
+            priority
+            unoptimized
+            className="h-10 w-auto md:h-11"
+          />
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
@@ -183,7 +193,7 @@ export function SiteHeader({
                 aria-label="Menú"
                 className="size-11 md:size-8"
               >
-                <Menu className="size-5" />
+                <Menu className="text-foreground size-5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64">

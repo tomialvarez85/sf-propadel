@@ -114,6 +114,31 @@ model Testimonial {
   createdAt     DateTime @default(now())
 }
 
+enum HomeBlockTipo {
+  BANNER // slide del carrusel principal del home
+  TILE // tarjeta de categoría destacada (se muestran las 3 primeras activas)
+}
+
+// Contenido editable del home desde /admin/inicio: slides del banner y
+// tarjetas de categorías destacadas. Un solo modelo porque comparten
+// exactamente los mismos campos (imagen + texto + link + orden + activo).
+model HomeBlock {
+  id           String        @id @default(cuid())
+  tipo         HomeBlockTipo
+  // TILE: texto de la tarjeta (obligatorio). BANNER: título opcional que se
+  // superpone sobre la imagen; si está vacío el slide es solo la imagen.
+  titulo       String?
+  imagen       String
+  // Solo BANNER: versión alternativa para celulares (más alta que ancha).
+  imagenMobile String?
+  link         String?
+  orden        Int           @default(0)
+  activo       Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+
+  @@index([tipo, activo, orden])
+}
+
 // Singleton: siempre se lee/escribe la fila con id 1 (upsert desde la app).
 model SiteSettings {
   id               Int     @id @default(1)

@@ -17,10 +17,10 @@ import {
 } from "@/components/ui/carousel";
 import {
   getActiveTestimonials,
-  getCategoryBySlug,
   getDestacadoProducts,
   getOfertaProducts,
 } from "@/lib/home-data";
+import { getActiveHomeBlocks } from "@/lib/home-blocks";
 import { buildSocialMetadata, DEFAULT_OG_IMAGE, SITE_NAME } from "@/lib/seo";
 import { getSiteSettings } from "@/lib/site-data";
 import { SITE_URL } from "@/lib/site-url";
@@ -93,9 +93,10 @@ function ProductSection({
 }
 
 export default async function HomePage() {
-  const [accesorios, ofertas, destacados, testimonials, settings] =
+  const [heroSlides, tiles, ofertas, destacados, testimonials, settings] =
     await Promise.all([
-      getCategoryBySlug("accesorios"),
+      getActiveHomeBlocks("BANNER"),
+      getActiveHomeBlocks("TILE"),
       getOfertaProducts(),
       getDestacadoProducts(),
       getActiveTestimonials(),
@@ -105,30 +106,14 @@ export default async function HomePage() {
   const cantidadCuotas = settings?.cantidadCuotas ?? 12;
   const cuotasSinInteres = settings?.cuotasSinInteres ?? true;
 
-  const categoryTiles: CategoryTile[] = [
-    {
-      key: "hombre",
-      nombre: "Hombre",
-      href: "/productos?genero=hombre",
-      // Fija en /public — el dueño no puede cambiarla desde el admin, ver
-      // DESIGN.md > Category Tiles.
-      imagen: "/tiles/hombre.jpg",
-    },
-    {
-      key: "mujer",
-      nombre: "Mujer",
-      href: "/productos?genero=mujer",
-      imagen: "/tiles/mujer.jpg",
-    },
-    {
-      key: "accesorios",
-      nombre: accesorios?.nombre ?? "Accesorios",
-      href: accesorios ? `/${accesorios.slug}` : "/productos?categoria=accesorios",
-      // Fija en /public, igual que Hombre/Mujer — Category.imagen fue
-      // eliminado del schema (ver DESIGN.md > Category Tiles).
-      imagen: "/tiles/accesorios.jpg",
-    },
-  ];
+  // Editables desde /admin/inicio (HomeBlock tipo TILE) — ver DESIGN.md >
+  // Category Tiles.
+  const categoryTiles: CategoryTile[] = tiles.map((tile) => ({
+    key: tile.id,
+    nombre: tile.titulo ?? "",
+    href: tile.link ?? "/productos",
+    imagen: tile.imagen,
+  }));
 
   // wa.me needs digits only — settings.whatsapp is stored in a human-typed
   // format (spaces, dashes, a leading +), see also product-purchase-panel.tsx.
@@ -154,9 +139,9 @@ export default async function HomePage() {
         }}
       />
 
-      <HeroBanner />
+      <HeroBanner slides={heroSlides} />
 
-      <CategoryTiles tiles={categoryTiles} />
+      {categoryTiles.length > 0 && <CategoryTiles tiles={categoryTiles} />}
 
       <ProductSection
         title="Ofertas"
