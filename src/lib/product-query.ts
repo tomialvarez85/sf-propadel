@@ -19,6 +19,8 @@ export type ProductListingParams = {
   precioMin?: number;
   precioMax?: number;
   soloOfertas?: boolean;
+  /** Texto libre del buscador del header (?q=). */
+  busqueda?: string;
   sort: SortOption;
   page: number;
 };
@@ -41,6 +43,37 @@ export async function getProductListing(
   }
 }
 
+/**
+ * Convierte el texto del buscador en condiciones de Prisma: cada palabra
+ * tiene que aparecer (sin importar mayúsculas) en el nombre, la descripción,
+ * la marca o la categoría (o su categoría padre) del producto. El plural se
+ * recorta ("bolsos" → "bolso") para que encuentre tanto "Bolso X" como la
+ * categoría "Bolsos".
+ */
+function buildSearchFilter(busqueda: string): Prisma.ProductWhereInput[] {
+  const terms = busqueda
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((term) => term.length > 0)
+    .slice(0, 6)
+    .map((term) =>
+      term.length > 3 && term.endsWith("s") ? term.slice(0, -1) : term,
+    );
+
+  return terms.map((term) => {
+    const contains = { contains: term, mode: "insensitive" as const };
+    return {
+      OR: [
+        { nombre: contains },
+        { descripcion: contains },
+        { brand: { nombre: contains } },
+        { category: { nombre: contains } },
+        { category: { parent: { nombre: contains } } },
+      ],
+    };
+  });
+}
+
 async function queryProductListing(
   params: ProductListingParams,
 ): Promise<ProductListingResult> {
@@ -56,6 +89,7 @@ async function queryProductListing(
     ...(params.brandIds?.length ? { brandId: { in: params.brandIds } } : {}),
     ...(params.genero ? { genero: params.genero } : {}),
     ...(params.soloOfertas ? { enOferta: true } : {}),
+    ...(params.busqueda ? { AND: buildSearchFilter(params.busqueda) } : {}),
     ...(params.precioMin != null || params.precioMax != null
       ? {
           precio: {

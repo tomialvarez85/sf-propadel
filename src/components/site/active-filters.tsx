@@ -37,8 +37,17 @@ export function ActiveFilters({
   const precioMin = searchParams.get("precioMin");
   const precioMax = searchParams.get("precioMax");
   const soloOfertas = searchParams.get("oferta") === "1";
+  const busqueda = searchParams.get("q")?.trim();
 
   const chips: Chip[] = [];
+
+  if (busqueda) {
+    chips.push({
+      key: "q",
+      label: `Búsqueda: ${busqueda}`,
+      onRemove: () => navigate((params) => params.delete("q")),
+    });
+  }
 
   for (const slug of activeCategories) {
     const category = categories.find((option) => option.slug === slug);

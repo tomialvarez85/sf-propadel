@@ -55,6 +55,7 @@ export async function ProductListing({
   const sort = parseSortOption(firstValue(searchParams.orden));
   const page = Math.max(1, Number(firstValue(searchParams.page)) || 1);
   const soloOfertas = firstValue(searchParams.oferta) === "1";
+  const busqueda = firstValue(searchParams.q)?.trim().slice(0, 100) || undefined;
   const precioMin = parseNumber(searchParams.precioMin);
   const precioMax = parseNumber(searchParams.precioMax);
   const brandSlugs = parseList(searchParams.marca);
@@ -82,6 +83,7 @@ export async function ProductListing({
     precioMin,
     precioMax,
     soloOfertas,
+    busqueda,
     sort,
     page,
   });
@@ -114,6 +116,7 @@ export async function ProductListing({
 
   const hasActiveFilters =
     soloOfertas ||
+    busqueda !== undefined ||
     precioMin !== undefined ||
     precioMax !== undefined ||
     brandSlugs.length > 0 ||
@@ -123,7 +126,9 @@ export async function ProductListing({
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
       <h1 className="font-heading text-2xl font-bold tracking-[-0.015em]">
-        {categoryScope?.nombre ?? "Productos"}
+        {busqueda
+          ? `Resultados para "${busqueda}"`
+          : (categoryScope?.nombre ?? "Productos")}
       </h1>
 
       <div className="mt-8 flex flex-col gap-8 md:flex-row">
@@ -147,7 +152,9 @@ export async function ProductListing({
           {products.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-16 text-center">
               <p className="text-muted-foreground text-sm">
-                No encontramos productos con estos filtros.
+                {busqueda
+                  ? `No encontramos productos para "${busqueda}".`
+                  : "No encontramos productos con estos filtros."}
               </p>
               {hasActiveFilters && (
                 <Button asChild variant="outline" size="sm">
