@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Images,
   LayoutDashboard,
   MessageSquareQuote,
   Package,
@@ -18,6 +19,7 @@ import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { href: "/admin/banners", label: "Banners", icon: Images },
   { href: "/admin/productos", label: "Productos", icon: Package },
   { href: "/admin/usados", label: "Usados", icon: Undo2 },
   { href: "/admin/pedidos", label: "Pedidos", icon: Receipt },

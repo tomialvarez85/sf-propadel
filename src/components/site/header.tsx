@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ChevronDown, Lock, Menu, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -30,7 +32,7 @@ function AdminAccessLink() {
       asChild
     >
       <Link href="/admin">
-        <Lock className="text-muted-foreground size-5" />
+        <Lock className="text-foreground size-5" />
       </Link>
     </Button>
   );
@@ -40,17 +42,21 @@ function SearchForm({ className }: { className?: string }) {
   return (
     <form action="/productos" method="GET" className={className}>
       <div className="relative w-full">
-        <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+        <Search className="text-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
         <Input
           type="search"
           name="q"
           placeholder="Buscar productos..."
-          className="pl-9"
+          className="border-neutral-300 pl-9"
         />
       </div>
     </form>
   );
 }
+
+// Sobre el navbar blanco: texto teal, hover/activo = subrayado teal.
+const NAV_LINK_CLASS =
+  "text-primary decoration-primary text-sm font-medium underline-offset-[6px] decoration-2 transition-colors hover:underline";
 
 function NavLink({
   href,
@@ -59,10 +65,14 @@ function NavLink({
   href: string;
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+
   return (
     <Link
       href={href}
-      className="hover:text-primary text-sm font-medium transition-colors"
+      aria-current={isActive ? "page" : undefined}
+      className={`${NAV_LINK_CLASS} ${isActive ? "underline" : ""}`}
     >
       {children}
     </Link>
@@ -77,7 +87,7 @@ function ProductsNav({ categories }: { categories: CategoryNavItem[] }) {
         <DropdownMenu>
           <DropdownMenuTrigger
             aria-label="Ver categorías"
-            className="hover:text-primary focus-visible:ring-ring/50 flex items-center rounded-md p-1 outline-none transition-colors focus-visible:ring-3"
+            className="text-primary hover:bg-primary/10 focus-visible:ring-ring/50 flex items-center rounded-md p-1 outline-none transition-colors focus-visible:ring-3"
           >
             <ChevronDown className="size-3.5" />
           </DropdownMenuTrigger>
@@ -142,10 +152,10 @@ export function SiteHeader({
   return (
     <header
       ref={headerRef}
-      className="border-border bg-lime sticky top-0 z-50 border-b"
+      className="border-border sticky top-0 z-50 border-b bg-white"
     >
       {topBarText && (
-        <div className="bg-primary text-primary-foreground px-6 py-2 text-center text-xs font-medium">
+        <div className="bg-lime text-lime-foreground px-6 py-2 text-center text-xs font-medium">
           {topBarText}
         </div>
       )}
@@ -153,9 +163,18 @@ export function SiteHeader({
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-6 py-4">
         <Link
           href="/"
-          className="font-heading shrink-0 text-xl font-extrabold tracking-[-0.02em] whitespace-nowrap"
+          className="focus-visible:ring-ring/50 shrink-0 rounded-md outline-none focus-visible:ring-3"
         >
-          SF<span className="text-primary">ProPadel</span>
+          {/* PNG chico y fijo: sin optimizar, no gasta transformaciones. */}
+          <Image
+            src="/logo.png"
+            alt="SF ProPadel"
+            width={566}
+            height={240}
+            priority
+            unoptimized
+            className="h-10 w-auto md:h-11"
+          />
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
@@ -166,9 +185,9 @@ export function SiteHeader({
           <NavLink href="/usados">Usados</NavLink>
         </nav>
 
-        <SearchForm className="ml-auto hidden max-w-xs flex-1 md:block" />
+        <SearchForm className="ml-auto hidden max-w-xs flex-1 lg:block" />
 
-        <div className="ml-auto flex items-center gap-1 md:ml-0">
+        <div className="ml-auto flex items-center gap-1 lg:ml-0">
           <CartSheet />
 
           <div aria-hidden className="bg-border mx-1 h-5 w-px" />
@@ -183,10 +202,10 @@ export function SiteHeader({
                 aria-label="Menú"
                 className="size-11 md:size-8"
               >
-                <Menu className="size-5" />
+                <Menu className="text-foreground size-5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64">
+            <DropdownMenuContent align="end" className="text-primary w-64">
               <DropdownMenuItem asChild>
                 <Link href="/">Home</Link>
               </DropdownMenuItem>
@@ -232,7 +251,7 @@ export function SiteHeader({
         </div>
       </div>
 
-      <div className="px-6 pb-4 md:hidden">
+      <div className="px-6 pb-4 lg:hidden">
         <SearchForm />
       </div>
     </header>
