@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Image from "next/image";
+// SafeImage: workaround temporal por el límite de transformaciones de Vercel
+// (ver src/components/safe-image.tsx).
+import { SafeImage as Image } from "@/components/safe-image";
 import { AlertCircle, Camera, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 

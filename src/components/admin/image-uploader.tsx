@@ -1,7 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Image from "next/image";
+// SafeImage: workaround temporal por el límite de transformaciones de Vercel
+// (ver src/components/safe-image.tsx).
+import { SafeImage as Image } from "@/components/safe-image";
 import {
   ImageIcon,
   Info,
