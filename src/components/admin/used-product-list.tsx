@@ -110,17 +110,18 @@ function UsedProductTableRow({
             imageCount={product.imageCount}
           />
         </TableCell>
-        <TableCell className="font-medium">
+        <TableCell className="min-w-48 font-medium whitespace-normal">
           <InlineTextCell
             value={product.nombre}
             onSave={(value) =>
               updateUsedProductField(product.id, "nombre", value)
             }
             requiredError="El nombre no puede estar vacío."
+            className="[&>span]:line-clamp-2 [&>span]:whitespace-normal"
             successMessage="Nombre actualizado"
           />
         </TableCell>
-        <TableCell className="text-muted-foreground">
+        <TableCell className="text-muted-foreground max-w-36">
           <InlineSelectCell
             valueId={product.categoryId}
             valueLabel={product.categoryNombre}
@@ -131,7 +132,7 @@ function UsedProductTableRow({
             successMessage="Categoría actualizada"
           />
         </TableCell>
-        <TableCell className="text-muted-foreground">
+        <TableCell className="text-muted-foreground max-w-36">
           <InlineSelectCell
             valueId={product.brandId}
             valueLabel={product.brandNombre}
@@ -140,7 +141,7 @@ function UsedProductTableRow({
             successMessage="Marca actualizada"
           />
         </TableCell>
-        <TableCell>
+        <TableCell className="min-w-28">
           <InlineNumberCell
             value={product.precio}
             format="currency"
@@ -154,7 +155,7 @@ function UsedProductTableRow({
             successMessage="Precio actualizado"
           />
         </TableCell>
-        <TableCell>
+        <TableCell className="min-w-14">
           <InlineNumberCell
             value={product.stock}
             validate={(n) =>
